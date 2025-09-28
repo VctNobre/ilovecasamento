@@ -104,66 +104,78 @@ app.post("/get-mp-balance", async (req, res) => {
   res.json({ balance: 0 });
 });
 
-app.post("/create-payment-preference", async (req, res) => {
-  const { cartItems, weddingPageId } = req.body;
-  if (!cartItems || cartItems.length === 0 || !weddingPageId) {
-    return res.status(400).json({ error: "Dados inválidos." });
-  }
+app.post('/create-payment-preference', async (req, res) => {
+    const { cartItems, weddingPageId } = req.body;
 
-  try {
-    // Busca credenciais do criador da página
-    const { data: pageData, error: pageError } = await supabase
-      .from("wedding_pages")
-      .select("mp_credentials")
-      .eq("id", weddingPageId)
-      .single();
-
-    if (pageError || !pageData || !pageData.mp_credentials?.access_token) {
-      return res.status(500).json({
-        error: "O criador da página não está configurado para receber pagamentos.",
-      });
+    if (!cartItems || cartItems.length === 0 || !weddingPageId) {
+        return res.status(400).json({ error: 'Dados inválidos.' });
     }
 
-    const coupleAccessToken = pageData.mp_credentials.access_token;
-    const coupleClient = new MercadoPagoConfig({
-      accessToken: coupleAccessToken,
-    });
-    const couplePreference = new Preference(coupleClient);
+    try {
+        console.log(`[Pagamento] Iniciando para a página ID: ${weddingPageId}`);
 
-    const items = cartItems.map((item) => ({
-      id: item.id.toString(),
-      title: `Presente: ${item.title}`,
-      quantity: 1,
-      unit_price: Number(item.value),
-      currency_id: "BRL",
-    }));
+        // 1. Buscar as credenciais do Mercado Pago do casal no Supabase
+        const { data: pageData, error: pageError } = await supabase
+            .from('wedding_pages')
+            .select('mp_credentials')
+            .eq('id', weddingPageId)
+            .single();
 
-    const totalAmount = items.reduce((acc, item) => acc + item.unit_price, 0);
-    const feeAmount = parseFloat((totalAmount * PLATFORM_FEE_PERCENTAGE).toFixed(2));
+        if (pageError) {
+            console.error("[Pagamento] Erro ao buscar dados no Supabase:", pageError);
+            throw new Error('Erro na base de dados.');
+        }
 
-    const result = await couplePreference.create({
-      body: {
-        items: items,
-        marketplace_fee: feeAmount,
-        back_urls: {
-          success: `${
-            process.env.SITE_URL || "http://localhost:3000"
-          }/casamento/${weddingPageId}?status=success`,
-        },
-        auto_return: "approved",
-      },
-    });
-    
-    // Corrigido para lidar com a estrutura de resposta da nova SDK
-    const initPoint = result.init_point;
+        if (!pageData || !pageData.mp_credentials?.access_token) {
+            console.error("[Pagamento] Credenciais do Mercado Pago não encontradas para o casal.");
+            return res.status(500).json({ error: 'O criador da página não está configurado para receber pagamentos.' });
+        }
+        
+        const coupleAccessToken = pageData.mp_credentials.access_token;
+        console.log("[Pagamento] Credenciais do casal encontradas.");
 
-    if (!initPoint) throw new Error("init_point não encontrado na resposta");
+        const coupleClient = new mercadopago.MercadoPagoConfig({ accessToken: coupleAccessToken });
+        const preference = new mercadopago.Preference(coupleClient);
+        
+        const items = cartItems.map(item => ({
+            id: item.id.toString(),
+            title: `Presente: ${item.title}`,
+            quantity: 1,
+            unit_price: Number(item.value),
+            currency_id: 'BRL',
+        }));
+        
+        const totalAmount = items.reduce((acc, item) => acc + item.unit_price, 0);
+        const feeAmount = parseFloat((totalAmount * PLATFORM_FEE_PERCENTAGE).toFixed(2));
+        
+        console.log(`[Pagamento] Total: ${totalAmount}, Comissão: ${feeAmount}`);
 
-    res.json({ init_point: initPoint });
-  } catch (error) {
-    console.error("Erro ao criar preferência de pagamento:", error);
-    res.status(500).json({ error: "Não foi possível processar o seu pedido." });
-  }
+        const result = await preference.create({
+            body: {
+                items: items,
+                marketplace_fee: feeAmount,
+                back_urls: {
+                    success: `${process.env.SITE_URL || 'http://localhost:3000'}/casamento/${weddingPageId}?status=success`,
+                },
+                auto_return: 'approved',
+            }
+        });
+        
+        console.log("[Pagamento] Preferência criada com sucesso.");
+        res.json({ init_point: result.init_point });
+
+    } catch (error) {
+        // LOG DE ERRO DETALHADO
+        console.error("--- ERRO DETALHADO AO CRIAR PREFERÊNCIA DE PAGAMENTO ---");
+        // A propriedade 'cause' geralmente contém a resposta da API do Mercado Pago
+        if (error.cause) {
+             console.error("Causa do Erro (API do Mercado Pago):", JSON.stringify(error.cause, null, 2));
+        } else {
+             console.error("Mensagem de Erro Geral:", error.message);
+        }
+        console.error("---------------------------------------------------------");
+        res.status(500).json({ error: 'Não foi possível processar o seu pedido.' });
+    }
 });
 
 // --- Start server ---
