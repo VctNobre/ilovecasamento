@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="font-body">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bem-vindo ao Ilovecasamento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-md bg-white p-8 rounded-xl card-shadow">
+        <!-- Logo e Título -->
+        <div class="flex justify-center items-center mb-6">
+           <a href="/" class="block cursor-pointer">
+            <svg class="h-16 w-16" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M35 80C28.3333 80 15 75 15 55C15 35 28.3333 30 35 30C41.6667 30 45 35 45 40" stroke="#333333" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M65 20C71.6667 20 85 25 85 45C85 65 71.6667 70 65 70C58.3333 70 55 65 55 60" stroke="var(--primary-color)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+         
+        </div>
+        <h1 class="text-3xl font-bold text-center mb-2 font-title">Ilovecasamento</h1>
+        <p class="text-center text-gray-500 mb-8">O seu site de casamento, do seu jeito.</p>
+        </a>
+        <!-- Formulário de Login (visível por padrão) -->
+        <div id="login-form">
+            <h2 class="text-2xl font-semibold mb-4 font-title text-gray-700">Entrar na sua conta</h2>
+            <div class="space-y-4">
+                <input type="email" id="login-email" placeholder="Email" class="input-styled w-full">
+                <input type="password" id="login-password" placeholder="Senha" class="input-styled w-full">
+            </div>
+            <!-- "ESQUECEU A SENHA?" -->
+            <div id="forgot-password-container" class="text-right text-sm mt-2">
+                <a href="#" id="forgot-password-link" class="font-medium hover:underline" style="color: var(--primary-color);">Esqueceu a senha?</a>
+            </div>
+            <button id="btn-login" class="w-full btn-primary mt-6">Entrar</button>
+            <p id="login-error" class="text-red-500 text-sm mt-2 text-center"></p>
+        </div>
+
+        <!-- Formulário de Cadastro (escondido por padrão) -->
+        <div id="register-form" class="hidden">
+            <h2 class="text-2xl font-semibold mb-4 font-title text-gray-700">Criar nova conta</h2>
+            <div class="space-y-4">
+                <input type="email" id="register-email" placeholder="Email" class="input-styled w-full">
+                <div>
+                    <label for="register-dob" class="text-sm text-gray-600">Data de Nascimento</label>
+                    <input type="date" id="register-dob" class="input-styled w-full">
+                </div>
+                <input type="password" id="register-password" placeholder="Crie uma senha" class="input-styled w-full">
+                <input type="password" id="register-password-confirm" placeholder="Confirme a senha" class="input-styled w-full">
+            </div>
+            <!-- Requisitos da Senha -->
+            <ul id="password-requirements" class="text-sm text-gray-600 mt-4 space-y-1">
+                <li id="req-length">› Mínimo de 8 caracteres</li>
+                <li id="req-uppercase">› Pelo menos 1 letra maiúscula</li>
+                <li id="req-lowercase">› Pelo menos 1 letra minúscula</li>
+                <li id="req-number">› Pelo menos 1 número</li>
+                <li id="req-special">› Pelo menos 1 caractere especial (!@#...)</li>
+            </ul>
+            <button id="btn-register" class="w-full btn-primary mt-6">Cadastrar</button>
+            <p id="register-error" class="text-red-500 text-sm mt-2 text-center"></p>
+        </div>
+
+        <!-- Links e Botões de Ação -->
+        <div class="text-center my-4">
+            <a href="#" id="toggle-form" class="hover:underline" style="color: var(--primary-color);">Não tem uma conta? Cadastre-se</a>
+        </div>
+        <div class="relative flex py-5 items-center">
+            <div class="flex-grow border-t border-gray-300"></div>
+            <span class="flex-shrink mx-4 text-gray-400">OU</span>
+            <div class="flex-grow border-t border-gray-300"></div>
+        </div>
+        <button id="btn-google-login" class="w-full bg-white border border-gray-300 text-gray-700 p-3 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors card-shadow">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo" class="w-6 h-6 mr-3">
+            Entrar com Google
+        </button>
+    </div>
+
+    <!-- MODAL DE RESET DE SENHA (ESTAVA EM FALTA) -->
+    <div id="reset-password-modal" class="fixed inset-0 bg-black/60 z-40 hidden items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-xl card-shadow w-full max-w-md">
+            <h2 class="text-2xl font-title mb-4">Redefinir Senha</h2>
+            <p class="text-gray-600 mb-6">Insira o seu email de cadastro e enviaremos um link para que possa criar uma nova senha.</p>
+            <input type="email" id="reset-email-input" placeholder="Seu email" class="input-styled w-full mb-6">
+            <div class="flex justify-end gap-4">
+                <button id="btn-cancel-reset" class="text-gray-600 font-semibold py-2 px-4 rounded-lg hover:bg-gray-100">Cancelar</button>
+                <button id="btn-send-reset-link" class="btn-primary">Enviar Link de Redefinição</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-3"></div>
+
+
+    <script type="module" src="/js/app.js"></script>
+    <script type="module" src="/js/auth.js"></script>
+</body>
+</html>
+

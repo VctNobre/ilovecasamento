@@ -1,0 +1,277 @@
+// casamento.js
+import { supabaseClient } from './app.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Seletores de Elementos ---
+    const pageLoader = document.getElementById('page-loader');
+    const pageWrapper = document.getElementById('page-wrapper');
+    const heroSection = document.getElementById('hero-section');
+    const heroTitle = document.getElementById('hero-title');
+    const heroDate = document.getElementById('hero-date');
+    const heroImage = document.getElementById('hero-image');
+    const monogramContainer = document.getElementById('monogram-container');
+    const monogramInitial1 = document.getElementById('monogram-initial-1');
+    const monogramInitial2 = document.getElementById('monogram-initial-2');
+    const introTextContainer = document.getElementById('intro-text-container');
+    const giftListContainer = document.getElementById('gift-list-container');
+    const sortSelect = document.getElementById('sort-gifts');
+    const root = document.documentElement;
+    const cartIcon = document.getElementById('cart-icon');
+    const cartCount = document.getElementById('cart-count');
+    const cartModalOverlay = document.getElementById('cart-modal-overlay');
+    const cartModal = document.getElementById('cart-modal');
+    const cartItemsContainer = document.getElementById('cart-items-container');
+    const cartTotal = document.getElementById('cart-total');
+    const btnAddMore = document.getElementById('btn-add-more');
+    const btnCheckout = document.getElementById('btn-checkout');
+
+    let originalGifts = [];
+    let cart = [];
+    let currentPageId = null;
+
+    // --- Funções Auxiliares ---
+
+    const hideLoaderAndShowContent = () => {
+        if (pageLoader) {
+            pageLoader.style.opacity = '0';
+            // Garante que o loader é removido após a animação
+            setTimeout(() => {
+                if (pageLoader) pageLoader.remove();
+            }, 600); // Um pouco mais que a duração da transição (0.5s)
+        }
+        if (pageWrapper) {
+            pageWrapper.style.opacity = '1';
+        }
+    };
+
+    const getPageIdFromUrl = () => {
+        const path = window.location.pathname;
+        const parts = path.split('/');
+        const pageId = parts[parts.length - 1];
+        currentPageId = !isNaN(pageId) && pageId ? pageId : null;
+        return currentPageId;
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString + 'T12:00:00');
+        return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+    };
+    
+    // --- Funções do Carrinho ---
+    const openCart = () => {
+        if (!cartModal || !cartModalOverlay) return;
+        cartModalOverlay.classList.remove('hidden');
+        cartModal.classList.remove('hidden');
+        setTimeout(() => cartModal.classList.remove('scale-95'), 10);
+    };
+
+    const closeCart = () => {
+        if (!cartModal || !cartModalOverlay) return;
+        cartModal.classList.add('scale-95');
+        setTimeout(() => {
+            cartModalOverlay.classList.add('hidden');
+            cartModal.classList.add('hidden');
+        }, 300);
+    };
+
+    const updateCartUI = () => {
+        if (!cartItemsContainer || !cartCount || !cartTotal) return;
+        cartItemsContainer.innerHTML = '';
+        let total = 0;
+        if (cart.length === 0) {
+            cartItemsContainer.innerHTML = '<p class="text-gray-500">O seu carrinho está vazio.</p>';
+        } else {
+            cart.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'flex items-center justify-between border-b pb-4';
+                itemDiv.innerHTML = `<div class="flex items-center"><img src="${item.image_url || 'https://placehold.co/100x100?text=Presente'}" alt="${item.title}" class="w-16 h-16 object-cover rounded-md mr-4"><div><p class="font-semibold text-gray-800">${item.title}</p><button data-cart-item-id="${item.cartItemId}" class="remove-item-btn text-red-500 text-sm hover:underline">Remover</button></div></div><p class="font-semibold text-gray-900">R$ ${Number(item.value).toFixed(2).replace('.', ',')}</p>`;
+                cartItemsContainer.appendChild(itemDiv);
+                total += Number(item.value);
+            });
+        }
+        cartCount.textContent = cart.length;
+        cartTotal.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        if (btnCheckout) btnCheckout.disabled = cart.length === 0;
+    };
+
+    // --- Função Principal de Carregamento ---
+    const loadPageData = async (pageId) => {
+        try {
+            const { data, error } = await supabaseClient.from('wedding_pages').select('*, gifts(*)').eq('id', pageId).single();
+
+            if (error || !data) {
+                throw new Error(error?.message || "Página não encontrada.");
+            }
+
+            document.title = `${data.main_title} | Ilovecasamento`;
+            if (heroTitle) heroTitle.textContent = data.main_title;
+            if (heroDate) heroDate.textContent = formatDate(data.wedding_date);
+            if (heroImage && data.hero_image_url) {
+                heroImage.src = data.hero_image_url;
+                heroImage.onload = () => { heroImage.classList.remove('hidden', 'opacity-0'); if (heroSection) heroSection.classList.remove('bg-gray-200'); };
+            }
+            if (data.main_title && monogramContainer) {
+                const cleanedTitle = data.main_title.replace(/\s*&\s*|\s+e\s+|\s+and\s+/i, ' ').trim();
+                const names = cleanedTitle.split(/\s+/);
+                if (names.length >= 2 && monogramInitial1 && monogramInitial2) {
+                    monogramInitial1.textContent = names[0].charAt(0).toUpperCase();
+                    monogramInitial2.textContent = names[names.length - 1].charAt(0).toUpperCase();
+                    monogramContainer.classList.remove('hidden');
+                }
+            }
+            if (introTextContainer) {
+                introTextContainer.innerHTML = '';
+                if (data.intro_text) {
+                    data.intro_text.split('\n').forEach(pText => {
+                        if (pText.trim() !== '') {
+                            const pElement = document.createElement('p');
+                            pElement.textContent = pText;
+                            introTextContainer.appendChild(pElement);
+                        }
+                    });
+                }
+                if (data.couple_signature) {
+                    const signatureElement = document.createElement('p');
+                    signatureElement.className = 'font-signature mt-8';
+                    signatureElement.textContent = data.couple_signature;
+                    introTextContainer.appendChild(signatureElement);
+                }
+            }
+            root.style.setProperty('--primary-color', data.primary_color || '#D9A8A4');
+            root.style.setProperty('--title-color', data.title_color || '#333333');
+            root.style.setProperty('--hero-title-color', data.hero_title_color || '#FFFFFF');
+            
+            originalGifts = data.gifts ? [...data.gifts].sort((a, b) => a.id - b.id) : [];
+            renderGifts(originalGifts);
+
+            hideLoaderAndShowContent();
+
+        } catch (err) {
+            console.error("Erro ao buscar dados:", err);
+            if (heroTitle) {
+                heroTitle.textContent = "Erro ao carregar a página.";
+            }
+            hideLoaderAndShowContent();
+        }
+    };
+    
+    const renderGifts = (gifts) => {
+        if (!giftListContainer) return;
+        giftListContainer.innerHTML = '';
+        if (gifts && gifts.length > 0) {
+            gifts.forEach(gift => {
+                const giftCard = document.createElement('div');
+                giftCard.className = 'bg-white rounded-lg overflow-hidden flex flex-col card-shadow';
+                giftCard.innerHTML = `
+                    <img src="${gift.image_url || 'https://placehold.co/600x400?text=Presente'}" alt="${gift.title}" class="w-full h-48 object-cover">
+                    <div class="p-6 flex flex-col flex-grow">
+                        <h3 class="text-2xl font-semibold mb-2 font-title">${gift.title}</h3>
+                        <p class="text-gray-600 mb-4 flex-grow">${gift.description || ''}</p>
+                        <p class="text-3xl font-light mb-6" style="color: var(--primary-color);">R$ ${Number(gift.value).toFixed(2).replace('.', ',')}</p>
+                        <button data-id="${gift.id}" class="add-to-cart-btn mt-auto w-full btn-primary">
+                            Adicionar ao Carrinho
+                        </button>
+                    </div>`;
+                giftListContainer.appendChild(giftCard);
+            });
+        } else {
+            giftListContainer.innerHTML = '<p class="text-gray-500 col-span-full">Este casal ainda não adicionou nenhum presente à lista.</p>';
+        }
+    };
+    
+    // --- Event Listeners ---
+    if (sortSelect) {
+        sortSelect.addEventListener('change', () => {
+            const sortBy = sortSelect.value;
+            let sortedGifts = [...originalGifts];
+            switch (sortBy) {
+                case 'price-asc': sortedGifts.sort((a, b) => a.value - b.value); break;
+                case 'price-desc': sortedGifts.sort((a, b) => b.value - a.value); break;
+                case 'az': sortedGifts.sort((a, b) => a.title.localeCompare(b.title)); break;
+                case 'za': sortedGifts.sort((a, b) => b.title.localeCompare(a.title)); break;
+                default: sortedGifts.sort((a, b) => a.id - b.id); break;
+            }
+            renderGifts(sortedGifts);
+        });
+    }
+
+    if (giftListContainer) {
+        giftListContainer.addEventListener('click', (e) => {
+            const button = e.target.closest('.add-to-cart-btn');
+            if (button) {
+                const giftId = Number(button.dataset.id);
+                const giftToAdd = originalGifts.find(g => g.id === giftId);
+                if (giftToAdd) {
+                    cart.push({ ...giftToAdd, cartItemId: Date.now() + Math.random() });
+                    updateCartUI();
+                }
+            }
+        });
+    }
+
+    if (cartItemsContainer) {
+        cartItemsContainer.addEventListener('click', (e) => {
+            const button = e.target.closest('.remove-item-btn');
+            if(button) {
+                const cartItemIdToRemove = Number(button.dataset.cartItemId);
+                cart = cart.filter(item => item.cartItemId !== cartItemIdToRemove);
+                updateCartUI();
+            }
+        });
+    }
+
+    if (cartIcon) cartIcon.addEventListener('click', openCart);
+    if (cartModalOverlay) cartModalOverlay.addEventListener('click', closeCart);
+    if (btnAddMore) btnAddMore.addEventListener('click', closeCart);
+       if (btnCheckout) {
+        btnCheckout.addEventListener('click', async () => {
+            if (cart.length === 0 || !currentPageId) return;
+
+            btnCheckout.textContent = 'Processando...';
+            btnCheckout.disabled = true;
+
+            try {
+                const response = await fetch('/create-payment-preference', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        cartItems: cart,
+                        weddingPageId: currentPageId,
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Falha ao criar a preferência de pagamento.');
+                }
+
+                const preference = await response.json();
+                
+                // Redireciona o convidado para a página de checkout do Mercado Pago
+                if (preference.init_point) {
+                    window.location.href = preference.init_point;
+                } else {
+                    throw new Error('URL de checkout não recebida.');
+                }
+
+            } catch (error) {
+                console.error("Erro no checkout:", error);
+                alert("Não foi possível iniciar o pagamento. Por favor, tente novamente.");
+                btnCheckout.textContent = 'Continuar Compra';
+                btnCheckout.disabled = false;
+            }
+        });
+    }
+
+    // --- Inicialização ---
+    const pageId = getPageIdFromUrl();
+    if (pageId) {
+        loadPageData(pageId);
+    } else {
+        hideLoaderAndShowContent();
+        if (heroTitle) heroTitle.textContent = "Página não encontrada";
+    }
+});
+

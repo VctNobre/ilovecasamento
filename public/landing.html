@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="font-body">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ilovecasamento - Crie o site de casamento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" href="/images/logo.svg" type="image/svg+xml">
+</head>
+<body class="bg-background-color">
+
+     <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-20 shadow-sm">
+
+        <nav class="container mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
+            <a href="/">
+    
+                <img src="/images/logo.svg" alt="Ilovecasamento Logo" class="h-10 sm:h-12 w-auto">
+            </a>
+            <div class="space-x-2 sm:space-x-4 flex items-center">
+                <a href="/login" class="text-gray-600 font-semibold hover:text-[color:var(--primary-color)] transition-colors px-3 py-2 text-sm sm:text-base">Entrar</a>
+         
+                <a href="/login?action=register" class="btn-primary text-sm sm:text-base whitespace-nowrap">
+                    <span class="hidden sm:inline">Criar Conta Grátis</span>
+                    <span class="sm:hidden">Criar Conta</span>
+                </a>
+            </div>
+        </nav>
+    </header>
+    <!-- Secção Principal (Hero) -->
+    <main>
+        <!-- Secção de capa com padding e tamanhos de texto responsivos -->
+        <section class="relative text-white py-20 md:py-32 px-4 sm:px-6 bg-cover bg-center" style="background-image: url('/images/image-landpage.jpg');">
+             <div class="absolute inset-0 bg-black/50"></div> <!-- Overlay para legibilidade -->
+            <div class="relative z-10 container mx-auto text-center">
+                <h1 class="text-4xl md:text-6xl font-title max-w-3xl mx-auto leading-tight drop-shadow-md text-white">O site de casamento que celebra a sua história</h1>
+                <p class="mt-6 text-base md:text-lg text-gray-200 max-w-2xl mx-auto drop-shadow">Crie uma página única e personalizada com lista de presentes em dinheiro, confirmação de presença e tudo o que precisa para o seu grande dia. Fácil, rápido e com o seu estilo.</p>
+                <a href="/login?action=register" class="btn-primary mt-10 inline-block text-base md:text-lg">Comece a criar agora</a>
+            </div>
+        </section>
+
+        <!-- Secção de Funcionalidades com espaçamento responsivo -->
+        <section class="py-16 md:py-20 px-4 sm:px-6 bg-white">
+            <div class="container mx-auto text-center">
+                <h2 class="text-3xl md:text-4xl font-title mb-12">Tudo o que precisa, num só lugar</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+                    <div class="feature-card">
+                        <h3 class="text-xl md:text-2xl font-title mb-4">Design Personalizável</h3>
+                        <p>Altere cores, fontes e imagens. Faça o upload das vossas fotos e deixem o site com a vossa cara, sem precisar de programar.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3 class="text-xl md:text-2xl font-title mb-4">Lista de Presentes em Dinheiro</h3>
+                        <p>Crie uma lista de presentes com cotas fictícias. Os vossos convidados presenteiam com PIX ou cartão e vocês recebem o valor em dinheiro.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3 class="text-xl md:text-2xl font-title mb-4">Fácil de Compartilhar</h3>
+                        <p>Tenha um link único para partilhar no vosso convite. Os convidados podem aceder, ver os detalhes e confirmar a presença facilmente.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto text-center px-4">
+            <p>&copy; 2025 Ilovecasamento. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
+
