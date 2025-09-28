@@ -114,7 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
         async updateStatus() {
             if (!this.container) return;
             this.container.innerHTML = `<p class="text-gray-500">A verificar estado da conexão...</p>`;
-            
             if (!weddingPageData || !weddingPageData.mp_credentials?.access_token) {
                 this.renderNotConnected();
                 return;
@@ -185,10 +184,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
 
-        // Renderiza uma mensagem de erro
-        renderError(message) {
-            this.container.innerHTML = `<p class="text-red-500">${message}</p>`;
-        }
+        async handleConnectMercadoPago() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return showToast('Por favor, faça login novamente.', 'error');
+            try {
+                const response = await fetch('/create-mp-connect-link', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: user.id })
+                });
+                if (!response.ok) throw new Error("Falha na resposta do servidor.");
+                const { authUrl } = await response.json();
+                if (authUrl) {
+                    window.location.href = authUrl;
+                } else {
+                    showToast('Não foi possível obter o link de conexão.', 'error');
+                }
+            } catch (error) {
+                console.error("Erro ao conectar com MP:", error);
+                showToast('Não foi possível iniciar a conexão. Tente novamente.', 'error');
+            }
+        },
+        renderError(message) { if(this.container) this.container.innerHTML = `<p class="text-red-500">${message}</p>`; }
+
     };
 
 
