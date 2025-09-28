@@ -180,11 +180,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const btnConnect = document.getElementById('btn-connect-mp');
             if (btnConnect) {
-                btnConnect.addEventListener('click', this.handleConnectMercadoPago);
+                btnConnect.addEventListener('click', () => this.handleConnectMercadoPago());
             }
         },
 
-        async handleConnectMercadoPago() {
+     async handleConnectMercadoPago() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) return showToast('Por favor, faça login novamente.', 'error');
             try {
@@ -206,9 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
         renderError(message) { if(this.container) this.container.innerHTML = `<p class="text-red-500">${message}</p>`; }
-
     };
-
 
     const sanitizeFilename = (filename) => {
         const withoutAccents = filename.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
