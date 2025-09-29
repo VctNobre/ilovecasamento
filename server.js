@@ -6,8 +6,8 @@ import fetch from "node-fetch";
 import { createClient } from "@supabase/supabase-js";
 import "dotenv/config";
 
-// SDK Mercado Pago (novo)
-import { MercadoPagoConfig, OAuth, Preference } from "mercadopago";
+// SDK Mercado Pago (Forma correta de importar)
+import mercadopago from "mercadopago";
 
 // --- Configuração para obter o __dirname em ES Modules ---
 const __filename = fileURLToPath(import.meta.url);
@@ -35,23 +35,22 @@ const redirectUri =
 
 const PLATFORM_FEE_PERCENTAGE = 0.03;
 
-// --- Inicialização Mercado Pago ---
-const client = new MercadoPagoConfig({ accessToken: mpAccessToken });
-const oauth = new OAuth(client);
-const preference = new Preference(client);
+// --- Inicialização Mercado Pago (usando o objeto importado) ---
+const client = new mercadopago.MercadoPagoConfig({ accessToken: mpAccessToken });
+const oauth = new mercadopago.OAuth(client);
+const preference = new mercadopago.Preference(client);
 
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 // --- ROTAS DO SITE ---
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'landing.html'));
-});
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
+app.get("/", (req, res) =>
+  res.sendFile(path.join(__dirname, "public", "landing.html"))
+);
+app.get("/login", (req, res) =>
+  res.sendFile(path.join(__dirname, "public", "login.html"))
+);
 app.get("/dashboard", (req, res) =>
   res.sendFile(path.join(__dirname, "public", "dashboard.html"))
 );
@@ -114,7 +113,6 @@ app.post('/create-payment-preference', async (req, res) => {
     try {
         console.log(`[Pagamento] Iniciando para a página ID: ${weddingPageId}`);
 
-        // 1. Buscar as credenciais do Mercado Pago do casal no Supabase
         const { data: pageData, error: pageError } = await supabase
             .from('wedding_pages')
             .select('mp_credentials')
@@ -134,8 +132,9 @@ app.post('/create-payment-preference', async (req, res) => {
         const coupleAccessToken = pageData.mp_credentials.access_token;
         console.log("[Pagamento] Credenciais do casal encontradas.");
 
+        // Usa o 'mercadopago' importado para criar as instâncias
         const coupleClient = new mercadopago.MercadoPagoConfig({ accessToken: coupleAccessToken });
-        const preference = new mercadopago.Preference(coupleClient);
+        const couplePreference = new mercadopago.Preference(coupleClient);
         
         const items = cartItems.map(item => ({
             id: item.id.toString(),
@@ -150,24 +149,26 @@ app.post('/create-payment-preference', async (req, res) => {
         
         console.log(`[Pagamento] Total: ${totalAmount}, Comissão: ${feeAmount}`);
 
-        const result = await preference.create({
+        const result = await couplePreference.create({
             body: {
                 items: items,
                 marketplace_fee: feeAmount,
                 back_urls: {
-                    success: `${process.env.SITE_URL || 'http://localhost:3000'}/casamento/${weddingPageId}?status=success`,
+                    success: `${process.env.SITE_URL || "http://localhost:3000"}/casamento/${weddingPageId}?status=success`,
                 },
-                auto_return: 'approved',
+                auto_return: "approved",
             }
         });
         
         console.log("[Pagamento] Preferência criada com sucesso.");
-        res.json({ init_point: result.init_point });
+        // Garante que o init_point é extraído corretamente, independentemente da estrutura da resposta
+        const initPoint = result?.body?.init_point ?? result?.init_point ?? null;
+        if (!initPoint) throw new Error("init_point não encontrado na resposta do Mercado Pago");
+        
+        res.json({ init_point: initPoint });
 
     } catch (error) {
-        // LOG DE ERRO DETALHADO
         console.error("--- ERRO DETALHADO AO CRIAR PREFERÊNCIA DE PAGAMENTO ---");
-        // A propriedade 'cause' geralmente contém a resposta da API do Mercado Pago
         if (error.cause) {
              console.error("Causa do Erro (API do Mercado Pago):", JSON.stringify(error.cause, null, 2));
         } else {
