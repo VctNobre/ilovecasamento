@@ -111,28 +111,19 @@ app.post('/create-payment-preference', async (req, res) => {
     }
 
     try {
-        console.log(`[Pagamento] Iniciando para a página ID: ${weddingPageId}`);
-
         const { data: pageData, error: pageError } = await supabase
             .from('wedding_pages')
             .select('mp_credentials')
             .eq('id', weddingPageId)
             .single();
 
-        if (pageError) {
-            console.error("[Pagamento] Erro ao buscar dados no Supabase:", pageError);
-            throw new Error('Erro na base de dados.');
-        }
-
-        if (!pageData || !pageData.mp_credentials?.access_token) {
-            console.error("[Pagamento] Credenciais do Mercado Pago não encontradas para o casal.");
+        if (pageError || !pageData || !pageData.mp_credentials?.access_token) {
+            console.error("Erro: Credenciais do casal não encontradas.", pageError);
             return res.status(500).json({ error: 'O criador da página não está configurado para receber pagamentos.' });
         }
         
         const coupleAccessToken = pageData.mp_credentials.access_token;
-        console.log("[Pagamento] Credenciais do casal encontradas.");
-
-        // Usa o 'mercadopago' importado para criar as instâncias
+        
         const coupleClient = new mercadopago.MercadoPagoConfig({ accessToken: coupleAccessToken });
         const couplePreference = new mercadopago.Preference(coupleClient);
         
@@ -143,26 +134,28 @@ app.post('/create-payment-preference', async (req, res) => {
             unit_price: Number(item.value),
             currency_id: 'BRL',
         }));
-        
+
         const totalAmount = items.reduce((acc, item) => acc + item.unit_price, 0);
         const feeAmount = parseFloat((totalAmount * PLATFORM_FEE_PERCENTAGE).toFixed(2));
-        
-        console.log(`[Pagamento] Total: ${totalAmount}, Comissão: ${feeAmount}`);
+
+        // Define a URL base. Usa a variável de ambiente se existir, caso contrário, usa a sua URL de produção.
+        const siteUrl = process.env.SITE_URL || "https://ilovecasamento.com.br";
 
         const result = await couplePreference.create({
             body: {
                 items: items,
                 marketplace_fee: feeAmount,
+                // CORREÇÃO AQUI: As URLs agora usam o seu domínio de produção
                 back_urls: {
-                    success: `${process.env.SITE_URL || "http://localhost:3000"}/casamento/${weddingPageId}?status=success`,
+                    success: `${siteUrl}/casamento/${weddingPageId}?status=success`,
+                    failure: `${siteUrl}/casamento/${weddingPageId}?status=failure`,
+                    pending: `${siteUrl}/casamento/${weddingPageId}?status=pending`,
                 },
                 auto_return: "approved",
             }
         });
         
-        console.log("[Pagamento] Preferência criada com sucesso.");
-        // Garante que o init_point é extraído corretamente, independentemente da estrutura da resposta
-        const initPoint = result?.body?.init_point ?? result?.init_point ?? null;
+        const initPoint = result?.init_point ?? null;
         if (!initPoint) throw new Error("init_point não encontrado na resposta do Mercado Pago");
         
         res.json({ init_point: initPoint });
