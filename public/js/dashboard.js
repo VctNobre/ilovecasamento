@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebar-overlay');
     
-
     const toggleSidebar = () => {
         if (sidebar && overlay) {
             sidebar.classList.toggle('-translate-x-full');
@@ -21,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (overlay) overlay.addEventListener('click', toggleSidebar);
     
     // --- LÓGICA DE NAVEGAÇÃO POR ABAS ---
-    
     const tabLinks = document.querySelectorAll('.tab-link');
     const tabPanels = document.querySelectorAll('.tab-panel');
 
@@ -41,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.innerWidth < 768 && sidebar && !sidebar.classList.contains('-translate-x-full')) {
             toggleSidebar();
         }
+        // CORREÇÃO: Chama a atualização da carteira apenas uma vez
         if (tabName === 'wallet') {
             walletPanel.updateStatus();
         }
@@ -52,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
             switchTab(link.dataset.tab);
         });
     });
-
 
     // --- LÓGICA DE LOGOUT POR INATIVIDADE ---
     const INACTIVITY_TIMEOUT = 30 * 60 * 1000;
@@ -66,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const toastContainer = document.getElementById('toast-container');
     let weddingPageData = null;
     
-    // Seletores do Painel "Editar Site"
+    // Seletores dos Painéis
     const viewSiteLink = document.getElementById('view-site-link');
     const btnSaveAll = document.getElementById('btn-save-all');
     const giftsEditorList = document.getElementById('gifts-editor-list');
@@ -84,13 +82,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const titleColorInput = document.getElementById('title-color');
     const heroTitleColorInput = document.getElementById('hero-title-color');
     const eventDescriptionInput = document.getElementById('event-description');
-    
-    // Seletores do Painel "Minha Conta"
     const accountEmailInput = document.getElementById('account-email');
     const newPasswordInput = document.getElementById('new-password');
     const confirmPasswordInput = document.getElementById('confirm-password');
     const btnUpdatePassword = document.getElementById('btn-update-password');
-    const btnUpdateEmail = document.getElementById('btn-update-email'); 
+    const btnUpdateEmail = document.getElementById('btn-update-email');
 
     // --- FUNÇÕES GLOBAIS ---
     const showToast = (message, type = 'success') => {
@@ -110,7 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const walletPanel = {
         container: document.getElementById('payment-status-container'),
         
-        // Função principal que atualiza o estado da carteira
         async updateStatus() {
             if (!this.container) return;
             this.container.innerHTML = `<p class="text-gray-500">A verificar estado da conexão...</p>`;
@@ -118,29 +113,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.renderNotConnected();
                 return;
             }
-            
-            // Se conectado, busca o saldo
             this.container.innerHTML = `<p class="text-gray-500">A buscar saldo...</p>`;
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) return;
-
             try {
                 const response = await fetch('/get-mp-balance', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId: user.id })
                 });
-
-                if (!response.ok) {
-                    this.renderError("Não foi possível buscar o saldo. Tente novamente mais tarde.");
-                    return;
-                }
+                if (!response.ok) { this.renderError("Não foi possível buscar o saldo."); return; }
                 const balance = await response.json();
                 this.renderConnected(balance);
-
-            } catch (error) {
-                this.renderError("Ocorreu um erro de comunicação.");
-            }
+            } catch (error) { this.renderError("Ocorreu um erro de comunicação."); }
         },
 
         // Renderiza a UI para quando o casal está conectado
@@ -171,20 +156,21 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         
         // Renderiza a UI para quando o casal não está conectado
-        renderNotConnected() {
+      renderNotConnected() {
+            if (!this.container) return;
             this.container.innerHTML = `
                 <p class="mb-4 text-center">Para receber os valores dos presentes, você precisa de conectar a sua conta do Mercado Pago à nossa plataforma. É um processo rápido e seguro.</p>
                 <div class="flex justify-center">
                     <button id="btn-connect-mp" class="btn-primary">Conectar com Mercado Pago</button>
                 </div>`;
-            
             const btnConnect = document.getElementById('btn-connect-mp');
             if (btnConnect) {
+                // CORREÇÃO: Garante que o 'this' se refere ao objeto walletPanel
                 btnConnect.addEventListener('click', () => this.handleConnectMercadoPago());
             }
         },
-
-     async handleConnectMercadoPago() {
+        // CORREÇÃO: A função handleConnectMercadoPago foi adicionada aqui
+        async handleConnectMercadoPago() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) return showToast('Por favor, faça login novamente.', 'error');
             try {
@@ -208,6 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderError(message) { if(this.container) this.container.innerHTML = `<p class="text-red-500">${message}</p>`; }
     };
 
+
     const sanitizeFilename = (filename) => {
         const withoutAccents = filename.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         return withoutAccents.replace(/[^a-zA-Z0-9.\-_]/g, '-').replace(/-+/g, '-');
@@ -224,10 +211,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return publicUrl;
     };
 
-    const loadWeddingPageData = async (userId) => {
+   const loadWeddingPageData = async (userId) => {
         const { data, error } = await supabaseClient.from('wedding_pages').select('*, gifts(*)').eq('user_id', userId).single();
-        if (error && error.code !== 'PGRST116') return showToast("Erro ao carregar dados do casamento.", 'error');
-        
+        if (error && error.code !== 'PGRST116') return showToast("Erro ao carregar dados.", 'error');
         if (data) {
             weddingPageData = data;
             const pageUrl = `/casamento/${data.id}`;
@@ -243,22 +229,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (primaryColorInput) primaryColorInput.value = data.primary_color || '#D9A8A4';
             if (titleColorInput) titleColorInput.value = data.title_color || '#333333';
             if (heroTitleColorInput) heroTitleColorInput.value = data.hero_title_color || '#FFFFFF';
-            if (heroImagePreview && data.hero_image_url) {
-                heroImagePreview.src = data.hero_image_url;
-                heroImagePreview.classList.remove('hidden');
-            }
-            if (giftsEditorList) {
-                giftsEditorList.innerHTML = '';
-                if (data.gifts) {
-                    data.gifts.sort((a, b) => a.id - b.id).forEach(renderGiftEditor);
-                }
-            }
+            if (heroImagePreview && data.hero_image_url) { heroImagePreview.src = data.hero_image_url; heroImagePreview.classList.remove('hidden'); }
+            if (giftsEditorList) { giftsEditorList.innerHTML = ''; if (data.gifts) data.gifts.sort((a, b) => a.id - b.id).forEach(renderGiftEditor); }
         } else {
             if (shareSection) shareSection.classList.add('hidden');
             if (viewSiteLink) viewSiteLink.classList.add('hidden');
         }
     };
-
+    
     const renderGiftEditor = (gift) => {
         const giftId = gift.id || `temp_${Date.now()}`;
         const editorDiv = document.createElement('div');
@@ -274,13 +252,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- EVENT LISTENERS ---
-    if (btnLogout) {
-        btnLogout.addEventListener('click', async () => {
-            clearTimeout(inactivityTimer);
-            await supabaseClient.auth.signOut()
-            window.location.href = '/';
-        });
-    }
+    if (btnLogout) btnLogout.addEventListener('click', async () => { clearTimeout(inactivityTimer); 
+        await supabaseClient.auth.signOut(); });
     if (btnAddGift) btnAddGift.addEventListener('click', () => renderGiftEditor({}));
     if (heroImageUploadInput) {
         heroImageUploadInput.addEventListener('change', (event) => {
@@ -404,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await loadWeddingPageData(user.id);
             switchTab('edit-site');
         } else {
-            window.location.href = '/';
+            window.location.href = '/login';
         }
     })();
 });
