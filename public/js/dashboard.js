@@ -253,15 +253,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (giftsEditorList) { giftsEditorList.innerHTML = ''; if (data.gifts) data.gifts.sort((a, b) => a.id - b.id).forEach(renderGiftEditor); }
             if (rsvpToggle) {
                 const isEnabled = data.rsvp_enabled;
+                const slider = rsvpToggle.querySelector('span'); // Seleciona a "bolinha"
                 rsvpToggle.setAttribute('aria-checked', isEnabled);
                 if (isEnabled) {
                     rsvpToggle.classList.remove('bg-gray-200');
                     rsvpToggle.classList.add('bg-green-500');
-                    rsvpToggle.firstElementChild.classList.add('translate-x-5');
+                    if (slider) slider.classList.add('translate-x-5');
                 } else {
                     rsvpToggle.classList.remove('bg-green-500');
                     rsvpToggle.classList.add('bg-gray-200');
-                    rsvpToggle.firstElementChild.classList.remove('translate-x-5');
+                    if (slider) slider.classList.remove('translate-x-5');
                 }
             }
         } else {
