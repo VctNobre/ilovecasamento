@@ -24,6 +24,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const cartTotal = document.getElementById('cart-total');
     const btnAddMore = document.getElementById('btn-add-more');
     const btnCheckout = document.getElementById('btn-checkout');
+    const rsvpSection = document.getElementById('rsvp-section');
+    const rsvpName = document.getElementById('rsvp-name');
+    const rsvpGuests = document.getElementById('rsvp-guests');
+    const rsvpMessage = document.getElementById('rsvp-message');
+    const btnSubmitRsvp = document.getElementById('btn-submit-rsvp');
 
     let originalGifts = [];
     let cart = [];
@@ -144,8 +149,16 @@ document.addEventListener('DOMContentLoaded', () => {
             
             originalGifts = data.gifts ? [...data.gifts].sort((a, b) => a.id - b.id) : [];
             renderGifts(originalGifts);
+              
+            if (data.rsvp_enabled && rsvpSection) {
+                rsvpSection.classList.remove('hidden');
+            }
 
             hideLoaderAndShowContent();
+
+
+
+
 
         } catch (err) {
             console.error("Erro ao buscar dados:", err);
@@ -181,6 +194,40 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     // --- Event Listeners ---
+    
+    if (btnSubmitRsvp) {
+        btnSubmitRsvp.addEventListener('click', async () => {
+            const attendingRadio = document.querySelector('input[name="attending"]:checked');
+            if (!rsvpName.value || !attendingRadio) {
+                // Adicione uma notificação de erro mais elegante se desejar
+                return alert("Por favor, preencha o seu nome e confirme a sua presença.");
+            }
+
+            btnSubmitRsvp.disabled = true;
+            btnSubmitRsvp.textContent = "Enviando...";
+
+            const rsvpData = {
+                wedding_page_id: currentPageId,
+                guest_name: rsvpName.value,
+                is_attending: attendingRadio.value === 'yes',
+                plus_ones: parseInt(rsvpGuests.value) || 1,
+                message: rsvpMessage.value,
+            };
+            
+            const { error } = await supabaseClient.from('rsvps').insert([rsvpData]);
+
+            if (error) {
+                alert("Ocorreu um erro ao enviar a sua confirmação. Por favor, tente novamente.");
+                btnSubmitRsvp.disabled = false;
+                btnSubmitRsvp.textContent = "Enviar Confirmação";
+            } else {
+                if (rsvpSection) {
+                    rsvpSection.innerHTML = '<p class="text-center text-lg text-green-600 font-semibold">Obrigado! A sua presença foi registada com sucesso.</p>';
+                }
+            }
+        });
+    }
+
     if (sortSelect) {
         sortSelect.addEventListener('change', () => {
             const sortBy = sortSelect.value;
@@ -224,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cartIcon) cartIcon.addEventListener('click', openCart);
     if (cartModalOverlay) cartModalOverlay.addEventListener('click', closeCart);
     if (btnAddMore) btnAddMore.addEventListener('click', closeCart);
-       if (btnCheckout) {
+    if (btnCheckout) {
         btnCheckout.addEventListener('click', async () => {
             if (cart.length === 0 || !currentPageId) return;
 

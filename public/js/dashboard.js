@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
             rsvpToggle.setAttribute('aria-checked', !isEnabled);
             rsvpToggle.classList.toggle('bg-gray-200');
             rsvpToggle.classList.toggle('bg-green-500');
-            rsvpToggle.firstElementChild.classList.toggle('translate-x-5');
+            rsvpToggle.querySelector('span').classList.toggle('translate-x-5');
         });
     }
     if (btnSaveAll) {
