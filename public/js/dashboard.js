@@ -39,9 +39,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.innerWidth < 768 && sidebar && !sidebar.classList.contains('-translate-x-full')) {
             toggleSidebar();
         }
-        // CORREÇÃO: Chama a atualização da carteira apenas uma vez
+        // Chama a atualização da carteira apenas uma vez
         if (tabName === 'wallet') {
             walletPanel.updateStatus();
+        }
+        if (tabName === 'guests') {
+            guestsPanel.loadRsvpData();
         }
     };
 
@@ -66,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Seletores dos Painéis
     const viewSiteLink = document.getElementById('view-site-link');
+    const rsvpToggle = document.getElementById('rsvp-toggle');
     const btnSaveAll = document.getElementById('btn-save-all');
     const giftsEditorList = document.getElementById('gifts-editor-list');
     const btnAddGift = document.getElementById('btn-add-gift');
@@ -102,7 +106,47 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => { toast.classList.add('translate-x-full', 'opacity-0'); toast.addEventListener('transitionend', () => toast.remove()); }, 4000);
     };
 
+    // --- LÓGICA DO PAINEL "CONVIDADOS" (RSVP) ---
+    const guestsPanel = {
+        rsvpListContainer: document.getElementById('rsvp-list-container'),
+        
+        async loadRsvpData() {
+            if (!this.rsvpListContainer || !weddingPageData) {
+                if (this.rsvpListContainer) this.rsvpListContainer.innerHTML = '<p>Salve o seu site primeiro para ver a lista de convidados.</p>';
+                return;
+            }
+            this.rsvpListContainer.innerHTML = '<p>A carregar respostas...</p>';
+            
+            const { data: rsvps, error } = await supabaseClient
+                .from('rsvps')
+                .select('*')
+                .eq('wedding_page_id', weddingPageData.id);
+
+            if (error) {
+                this.rsvpListContainer.innerHTML = '<p class="text-red-500">Erro ao carregar as respostas.</p>';
+                return;
+            }
+
+            if (rsvps.length === 0) {
+                this.rsvpListContainer.innerHTML = '<p>Ainda ninguém respondeu à sua confirmação de presença.</p>';
+                return;
+            }
+
+            // Ordena as respostas: confirmados primeiro
+            rsvps.sort((a, b) => b.is_attending - a.is_attending);
+
+            this.rsvpListContainer.innerHTML = rsvps.map(rsvp => `
+                <div class="border p-4 rounded-lg ${rsvp.is_attending ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
+                    <p class="font-bold text-gray-800">${rsvp.guest_name}</p>
+                    <p class="text-sm">Status: ${rsvp.is_attending ? '<span class="font-semibold text-green-700">✅ Confirmado</span>' : '<span class="font-semibold text-red-700">❌ Não poderá ir</span>'}</p>
+                    <p class="text-sm">Total de convidados: ${rsvp.plus_ones}</p>
+                    ${rsvp.message ? `<p class="mt-2 text-sm italic text-gray-600">"${rsvp.message}"</p>` : ''}
+                </div>
+            `).join('');
+        }
+    };
     // --- LÓGICA DO PAINEL "MINHA CARTEIRA" ---
+    
      const walletPanel = {
         container: document.getElementById('payment-status-container'),
         
@@ -207,6 +251,19 @@ document.addEventListener('DOMContentLoaded', () => {
             if (heroTitleColorInput) heroTitleColorInput.value = data.hero_title_color || '#FFFFFF';
             if (heroImagePreview && data.hero_image_url) { heroImagePreview.src = data.hero_image_url; heroImagePreview.classList.remove('hidden'); }
             if (giftsEditorList) { giftsEditorList.innerHTML = ''; if (data.gifts) data.gifts.sort((a, b) => a.id - b.id).forEach(renderGiftEditor); }
+            if (rsvpToggle) {
+                const isEnabled = data.rsvp_enabled;
+                rsvpToggle.setAttribute('aria-checked', isEnabled);
+                if (isEnabled) {
+                    rsvpToggle.classList.remove('bg-gray-200');
+                    rsvpToggle.classList.add('bg-green-500');
+                    rsvpToggle.firstElementChild.classList.add('translate-x-5');
+                } else {
+                    rsvpToggle.classList.remove('bg-green-500');
+                    rsvpToggle.classList.add('bg-gray-200');
+                    rsvpToggle.firstElementChild.classList.remove('translate-x-5');
+                }
+            }
         } else {
             if (shareSection) shareSection.classList.add('hidden');
             if (viewSiteLink) viewSiteLink.classList.add('hidden');
@@ -237,6 +294,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (file && heroImagePreview) { heroImagePreview.src = URL.createObjectURL(file); heroImagePreview.classList.remove('hidden'); }
         });
     }
+    if (rsvpToggle) {
+        rsvpToggle.addEventListener('click', () => {
+            const isEnabled = rsvpToggle.getAttribute('aria-checked') === 'true';
+            rsvpToggle.setAttribute('aria-checked', !isEnabled);
+            rsvpToggle.classList.toggle('bg-gray-200');
+            rsvpToggle.classList.toggle('bg-green-500');
+            rsvpToggle.firstElementChild.classList.toggle('translate-x-5');
+        });
+    }
     if (btnSaveAll) {
         btnSaveAll.addEventListener('click', async () => {
             const { data: { user } } = await supabaseClient.auth.getUser();
@@ -261,7 +327,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     primary_color: primaryColorInput ? primaryColorInput.value : '#D9A8A4',
                     title_color: titleColorInput ? titleColorInput.value : '#333333',
                     hero_title_color: heroTitleColorInput ? heroTitleColorInput.value : '#FFFFFF',
-                    hero_image_url: heroImageUrl
+                    hero_image_url: heroImageUrl,
+                    rsvp_enabled: rsvpToggle ? rsvpToggle.getAttribute('aria-checked') === 'true' : false,
                 };
                 const { data: pageResult, error: pageError } = await supabaseClient.from('wedding_pages').upsert(pageDataToSave, { onConflict: 'user_id' }).select().single();
                 if (pageError) throw pageError;
