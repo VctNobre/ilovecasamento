@@ -213,8 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
         },
     };
 
-
-
     const sanitizeFilename = (filename) => {
         const withoutAccents = filename.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         return withoutAccents.replace(/[^a-zA-Z0-9.\-_]/g, '-').replace(/-+/g, '-');
@@ -251,7 +249,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (heroTitleColorInput) heroTitleColorInput.value = data.hero_title_color || '#FFFFFF';
             if (heroImagePreview && data.hero_image_url) { heroImagePreview.src = data.hero_image_url; heroImagePreview.classList.remove('hidden'); }
             if (giftsEditorList) { giftsEditorList.innerHTML = ''; if (data.gifts) data.gifts.sort((a, b) => a.id - b.id).forEach(renderGiftEditor); }
-            setRsvpToggleState(Boolean(data.rsvp_enabled));
+            if (rsvpToggle) {
+                const isEnabled = data.rsvp_enabled;
+                const slider = rsvpToggle.querySelector('.toggle-knob'); // Seleciona a "bolinha"
+                rsvpToggle.setAttribute('aria-checked', isEnabled);
+                if (isEnabled) {
+                    rsvpToggle.classList.remove('bg-gray-200', 'border-gray-300');
+                    rsvpToggle.classList.add('bg-green-500', 'border-green-600');
+                    if (slider) slider.classList.add('translate-x-5');
+                } else {
+                    rsvpToggle.classList.remove('bg-green-500', 'border-green-600');
+                    rsvpToggle.classList.add('bg-gray-200', 'border-gray-300');
+                    if (slider) slider.classList.remove('translate-x-5');
+                }
+            }
         } else {
             if (shareSection) shareSection.classList.add('hidden');
             if (viewSiteLink) viewSiteLink.classList.add('hidden');
@@ -282,11 +293,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (file && heroImagePreview) { heroImagePreview.src = URL.createObjectURL(file); heroImagePreview.classList.remove('hidden'); }
         });
     }
-    if (rsvpToggle) {
+   if (rsvpToggle) {
         rsvpToggle.addEventListener('click', () => {
-            const isCurrentlyEnabled = rsvpToggle.getAttribute('aria-checked') === 'true';
-            // Inverte o estado e atualiza a UI
-            setRsvpToggleState(!isCurrentlyEnabled);
+            const isEnabled = rsvpToggle.getAttribute('aria-checked') === 'true';
+            rsvpToggle.setAttribute('aria-checked', !isEnabled);
+            rsvpToggle.classList.toggle('bg-gray-200');
+            rsvpToggle.classList.toggle('bg-green-500');
+            rsvpToggle.classList.toggle('border-gray-300');
+            rsvpToggle.classList.toggle('border-green-600');
+            // Garante que a bolinha se move
+            rsvpToggle.querySelector('.toggle-knob').classList.toggle('translate-x-5');
         });
     }
     if (btnSaveAll) {
