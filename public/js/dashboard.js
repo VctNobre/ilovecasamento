@@ -252,17 +252,29 @@ document.addEventListener('DOMContentLoaded', () => {
             if (heroImagePreview && data.hero_image_url) { heroImagePreview.src = data.hero_image_url; heroImagePreview.classList.remove('hidden'); }
             if (giftsEditorList) { giftsEditorList.innerHTML = ''; if (data.gifts) data.gifts.sort((a, b) => a.id - b.id).forEach(renderGiftEditor); }
             if (rsvpToggle) {
-                const isEnabled = data.rsvp_enabled;
-                const slider = rsvpToggle.querySelector('span'); // Seleciona a "bolinha"
-                rsvpToggle.setAttribute('aria-checked', isEnabled);
-                if (isEnabled) {
-                    rsvpToggle.classList.remove('bg-gray-200');
-                    rsvpToggle.classList.add('bg-green-500');
-                    if (slider) slider.classList.add('translate-x-5');
-                } else {
-                    rsvpToggle.classList.remove('bg-green-500');
-                    rsvpToggle.classList.add('bg-gray-200');
-                    if (slider) slider.classList.remove('translate-x-5');
+            // garantir booleano
+            const isEnabled = Boolean(data.rsvp_enabled);
+            const slider = rsvpToggle.querySelector('.toggle-knob'); // agora seleciona a bolinha corretamente
+
+            // garante string "true"/"false"
+            rsvpToggle.setAttribute('aria-checked', String(isEnabled));
+
+            if (isEnabled) {
+                rsvpToggle.classList.remove('bg-gray-200', 'border-gray-300');
+                rsvpToggle.classList.add('bg-green-500', 'border-green-600');
+
+                if (slider) {
+                slider.classList.remove('translate-x-0');
+                slider.classList.add('translate-x-5');
+                }
+            } else {
+                rsvpToggle.classList.remove('bg-green-500', 'border-green-600');
+                rsvpToggle.classList.add('bg-gray-200', 'border-gray-300');
+
+                if (slider) {
+                slider.classList.remove('translate-x-5');
+                slider.classList.add('translate-x-0');
+                }
                 }
             }
         } else {
@@ -295,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (file && heroImagePreview) { heroImagePreview.src = URL.createObjectURL(file); heroImagePreview.classList.remove('hidden'); }
         });
     }
-            if (rsvpToggle) {
+    if (rsvpToggle) {
             // Função para definir estado explicitamente
             function setState(enabled) {
                 btn.setAttribute('aria-checked', String(enabled));
