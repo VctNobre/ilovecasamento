@@ -256,11 +256,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (isEnabled) {
                     rsvpToggle.classList.remove('bg-gray-200', 'border-gray-300');
                     rsvpToggle.classList.add('bg-green-500', 'border-green-600');
-                    if (slider) slider.classList.add('translate-x-5');
+                    if (slider) slider.classList.add('translate-x-6');
                 } else {
                     rsvpToggle.classList.remove('bg-green-500', 'border-green-600');
                     rsvpToggle.classList.add('bg-gray-200', 'border-gray-300');
-                    if (slider) slider.classList.remove('translate-x-5');
+                    if (slider) slider.classList.remove('translate-x-6');
                 }
             }
         } else {
