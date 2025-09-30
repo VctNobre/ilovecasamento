@@ -296,12 +296,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     if (rsvpToggle) {
-        rsvpToggle.addEventListener('click', () => {
-            const isEnabled = rsvpToggle.getAttribute('aria-checked') === 'true';
-            rsvpToggle.setAttribute('aria-checked', !isEnabled);
-            rsvpToggle.classList.toggle('bg-gray-200');
-            rsvpToggle.classList.toggle('bg-green-500');
-            rsvpToggle.querySelector('span').classList.toggle('translate-x-5');
+        rsvpToggle.addEventListener("click", () => {
+            const isEnabled = rsvpToggle.getAttribute("aria-checked") === "true";
+            rsvpToggle.setAttribute("aria-checked", !isEnabled);
+
+            // alterna cor e borda do container
+            rsvpToggle.classList.toggle("bg-gray-200");
+            rsvpToggle.classList.toggle("bg-green-500");
+            rsvpToggle.classList.toggle("border-red-300");
+            rsvpToggle.classList.toggle("border-green-600");
+
+            // alterna posição da bolinha
+            rsvpToggle.querySelector("span:last-child").classList.toggle("translate-x-1");
+            rsvpToggle.querySelector("span:last-child").classList.toggle("translate-x-6");
         });
     }
     if (btnSaveAll) {
