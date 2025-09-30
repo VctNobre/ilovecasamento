@@ -296,19 +296,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
             if (rsvpToggle) {
-        rsvpToggle.addEventListener("click", () => {
-            const isEnabled = rsvpToggle.getAttribute("aria-checked") === "true";
-            rsvpToggle.setAttribute("aria-checked", !isEnabled);
+            // Função para definir estado explicitamente
+            function setState(enabled) {
+                btn.setAttribute('aria-checked', String(enabled));
+                if (enabled) {
+                btn.classList.remove('bg-gray-200', 'border-gray-300');
+                btn.classList.add('bg-green-500', 'border-green-600');
+                knob.classList.remove('translate-x-0');
+                knob.classList.add('translate-x-5'); // ajusta se quiser mais/menos deslocamento
+                } else {
+                btn.classList.remove('bg-green-500', 'border-green-600');
+                btn.classList.add('bg-gray-200', 'border-gray-300');
+                knob.classList.remove('translate-x-5');
+                knob.classList.add('translate-x-0');
+                }
+            }
 
-            // alterna cor e borda
-            rsvpToggle.classList.toggle("bg-gray-200");
-            rsvpToggle.classList.toggle("bg-green-500");
-            rsvpToggle.classList.toggle("border-red-300");
-            rsvpToggle.classList.toggle("border-green-600");
+            // inicializa visualmente com base no aria-checked atual
+            setState(btn.getAttribute('aria-checked') === 'true');
 
-            // alterna posição da bolinha
-            rsvpToggle.querySelector("span:last-child").classList.toggle("translate-x-5");
-        });
+            // clique
+            btn.addEventListener('click', () => {
+                const currentlyOn = btn.getAttribute('aria-checked') === 'true';
+                setState(!currentlyOn);
+            });
         }
     if (btnSaveAll) {
         btnSaveAll.addEventListener('click', async () => {
