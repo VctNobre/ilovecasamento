@@ -103,60 +103,37 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- LÓGICA DO PAINEL "MINHA CARTEIRA" ---
-    const walletPanel = {
+     const walletPanel = {
         container: document.getElementById('payment-status-container'),
         
-        async updateStatus() {
+        updateStatus() {
             if (!this.container) return;
             this.container.innerHTML = `<p class="text-gray-500">A verificar estado da conexão...</p>`;
-            if (!weddingPageData || !weddingPageData.mp_credentials?.access_token) {
+            
+            if (weddingPageData && weddingPageData.mp_credentials?.access_token) {
+                this.renderConnected();
+            } else {
                 this.renderNotConnected();
-                return;
             }
-            this.container.innerHTML = `<p class="text-gray-500">A buscar saldo...</p>`;
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) return;
-            try {
-                const response = await fetch('/get-mp-balance', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: user.id })
-                });
-                if (!response.ok) { this.renderError("Não foi possível buscar o saldo."); return; }
-                const balance = await response.json();
-                this.renderConnected(balance);
-            } catch (error) { this.renderError("Ocorreu um erro de comunicação."); }
         },
 
-        // Renderiza a UI para quando o casal está conectado
-        renderConnected(balance) {
-            const available = Number(balance.available_balance || 0);
-            const unavailable = Number(balance.unavailable_balance || 0);
+        renderConnected() {
             this.container.innerHTML = `
-                <div class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-green-50 p-6 rounded-lg border border-green-200">
-                            <p class="text-sm font-medium text-green-700">Saldo Disponível</p>
-                            <p class="text-3xl font-bold text-green-800 mt-1">R$ ${available.toFixed(2).replace('.', ',')}</p>
-                            <p class="text-xs text-gray-500 mt-1">Este é o valor que já pode sacar.</p>
-                        </div>
-                        <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
-                            <p class="text-sm font-medium text-yellow-700">Saldo a Liberar</p>
-                            <p class="text-3xl font-bold text-yellow-800 mt-1">R$ ${unavailable.toFixed(2).replace('.', ',')}</p>
-                             <p class="text-xs text-gray-500 mt-1">Valores de pagamentos recentes.</p>
-                        </div>
+                <div class="space-y-6 text-center">
+                    <div class="flex justify-center items-center text-green-600">
+                        <svg class="w-8 h-8 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <p class="text-lg font-semibold">Sua conta está conectada e pronta para receber presentes!</p>
                     </div>
-                    <div class="text-center">
+                    <div>
                         <a href="https://www.mercadopago.com.br/summary" target="_blank" rel="noopener noreferrer" class="btn-primary inline-block">
                             Gerir Ganhos no Mercado Pago
                         </a>
-                        <p class="text-xs text-gray-500 mt-2">Você será redirecionado para o painel seguro do Mercado Pago para gerir os seus saques e dados bancários.</p>
+                        <p class="text-xs text-gray-500 mt-2">Você será redirecionado para o painel seguro do Mercado Pago para ver o seu saldo e gerir os seus saques.</p>
                     </div>
                 </div>`;
         },
         
-        // Renderiza a UI para quando o casal não está conectado
-      renderNotConnected() {
+        renderNotConnected() {
             if (!this.container) return;
             this.container.innerHTML = `
                 <p class="mb-4 text-center">Para receber os valores dos presentes, você precisa de conectar a sua conta do Mercado Pago à nossa plataforma. É um processo rápido e seguro.</p>
@@ -165,11 +142,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>`;
             const btnConnect = document.getElementById('btn-connect-mp');
             if (btnConnect) {
-                // CORREÇÃO: Garante que o 'this' se refere ao objeto walletPanel
                 btnConnect.addEventListener('click', () => this.handleConnectMercadoPago());
             }
         },
-        // CORREÇÃO: A função handleConnectMercadoPago foi adicionada aqui
+        
         async handleConnectMercadoPago() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) return showToast('Por favor, faça login novamente.', 'error');
@@ -191,8 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Não foi possível iniciar a conexão. Tente novamente.', 'error');
             }
         },
-        renderError(message) { if(this.container) this.container.innerHTML = `<p class="text-red-500">${message}</p>`; }
     };
+
 
 
     const sanitizeFilename = (filename) => {
