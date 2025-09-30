@@ -251,32 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (heroTitleColorInput) heroTitleColorInput.value = data.hero_title_color || '#FFFFFF';
             if (heroImagePreview && data.hero_image_url) { heroImagePreview.src = data.hero_image_url; heroImagePreview.classList.remove('hidden'); }
             if (giftsEditorList) { giftsEditorList.innerHTML = ''; if (data.gifts) data.gifts.sort((a, b) => a.id - b.id).forEach(renderGiftEditor); }
-            if (rsvpToggle) {
-            // garantir booleano
-            const isEnabled = Boolean(data.rsvp_enabled);
-            const slider = rsvpToggle.querySelector('.toggle-knob'); // agora seleciona a bolinha corretamente
-
-            // garante string "true"/"false"
-            rsvpToggle.setAttribute('aria-checked', String(isEnabled));
-
-            if (isEnabled) {
-                rsvpToggle.classList.remove('bg-gray-200', 'border-gray-300');
-                rsvpToggle.classList.add('bg-green-500', 'border-green-600');
-
-                if (slider) {
-                slider.classList.remove('translate-x-0');
-                slider.classList.add('translate-x-5');
-                }
-            } else {
-                rsvpToggle.classList.remove('bg-green-500', 'border-green-600');
-                rsvpToggle.classList.add('bg-gray-200', 'border-gray-300');
-
-                if (slider) {
-                slider.classList.remove('translate-x-5');
-                slider.classList.add('translate-x-0');
-                }
-                }
-            }
+            setRsvpToggleState(Boolean(data.rsvp_enabled));
         } else {
             if (shareSection) shareSection.classList.add('hidden');
             if (viewSiteLink) viewSiteLink.classList.add('hidden');
@@ -308,31 +283,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     if (rsvpToggle) {
-            // Função para definir estado explicitamente
-            function setState(enabled) {
-                btn.setAttribute('aria-checked', String(enabled));
-                if (enabled) {
-                btn.classList.remove('bg-gray-200', 'border-gray-300');
-                btn.classList.add('bg-green-500', 'border-green-600');
-                knob.classList.remove('translate-x-0');
-                knob.classList.add('translate-x-5'); // ajusta se quiser mais/menos deslocamento
-                } else {
-                btn.classList.remove('bg-green-500', 'border-green-600');
-                btn.classList.add('bg-gray-200', 'border-gray-300');
-                knob.classList.remove('translate-x-5');
-                knob.classList.add('translate-x-0');
-                }
-            }
-
-            // inicializa visualmente com base no aria-checked atual
-            setState(btn.getAttribute('aria-checked') === 'true');
-
-            // clique
-            btn.addEventListener('click', () => {
-                const currentlyOn = btn.getAttribute('aria-checked') === 'true';
-                setState(!currentlyOn);
-            });
-        }
+        rsvpToggle.addEventListener('click', () => {
+            const isCurrentlyEnabled = rsvpToggle.getAttribute('aria-checked') === 'true';
+            // Inverte o estado e atualiza a UI
+            setRsvpToggleState(!isCurrentlyEnabled);
+        });
+    }
     if (btnSaveAll) {
         btnSaveAll.addEventListener('click', async () => {
             const { data: { user } } = await supabaseClient.auth.getUser();
