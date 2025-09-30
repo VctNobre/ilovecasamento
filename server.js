@@ -30,8 +30,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const mpAccessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
 const mpClientId = process.env.MP_CLIENT_ID;
 const mpClientSecret = process.env.MP_CLIENT_SECRET;
-const redirectUri =
-  process.env.MP_REDIRECT_URI || "http://ilovecasamento.com.br/mp-callback";
+const redirectUri = process.env.MP_REDIRECT_URI || 'http://localhost:3000/mp-callback';
 
 //Taxa de comissão
 const DEFAULT_PLATFORM_FEE = 0.03; // 3%
