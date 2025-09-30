@@ -31,9 +31,11 @@ const mpAccessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
 const mpClientId = process.env.MP_CLIENT_ID;
 const mpClientSecret = process.env.MP_CLIENT_SECRET;
 const redirectUri =
-  process.env.MP_REDIRECT_URI || "http://localhost:3000/mp-callback";
+  process.env.MP_REDIRECT_URI || "http://ilovecasamento.com.br/mp-callback";
 
-const PLATFORM_FEE_PERCENTAGE = 0.03;
+//Taxa de comissão
+const DEFAULT_PLATFORM_FEE = 0.03; // 3%
+
 
 // --- Inicialização Mercado Pago (usando o objeto importado) ---
 const client = new mercadopago.MercadoPagoConfig({ accessToken: mpAccessToken });
@@ -98,32 +100,81 @@ app.get("/mp-callback", async (req, res) => {
   }
 });
 
-app.post("/get-mp-balance", async (req, res) => {
-  // implementar futuramente se precisar
-  res.json({ balance: 0 });
+app.post('/get-mp-balance', async (req, res) => {
+    const { userId } = req.body;
+    if (!userId) {
+        return res.status(400).json({ error: 'User ID não fornecido.' });
+    }
+
+    try {
+        // 1. Busca as credenciais do casal no Supabase
+        const { data: pageData, error: dbError } = await supabase
+            .from('wedding_pages')
+            .select('mp_credentials')
+            .eq('user_id', userId)
+            .single();
+
+        if (dbError || !pageData || !pageData.mp_credentials?.access_token) {
+            throw new Error('Credenciais do Mercado Pago não encontradas para este utilizador.');
+        }
+
+        const coupleAccessToken = pageData.mp_credentials.access_token;
+        const coupleUserId = pageData.mp_credentials.user_id;
+
+        // 2. Faz a chamada à API do Mercado Pago para buscar o saldo
+        const response = await fetch(`https://api.mercadopago.com/users/${coupleUserId}/mercadopago_account/balance`, {
+            headers: {
+                'Authorization': `Bearer ${coupleAccessToken}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Erro na API do Mercado Pago: ${errorData.message || response.statusText}`);
+        }
+
+        const balanceData = await response.json();
+        
+        // 3. Envia o saldo de volta para o frontend
+        res.json({
+            available_balance: balanceData.available_balance,
+            unavailable_balance: balanceData.unavailable_balance
+        });
+
+    } catch (error) {
+        console.error("Erro ao buscar saldo do MP:", error.message);
+        res.status(500).json({ error: 'Não foi possível buscar o saldo.' });
+    }
 });
 
 app.post('/create-payment-preference', async (req, res) => {
     const { cartItems, weddingPageId } = req.body;
-
     if (!cartItems || cartItems.length === 0 || !weddingPageId) {
         return res.status(400).json({ error: 'Dados inválidos.' });
     }
 
     try {
+        // 1. Busca as credenciais E a taxa personalizada do casal
         const { data: pageData, error: pageError } = await supabase
             .from('wedding_pages')
-            .select('mp_credentials')
+            .select('mp_credentials, custom_fee_percentage') // Pede a nova coluna
             .eq('id', weddingPageId)
             .single();
 
-        if (pageError || !pageData || !pageData.mp_credentials?.access_token) {
-            console.error("Erro: Credenciais do casal não encontradas.", pageError);
+        if (pageError || !pageData) {
+            return res.status(500).json({ error: 'Página de casamento não encontrada.' });
+        }
+        if (!pageData.mp_credentials?.access_token) {
             return res.status(500).json({ error: 'O criador da página não está configurado para receber pagamentos.' });
         }
         
         const coupleAccessToken = pageData.mp_credentials.access_token;
         
+        // 2. Decide qual taxa usar
+        const feePercentage = (typeof pageData.custom_fee_percentage === 'number')
+            ? pageData.custom_fee_percentage // Usa a taxa personalizada se existir
+            : DEFAULT_PLATFORM_FEE;          // Caso contrário, usa a padrão
+
         const coupleClient = new mercadopago.MercadoPagoConfig({ accessToken: coupleAccessToken });
         const couplePreference = new mercadopago.Preference(coupleClient);
         
@@ -136,38 +187,24 @@ app.post('/create-payment-preference', async (req, res) => {
         }));
 
         const totalAmount = items.reduce((acc, item) => acc + item.unit_price, 0);
-        const feeAmount = parseFloat((totalAmount * PLATFORM_FEE_PERCENTAGE).toFixed(2));
-
-        // Define a URL base. Usa a variável de ambiente se existir, caso contrário, usa a sua URL de produção.
-        const siteUrl = process.env.SITE_URL || "https://ilovecasamento.com.br";
+        // 3. Calcula a comissão com base na taxa correta
+        const feeAmount = parseFloat((totalAmount * feePercentage).toFixed(2));
 
         const result = await couplePreference.create({
             body: {
                 items: items,
-                marketplace_fee: feeAmount,
-                // CORREÇÃO AQUI: As URLs agora usam o seu domínio de produção
+                marketplace_fee: feeAmount, // Aplica a comissão (personalizada ou padrão)
                 back_urls: {
-                    success: `${siteUrl}/casamento/${weddingPageId}?status=success`,
-                    failure: `${siteUrl}/casamento/${weddingPageId}?status=failure`,
-                    pending: `${siteUrl}/casamento/${weddingPageId}?status=pending`,
+                    success: `${process.env.SITE_URL || "http://localhost:3000"}/casamento/${weddingPageId}?status=success`,
                 },
                 auto_return: "approved",
             }
         });
         
-        const initPoint = result?.init_point ?? null;
-        if (!initPoint) throw new Error("init_point não encontrado na resposta do Mercado Pago");
-        
-        res.json({ init_point: initPoint });
+        res.json({ init_point: result.init_point });
 
     } catch (error) {
-        console.error("--- ERRO DETALHADO AO CRIAR PREFERÊNCIA DE PAGAMENTO ---");
-        if (error.cause) {
-             console.error("Causa do Erro (API do Mercado Pago):", JSON.stringify(error.cause, null, 2));
-        } else {
-             console.error("Mensagem de Erro Geral:", error.message);
-        }
-        console.error("---------------------------------------------------------");
+        console.error("Erro ao criar preferência de pagamento:", error.cause || error);
         res.status(500).json({ error: 'Não foi possível processar o seu pedido.' });
     }
 });
