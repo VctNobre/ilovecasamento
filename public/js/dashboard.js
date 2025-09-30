@@ -302,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
             rsvpToggle.classList.toggle('border-gray-300');
             rsvpToggle.classList.toggle('border-green-600');
             // Garante que a bolinha se move
-            rsvpToggle.querySelector('.toggle-knob').classList.toggle('translate-x-5');
+            rsvpToggle.querySelector('.toggle-knob').classList.toggle('translate-x-6');
         });
     }
     if (btnSaveAll) {
