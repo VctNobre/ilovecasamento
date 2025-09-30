@@ -295,22 +295,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (file && heroImagePreview) { heroImagePreview.src = URL.createObjectURL(file); heroImagePreview.classList.remove('hidden'); }
         });
     }
-    if (rsvpToggle) {
+            if (rsvpToggle) {
         rsvpToggle.addEventListener("click", () => {
             const isEnabled = rsvpToggle.getAttribute("aria-checked") === "true";
             rsvpToggle.setAttribute("aria-checked", !isEnabled);
 
-            // alterna cor e borda do container
+            // alterna cor e borda
             rsvpToggle.classList.toggle("bg-gray-200");
             rsvpToggle.classList.toggle("bg-green-500");
             rsvpToggle.classList.toggle("border-red-300");
             rsvpToggle.classList.toggle("border-green-600");
 
             // alterna posição da bolinha
-            rsvpToggle.querySelector("span:last-child").classList.toggle("translate-x-1");
-            rsvpToggle.querySelector("span:last-child").classList.toggle("translate-x-6");
+            rsvpToggle.querySelector("span:last-child").classList.toggle("translate-x-5");
         });
-    }
+        }
     if (btnSaveAll) {
         btnSaveAll.addEventListener('click', async () => {
             const { data: { user } } = await supabaseClient.auth.getUser();
