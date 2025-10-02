@@ -21,11 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Elementos do Formulário de Registo
     const passwordInput = document.getElementById('register-password');
-    const passwordConfirmInput = document.getElementById('register-password-confirm');
-    const dobInput = document.getElementById('register-dob');
-    const emailRegisterInput = document.getElementById('register-email');
-    const registerError = document.getElementById('register-error');
-    
+    const passwordRequirements = document.getElementById('password-requirements');
     const requirements = {
         length: document.getElementById('req-length'),
         uppercase: document.getElementById('req-uppercase'),
@@ -33,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         number: document.getElementById('req-number'),
         special: document.getElementById('req-special'),
     };
-
+    
     // Elementos de "Esqueceu a Senha"
     const forgotPasswordLink = document.getElementById('forgot-password-link');
     const resetPasswordModal = document.getElementById('reset-password-modal');
