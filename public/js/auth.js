@@ -152,13 +152,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     return registerError.textContent = 'A senha não cumpre todos os requisitos de segurança.';
                 }
 
+                // CORREÇÃO: Desativa o botão para prevenir múltiplos cliques
+                btnRegister.disabled = true;
+                btnRegister.textContent = 'Cadastrando...';
+
                 // Se todas as validações passarem, submete para o Supabase
                 const { error } = await supabaseClient.auth.signUp({ email, password });
                 if (error) {
                     registerError.textContent = "Erro ao registar: " + error.message;
+                    // Reativa o botão em caso de erro
+                    btnRegister.disabled = false;
+                    btnRegister.textContent = 'Cadastrar';
                 } else {
                     showToast("Registo realizado! Verifique o seu e-mail para confirmar a conta.");
                     setTimeout(() => window.location.reload(), 3000);
+                    // O botão permanece desativado, pois a página irá recarregar
                 }
             });
         }
