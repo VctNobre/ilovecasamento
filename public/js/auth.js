@@ -61,14 +61,44 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Event Listeners ---
 
     // Feedback visual em tempo real para a senha
-    if (passwordInput) {
+     if (passwordInput && passwordRequirements) {
+        passwordInput.addEventListener('focus', () => {
+            passwordRequirements.classList.remove('hidden');
+        });
+
+        // Atualiza os requisitos em tempo real enquanto o utilizador digita
         passwordInput.addEventListener('input', () => {
             const value = passwordInput.value;
-            setRequirementStyle(requirements.length, value.length >= 8);
-            setRequirementStyle(requirements.uppercase, /[A-Z]/.test(value));
-            setRequirementStyle(requirements.lowercase, /[a-z]/.test(value));
-            setRequirementStyle(requirements.number, /[0-9]/.test(value));
-            setRequirementStyle(requirements.special, /[^A-Za-z0-9]/.test(value));
+            const checks = {
+                length: value.length >= 8,
+                uppercase: /[A-Z]/.test(value),
+                lowercase: /[a-z]/.test(value),
+                number: /[0-9]/.test(value),
+                special: /[^A-Za-z0-9]/.test(value),
+            };
+
+            const setRequirementVisibility = (element, isValid) => {
+                if (!element) return;
+                if (isValid) {
+                    element.classList.add('hidden'); // Esconde se for válido
+                } else {
+                    element.classList.remove('hidden'); // Mostra se for inválido
+                    element.style.color = '#EF4444'; // Cor vermelha (red-500 do Tailwind)
+                    element.style.fontWeight = '600';
+                }
+            };
+
+            setRequirementVisibility(requirements.length, checks.length);
+            setRequirementVisibility(requirements.uppercase, checks.uppercase);
+            setRequirementVisibility(requirements.lowercase, checks.lowercase);
+            setRequirementVisibility(requirements.number, checks.number);
+            setRequirementVisibility(requirements.special, checks.special);
+
+            // Esconde a lista inteira se todos os requisitos forem cumpridos
+            const allValid = Object.values(checks).every(Boolean);
+            if (allValid) {
+                passwordRequirements.classList.add('hidden');
+            }
         });
     }
 

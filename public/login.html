@@ -36,21 +36,21 @@
         <div id="register-form" class="hidden">
             <h2 class="text-2xl font-semibold mb-2 font-title text-gray-700">Criar nova conta</h2>
             <div class="space-y-4">
-                <input type="email" id="register-email" placeholder="Email" class="input-styled w-full">
+                <input type="email" id="register-email" placeholder="Email" class="input-styled h-12 w-full">
                 <div>
                     <label for="register-dob" class="text-sm text-gray-600">Data de Nascimento</label>
-                    <input type="date" id="register-dob" class="input-styled w-full">
+                    <input type="date" id="register-dob" class="input-styled h-12 w-full">
                 </div>
-                <input type="password" id="register-password" placeholder="Crie uma senha" class="input-styled w-full">
-                <input type="password" id="register-password-confirm" placeholder="Confirme a senha" class="input-styled w-full">
+                <input type="password" id="register-password" placeholder="Crie uma senha" class="input-styled h-12 w-full">
+                <input type="password" id="register-password-confirm" placeholder="Confirme a senha" class="input-styled h-12 w-full">
             </div>
             <!-- Requisitos da Senha -->
-            <ul id="password-requirements" class="text-sm text-gray-600 mt-2 space-y-1">
-                <li id="req-length">› Mínimo de 8 caracteres</li>
-                <li id="req-uppercase">› Pelo menos 1 letra maiúscula</li>
-                <li id="req-lowercase">› Pelo menos 1 letra minúscula</li>
-                <li id="req-number">› Pelo menos 1 número</li>
-                <li id="req-special">› Pelo menos 1 caractere especial (!@#...)</li>
+            <ul id="password-requirements" class="text-sm mt-4 space-y-1 hidden transition-all duration-300">
+                <li id="req-length" class="transition-all duration-300">› Mínimo de 8 caracteres</li>
+                <li id="req-uppercase" class="transition-all duration-300">› Pelo menos 1 letra maiúscula</li>
+                <li id="req-lowercase" class="transition-all duration-300">› Pelo menos 1 letra minúscula</li>
+                <li id="req-number" class="transition-all duration-300">› Pelo menos 1 número</li>
+                <li id="req-special" class="transition-all duration-300">› Pelo menos 1 caractere especial (!@#...)</li>
             </ul>
             <button id="btn-register" class="w-full btn-primary mt-2">Cadastrar</button>
             <p id="register-error" class="text-red-500 text-sm mt-2 text-center"></p>
