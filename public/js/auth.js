@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         number: document.getElementById('req-number'),
         special: document.getElementById('req-special'),
     };
-    
+
     // Elementos de "Esqueceu a Senha"
     const forgotPasswordLink = document.getElementById('forgot-password-link');
     const resetPasswordModal = document.getElementById('reset-password-modal');
@@ -56,48 +56,114 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Listeners ---
 
-    // Feedback visual em tempo real para a senha
-     if (passwordInput && passwordRequirements) {
-        passwordInput.addEventListener('focus', () => {
-            passwordRequirements.classList.remove('hidden');
-        });
+    // --- Lógica de Registo ---
+    if (registerForm) {
+        const btnRegister = document.getElementById('btn-register');
+        const emailRegisterInput = document.getElementById('register-email');
+        const dobInput = document.getElementById('register-dob');
+        const passwordInput = document.getElementById('register-password');
+        const passwordConfirmInput = document.getElementById('register-password-confirm');
+        const registerError = document.getElementById('register-error');
+        const passwordRequirements = document.getElementById('password-requirements');
+        const requirements = {
+            length: document.getElementById('req-length'),
+            uppercase: document.getElementById('req-uppercase'),
+            lowercase: document.getElementById('req-lowercase'),
+            number: document.getElementById('req-number'),
+            special: document.getElementById('req-special'),
+        };
 
-        // Atualiza os requisitos em tempo real enquanto o utilizador digita
-        passwordInput.addEventListener('input', () => {
-            const value = passwordInput.value;
-            const checks = {
-                length: value.length >= 8,
-                uppercase: /[A-Z]/.test(value),
-                lowercase: /[a-z]/.test(value),
-                number: /[0-9]/.test(value),
-                special: /[^A-Za-z0-9]/.test(value),
-            };
+        // Validação dinâmica da senha
+        if (passwordInput && passwordRequirements) {
+            passwordInput.addEventListener('focus', () => {
+                passwordRequirements.classList.remove('hidden');
+            });
 
-            const setRequirementVisibility = (element, isValid) => {
-                if (!element) return;
-                if (isValid) {
-                    element.classList.add('hidden'); // Esconde se for válido
-                } else {
-                    element.classList.remove('hidden'); // Mostra se for inválido
-                    element.style.color = '#EF4444'; // Cor vermelha (red-500 do Tailwind)
-                    element.style.fontWeight = '600';
+            passwordInput.addEventListener('input', () => {
+                const value = passwordInput.value;
+                const checks = {
+                    length: value.length >= 8,
+                    uppercase: /[A-Z]/.test(value),
+                    lowercase: /[a-z]/.test(value),
+                    number: /[0-9]/.test(value),
+                    special: /[^A-Za-z0-9]/.test(value),
+                };
+
+                const setRequirementVisibility = (element, isValid) => {
+                    if (!element) return;
+                    if (isValid) {
+                        element.classList.add('hidden');
+                    } else {
+                        element.classList.remove('hidden');
+                        element.style.color = '#EF4444';
+                        element.style.fontWeight = '600';
+                    }
+                };
+
+                setRequirementVisibility(requirements.length, checks.length);
+                setRequirementVisibility(requirements.uppercase, checks.uppercase);
+                setRequirementVisibility(requirements.lowercase, checks.lowercase);
+                setRequirementVisibility(requirements.number, checks.number);
+                setRequirementVisibility(requirements.special, checks.special);
+
+                const allValid = Object.values(checks).every(Boolean);
+                if (allValid) {
+                    passwordRequirements.classList.add('hidden');
                 }
-            };
+            });
+        }
+        
+        // Submissão do formulário de registo com validação completa
+        if (btnRegister) {
+            btnRegister.addEventListener('click', async () => {
+                if(registerError) registerError.textContent = '';
+                
+                const email = emailRegisterInput.value;
+                const password = passwordInput.value;
+                const passwordConfirm = passwordConfirmInput.value;
+                const dob = dobInput.value;
 
-            setRequirementVisibility(requirements.length, checks.length);
-            setRequirementVisibility(requirements.uppercase, checks.uppercase);
-            setRequirementVisibility(requirements.lowercase, checks.lowercase);
-            setRequirementVisibility(requirements.number, checks.number);
-            setRequirementVisibility(requirements.special, checks.special);
+                // --- VALIDAÇÕES AO SUBMETER ---
+                if (!email || !email.includes('@')) {
+                    return registerError.textContent = 'Por favor, insira um email válido.';
+                }
+                if (!dob) {
+                    return registerError.textContent = 'Por favor, insira a sua data de nascimento.';
+                }
+                const birthDate = new Date(dob);
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const m = today.getMonth() - birthDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+                if (age < 18) {
+                    return registerError.textContent = 'Você deve ter pelo menos 18 anos para se registar.';
+                }
+                if (password !== passwordConfirm) {
+                    return registerError.textContent = 'As senhas não coincidem.';
+                }
+                const allValid = Object.values({
+                    length: password.length >= 8,
+                    uppercase: /[A-Z]/.test(password),
+                    lowercase: /[a-z]/.test(password),
+                    number: /[0-9]/.test(password),
+                    special: /[^A-Za-z0-9]/.test(password),
+                }).every(Boolean);
+                if (!allValid) {
+                    return registerError.textContent = 'A senha não cumpre todos os requisitos de segurança.';
+                }
 
-            // Esconde a lista inteira se todos os requisitos forem cumpridos
-            const allValid = Object.values(checks).every(Boolean);
-            if (allValid) {
-                passwordRequirements.classList.add('hidden');
-            }
-        });
+                // Se todas as validações passarem, submete para o Supabase
+                const { error } = await supabaseClient.auth.signUp({ email, password });
+                if (error) {
+                    registerError.textContent = "Erro ao registar: " + error.message;
+                } else {
+                    showToast("Registo realizado! Verifique o seu e-mail para confirmar a conta.");
+                    setTimeout(() => window.location.reload(), 3000);
+                }
+            });
+        }
     }
-
+    
     // Login com email e senha
     if (btnLogin) {
         btnLogin.addEventListener('click', async () => {
@@ -107,37 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
             loginError.textContent = '';
             const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
             if (error) loginError.textContent = "Email ou senha inválidos.";
-        });
-    }
-    
-    // Registo com validação completa
-    if (btnRegister) {
-        btnRegister.addEventListener('click', async () => {
-            registerError.textContent = '';
-            const email = emailRegisterInput.value;
-            const password = passwordInput.value;
-            const passwordConfirm = passwordConfirmInput.value;
-            const dob = dobInput.value;
-
-            if (!dob) return registerError.textContent = 'Por favor, insira a sua data de nascimento.';
-            const birthDate = new Date(dob);
-            const today = new Date();
-            let age = today.getFullYear() - birthDate.getFullYear();
-            const m = today.getMonth() - birthDate.getMonth();
-            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
-            if (age < 16) return registerError.textContent = 'Você deve ter pelo menos 16 anos para se registar.';
-            if (password !== passwordConfirm) return registerError.textContent = 'As senhas não coincidem.';
-            if (!(/[A-Z]/.test(password) && /[a-z]/.test(password) && /[0-9]/.test(password) && /[^A-Za-z0-9]/.test(password) && password.length >= 8)) {
-                return registerError.textContent = 'A senha não cumpre todos os requisitos de segurança.';
-            }
-
-            const { error } = await supabaseClient.auth.signUp({ email, password });
-            if (error) {
-                registerError.textContent = "Erro ao registar: " + error.message;
-            } else {
-                showToast("Registo realizado! Verifique o seu e-mail para confirmar a conta.");
-                setTimeout(() => window.location.reload(), 3000);
-            }
         });
     }
 

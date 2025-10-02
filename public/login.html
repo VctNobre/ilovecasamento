@@ -12,19 +12,19 @@
 <body class="flex items-center justify-center min-h-screen p-4">
 
     <div class="w-full max-w-md bg-white p-8 rounded-xl card-shadow">
-        <!-- Logo e Título -->
+ 
         <div class="flex justify-center items-center ">
            <a href="/" class="block cursor-pointer">
                 <img src="/images/logo.svg" alt="Ilovecasamento Logo" class="h-18 sm:h-22 w-full object-contain">
         </a></div>
-        <!-- Formulário de Login (visível por padrão) -->
+      
         <div id="login-form">
             <h2 class="text-2xl font-semibold mb-3 font-title text-gray-700">Entrar na sua conta</h2>
             <div class="space-y-2">
                 <input type="email" id="login-email" placeholder="Email" class="input-styled w-full">
                 <input type="password" id="login-password" placeholder="Senha" class="input-styled w-full">
             </div>
-            <!-- "ESQUECEU A SENHA?" -->
+        
             <div id="forgot-password-container" class="text-right text-sm mt-2">
                 <a href="#" id="forgot-password-link" class="font-medium hover:underline" style="color: var(--primary-color);">Esqueceu a senha?</a>
             </div>
@@ -32,7 +32,7 @@
             <p id="login-error" class="text-red-500 text-sm mt-2 text-center"></p>
         </div>
 
-        <!-- Formulário de Cadastro (escondido por padrão) -->
+  
         <div id="register-form" class="hidden">
             <h2 class="text-2xl font-semibold mb-2 font-title text-gray-700">Criar nova conta</h2>
             <div class="space-y-4">
@@ -44,7 +44,7 @@
                 <input type="password" id="register-password" placeholder="Crie uma senha" class="input-styled h-12 w-full">
                 <input type="password" id="register-password-confirm" placeholder="Confirme a senha" class="input-styled h-12 w-full">
             </div>
-            <!-- Requisitos da Senha -->
+     
             <ul id="password-requirements" class="text-sm mt-4 space-y-1 hidden transition-all duration-300">
                 <li id="req-length" class="transition-all duration-300">› Mínimo de 8 caracteres</li>
                 <li id="req-uppercase" class="transition-all duration-300">› Pelo menos 1 letra maiúscula</li>
@@ -56,8 +56,8 @@
             <p id="register-error" class="text-red-500 text-sm mt-2 text-center"></p>
         </div>
 
-        <!-- Links e Botões de Ação -->
-        <div class="text-center my-4">
+
+        <div class="text-center my-2 h-2">
             <a href="#" id="toggle-form" class="hover:underline" style="color: var(--primary-color);">Não tem uma conta? Cadastre-se</a>
         </div>
         <div class="relative flex py-5 items-center">
@@ -71,7 +71,7 @@
         </button>
     </div>
 
-    <!-- MODAL DE RESET DE SENHA (ESTAVA EM FALTA) -->
+
     <div id="reset-password-modal" class="fixed inset-0 bg-black/60 z-40 hidden items-center justify-center p-4">
         <div class="bg-white p-8 rounded-xl card-shadow w-full max-w-md">
             <h2 class="text-2xl font-title mb-4">Redefinir Senha</h2>
