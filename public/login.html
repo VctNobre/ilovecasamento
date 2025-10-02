@@ -13,21 +13,14 @@
 
     <div class="w-full max-w-md bg-white p-8 rounded-xl card-shadow">
         <!-- Logo e Título -->
-        <div class="flex justify-center items-center mb-6">
+        <div class="flex justify-center items-center ">
            <a href="/" class="block cursor-pointer">
-            <svg class="h-16 w-16" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M35 80C28.3333 80 15 75 15 55C15 35 28.3333 30 35 30C41.6667 30 45 35 45 40" stroke="#333333" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M65 20C71.6667 20 85 25 85 45C85 65 71.6667 70 65 70C58.3333 70 55 65 55 60" stroke="var(--primary-color)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-         
-        </div>
-        <h1 class="text-3xl font-bold text-center mb-2 font-title">Ilovecasamento</h1>
-        <p class="text-center text-gray-500 mb-8">O seu site de casamento, do seu jeito.</p>
-        </a>
+                <img src="/images/logo.svg" alt="Ilovecasamento Logo" class="h-18 sm:h-22 w-full object-contain">
+        </a></div>
         <!-- Formulário de Login (visível por padrão) -->
         <div id="login-form">
-            <h2 class="text-2xl font-semibold mb-4 font-title text-gray-700">Entrar na sua conta</h2>
-            <div class="space-y-4">
+            <h2 class="text-2xl font-semibold mb-3 font-title text-gray-700">Entrar na sua conta</h2>
+            <div class="space-y-2">
                 <input type="email" id="login-email" placeholder="Email" class="input-styled w-full">
                 <input type="password" id="login-password" placeholder="Senha" class="input-styled w-full">
             </div>
@@ -35,13 +28,13 @@
             <div id="forgot-password-container" class="text-right text-sm mt-2">
                 <a href="#" id="forgot-password-link" class="font-medium hover:underline" style="color: var(--primary-color);">Esqueceu a senha?</a>
             </div>
-            <button id="btn-login" class="w-full btn-primary mt-6">Entrar</button>
+            <button id="btn-login" class="w-full btn-primary mt-4">Entrar</button>
             <p id="login-error" class="text-red-500 text-sm mt-2 text-center"></p>
         </div>
 
         <!-- Formulário de Cadastro (escondido por padrão) -->
         <div id="register-form" class="hidden">
-            <h2 class="text-2xl font-semibold mb-4 font-title text-gray-700">Criar nova conta</h2>
+            <h2 class="text-2xl font-semibold mb-2 font-title text-gray-700">Criar nova conta</h2>
             <div class="space-y-4">
                 <input type="email" id="register-email" placeholder="Email" class="input-styled w-full">
                 <div>
@@ -52,14 +45,14 @@
                 <input type="password" id="register-password-confirm" placeholder="Confirme a senha" class="input-styled w-full">
             </div>
             <!-- Requisitos da Senha -->
-            <ul id="password-requirements" class="text-sm text-gray-600 mt-4 space-y-1">
+            <ul id="password-requirements" class="text-sm text-gray-600 mt-2 space-y-1">
                 <li id="req-length">› Mínimo de 8 caracteres</li>
                 <li id="req-uppercase">› Pelo menos 1 letra maiúscula</li>
                 <li id="req-lowercase">› Pelo menos 1 letra minúscula</li>
                 <li id="req-number">› Pelo menos 1 número</li>
                 <li id="req-special">› Pelo menos 1 caractere especial (!@#...)</li>
             </ul>
-            <button id="btn-register" class="w-full btn-primary mt-6">Cadastrar</button>
+            <button id="btn-register" class="w-full btn-primary mt-2">Cadastrar</button>
             <p id="register-error" class="text-red-500 text-sm mt-2 text-center"></p>
         </div>
 
