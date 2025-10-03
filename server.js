@@ -203,7 +203,15 @@ app.post('/create-payment-preference', async (req, res) => {
         res.json({ init_point: result.init_point });
 
     } catch (error) {
-        console.error("Erro ao criar preferência de pagamento:", error.cause || error);
+
+        console.error("--- ERRO DETALHADO AO CRIAR PREFERÊNCIA DE PAGAMENTO ---");
+
+        if (error.cause) {
+             console.error("Causa do Erro (API do Mercado Pago):", JSON.stringify(error.cause, null, 2));
+        } else {
+             console.error("Mensagem de Erro Geral:", error.message);
+        }
+        console.error("---------------------------------------------------------");
         res.status(500).json({ error: 'Não foi possível processar o seu pedido.' });
     }
 });
