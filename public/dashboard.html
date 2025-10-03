@@ -90,6 +90,25 @@
                 <div id="edit-site-panel" class="tab-panel">
                     <div class="space-y-8">
 
+                        <div class="bg-white p-6 rounded-xl card-shadow">
+                            <h2 class="text-2xl font-title mb-4">Escolha o Layout do seu Site</h2>
+                            <div id="theme-selector" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <!-- Layout Padrão -->
+                                <label class="theme-option relative border-2 border-gray-300 rounded-lg p-4 cursor-pointer transition-all duration-200">
+                                    <input type="radio" name="layout-theme" value="padrao" class="absolute top-4 right-4 h-5 w-5">
+                                    <img src="https://placehold.co/400x300/F4F0E8/3C4A5A?text=Clássico" alt="Layout Clássico" class="w-full rounded-md mb-2 pointer-events-none">
+                                    <p class="text-center font-semibold">Clássico</p>
+                                    <div class="selected-indicator absolute inset-0 rounded-lg ring-2 ring-[color:var(--primary-color)] opacity-0 transition-opacity"></div>
+                                </label>
+                                <!-- Layout Moderno (exemplo) -->
+                                <label class="theme-option relative border-2 border-gray-300 rounded-lg p-4 cursor-pointer transition-all duration-200">
+                                    <input type="radio" name="layout-theme" value="moderno" class="absolute top-4 right-4 h-5 w-5">
+                                    <img src="https://placehold.co/400x300/3C4A5A/F4F0E8?text=Moderno" alt="Layout Moderno" class="w-full rounded-md mb-2 pointer-events-none">
+                                    <p class="text-center font-semibold">Moderno</p>
+                                    <div class="selected-indicator absolute inset-0 rounded-lg ring-2 ring-[color:var(--primary-color)] opacity-0 transition-opacity"></div>
+                                </label>
+                            </div>
+                        </div>
               
                         <div class="bg-white p-6 rounded-xl card-shadow">
                              <div class="flex flex-wrap justify-between items-end gap-4">

@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmPasswordInput = document.getElementById('confirm-password');
     const btnUpdatePassword = document.getElementById('btn-update-password');
     const btnUpdateEmail = document.getElementById('btn-update-email');
-
+    const themeSelector = document.getElementById('theme-selector');
     // --- FUNÇÕES GLOBAIS ---
     const showToast = (message, type = 'success') => {
         if (!toastContainer) return;
@@ -263,6 +263,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (slider) slider.classList.remove('translate-x-6');
                 }
             }
+
+             if (themeSelector && data.layout_theme) {
+                const selectedRadio = themeSelector.querySelector(`input[value="${data.layout_theme}"]`);
+                if (selectedRadio) {
+                    selectedRadio.checked = true;
+                    // Atualiza o feedback visual para todos os cards
+                    document.querySelectorAll('.theme-option').forEach(label => {
+                        const radio = label.querySelector('input');
+                        const indicator = label.querySelector('.selected-indicator');
+                        if (indicator) {
+                            indicator.style.opacity = radio.checked ? '1' : '0';
+                        }
+                    });
+                }
+            }
         } else {
             if (shareSection) shareSection.classList.add('hidden');
             if (viewSiteLink) viewSiteLink.classList.add('hidden');
@@ -305,6 +320,22 @@ document.addEventListener('DOMContentLoaded', () => {
             rsvpToggle.querySelector('.toggle-knob').classList.toggle('translate-x-6');
         });
     }
+     if (themeSelector) {
+        themeSelector.addEventListener('change', (e) => {
+            // Garante que o evento é de um dos nossos botões de rádio
+            if (e.target.name === 'layout-theme') {
+                // Remove o anel de seleção de todas as opções
+                document.querySelectorAll('.theme-option .selected-indicator').forEach(indicator => {
+                    indicator.style.opacity = '0';
+                });
+                // Adiciona o anel de seleção apenas à opção clicada
+                const indicator = e.target.closest('.theme-option').querySelector('.selected-indicator');
+                if (indicator) {
+                    indicator.style.opacity = '1';
+                }
+            }
+        });
+    }
     if (btnSaveAll) {
         btnSaveAll.addEventListener('click', async () => {
             const { data: { user } } = await supabaseClient.auth.getUser();
@@ -319,6 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const filePath = `${user.id}/hero-${Date.now()}-${sanitizedFileName}`;
                     heroImageUrl = await uploadFile(file, filePath);
                 }
+                const selectedTheme = themeSelector ? themeSelector.querySelector('input[name="layout-theme"]:checked')?.value : 'padrao';
                 const pageDataToSave = {
                     user_id: user.id,
                     main_title: mainTitleInput ? mainTitleInput.value : null,
@@ -331,6 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     hero_title_color: heroTitleColorInput ? heroTitleColorInput.value : '#FFFFFF',
                     hero_image_url: heroImageUrl,
                     rsvp_enabled: rsvpToggle ? rsvpToggle.getAttribute('aria-checked') === 'true' : false,
+                    layout_theme: selectedTheme,
                 };
                 const { data: pageResult, error: pageError } = await supabaseClient.from('wedding_pages').upsert(pageDataToSave, { onConflict: 'user_id' }).select().single();
                 if (pageError) throw pageError;
@@ -356,6 +389,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 showToast("Site atualizado com sucesso!");
                 loadWeddingPageData(user.id);
+
+              
             } catch (error) {
                 console.error("ERRO DETALHADO AO SALVAR:", error);
                 showToast("Ocorreu um erro ao salvar: " + error.message, 'error');
