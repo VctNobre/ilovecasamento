@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Seletores de Elementos ---
     const pageLoader = document.getElementById('page-loader');
     const pageWrapper = document.getElementById('page-wrapper');
+    const weddingBody = document.getElementById('wedding-body');
     const heroSection = document.getElementById('hero-section');
     const heroTitle = document.getElementById('hero-title');
     const heroDate = document.getElementById('hero-date');
@@ -108,6 +109,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (error || !data) {
                 throw new Error(error?.message || "Página não encontrada.");
             }
+
+            weddingBody.className = 'transition-colors duration-500'; 
+            weddingBody.classList.add(`theme-${data.layout_theme || 'padrao'}`);    
 
             document.title = `${data.main_title} | Ilovecasamento`;
             if (heroTitle) heroTitle.textContent = data.main_title;
