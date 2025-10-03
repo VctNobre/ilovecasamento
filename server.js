@@ -6,14 +6,14 @@ import fetch from "node-fetch";
 import { createClient } from "@supabase/supabase-js";
 import "dotenv/config";
 
-// SDK Mercado Pago (Forma correta de importar)
+
 import mercadopago from "mercadopago";
 
-// --- Configuração para obter o __dirname em ES Modules ---
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// --- Configurações ---
+
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
 
