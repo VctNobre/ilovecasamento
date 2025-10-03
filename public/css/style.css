@@ -30,6 +30,12 @@ body {
     color: var(--title-color);
 }
 .font-body { font-family: 'Inter', sans-serif; }
+.font-signature {
+    font-family: 'Great Vibes', cursive;
+    color: var(--primary-color);
+    font-size: 2.25rem;
+    font-weight: normal;
+}
 
 /* 5. Estilos de Componentes Personalizados */
 .btn-primary {
@@ -83,60 +89,62 @@ body {
     font-weight: normal;
 }
 
-/* 8. Animação de Carregamento (Spinner) */
-#page-loader {
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%;
-    background-color: var(--background-color);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    transition: opacity 0.5s ease;
-}
-.spinner {
-    width: 50px; height: 50px;
-    border: 5px solid rgba(0, 0, 0, 0.1);
-    border-top-color: var(--primary-color);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-
-/* 9. ESTILOS DE TEMA (NOVA SECÇÃO) */
+/* 8. ESTILOS DE TEMA (NOVA SECÇÃO COM LAYOUTS DE GRELHA) */
 
 /* ------------------------------ */
 /* TEMA: Padrão (Clássico)        */
 /* ------------------------------ */
-body.theme-padrao .font-title {
-    font-family: 'Playfair Display', serif;
+body.theme-padrao #page-wrapper {
+    display: block; /* Layout de bloco padrão, um a seguir ao outro */
 }
-/* (Qualquer outro estilo específico do tema padrão pode ir aqui) */
+/* O nosso layout atual, com o conteúdo a sobrepor a imagem de capa */
+body.theme-padrao #page-content {
+    margin-top: -8rem;
+}
+@media (min-width: 768px) {
+    body.theme-padrao #page-content {
+        margin-top: -8rem;
+    }
+}
 
 
 /* ------------------------------ */
-/* TEMA: Moderno (Exemplo de IA)  */
+/* TEMA: Moderno (Layout Dividido) */
 /* ------------------------------ */
+@media (min-width: 1024px) { /* Aplica-se apenas a ecrãs de computador */
+    body.theme-moderno #page-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Duas colunas de tamanho igual */
+        grid-template-rows: auto;
+        grid-template-areas:
+            "hero content"
+            "hero content";
+        min-height: 100vh;
+    }
+    
+    body.theme-moderno .hero-section { 
+        grid-area: hero; 
+        height: 100vh; /* Ocupa toda a altura da tela */
+        position: sticky; /* Fica "colado" à esquerda enquanto se faz scroll */
+        top: 0;
+    }
+
+    body.theme-moderno #page-content {
+        grid-area: content;
+        margin-top: 0; /* Remove a margem negativa */
+    }
+
+    body.theme-moderno #main-content {
+        border-radius: 0;
+        box-shadow: none;
+    }
+}
+/* Em ecrãs pequenos, o tema moderno comporta-se como o clássico */
 body.theme-moderno .font-title {
     font-family: 'Inter', sans-serif;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-}
-body.theme-moderno #hero-section {
-    min-height: 70vh;
-}
-body.theme-moderno #main-content {
-    border-radius: 0;
-}
-body.theme-moderno .card-shadow {
-    border-radius: 4px;
-    box-shadow: none;
-    border: 1px solid var(--border-color);
-}
-body.theme-moderno .btn-primary {
-    border-radius: 4px;
 }
 body.theme-moderno .font-signature {
     font-family: 'Inter', sans-serif;
@@ -145,4 +153,3 @@ body.theme-moderno .font-signature {
     text-transform: uppercase;
     letter-spacing: 0.1em;
 }
-
