@@ -188,16 +188,20 @@ app.post('/create-payment-preference', async (req, res) => {
         const totalAmount = items.reduce((acc, item) => acc + item.unit_price, 0);
         // 3. Calcula a comissão com base na taxa correta
         const feeAmount = parseFloat((totalAmount * feePercentage).toFixed(2));
+        const siteUrl = process.env.SITE_URL || "https://ilovecasamento.com.br";
+
 
         const result = await couplePreference.create({
             body: {
                 items: items,
-                marketplace_fee: feeAmount, // Aplica a comissão (personalizada ou padrão)
+                marketplace_fee: feeAmount,
                 back_urls: {
-                    success: `${process.env.SITE_URL || "http://localhost:3000"}/casamento/${weddingPageId}?status=success`,
+                    success: `${siteUrl}/casamento/${weddingPageId}?status=success`,
+                    failure: `${siteUrl}/casamento/${weddingPageId}?status=failure`,
+                    pending: `${siteUrl}/casamento/${weddingPageId}?status=pending`,
                 },
                 auto_return: "approved",
-            }
+            }     
         });
         
         res.json({ init_point: result.init_point });
