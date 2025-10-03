@@ -1,23 +1,22 @@
 /* public/css/style.css */
 
-/* 1. Importação das Fontes (Consolidada) */
+/* 1. Importação das Fontes */
 @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap');
 
 /* 2. Definição das Variáveis de Cores (Paleta) */
 :root {
-    /* Cores principais que o utilizador pode alterar no painel */
-    --primary-color: #D9A8A4; /* Rosa Queimado (padrão) */
-    --title-color: #333333;   /* Grafite Escuro (padrão) */
-    --hero-title-color: #FFFFFF; /* Branco (padrão para a capa) */
-
-    /* Cores de suporte da identidade visual */
-    --background-color: #F8F7F4; /* Branco Creme */
-    --text-color: #555555;       /* Cinza para texto */
+    --primary-color: #D9A8A4;
+    --title-color: #333333;
+    --hero-title-color: #FFFFFF;
+    --background-color: #F8F7F4;
+    --text-color: #555555;
     --white-color: #FFFFFF;
     --border-color: #EAEAEA;
 }
 
-/* 3. Estilos de Base para o Corpo da Página */
+/* 3. Reset e Base Responsiva */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: 100%; }
 body {
     background-color: var(--background-color);
     font-family: 'Inter', sans-serif;
@@ -30,10 +29,7 @@ body {
     font-family: 'Playfair Display', serif;
     color: var(--title-color);
 }
-
-.font-body {
-    font-family: 'Inter', sans-serif;
-}
+.font-body { font-family: 'Inter', sans-serif; }
 
 /* 5. Estilos de Componentes Personalizados */
 .btn-primary {
@@ -50,7 +46,6 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px -5px rgba(0,0,0,0.25);
 }
-
 .card-shadow {
     box-shadow: 0 10px 25px -10px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
@@ -59,7 +54,6 @@ body {
     transform: translateY(-5px);
     box-shadow: 0 15px 30px -10px rgba(0,0,0,0.15);
 }
-
 .input-styled {
     border-radius: 8px;
     border: 1px solid var(--border-color);
@@ -75,30 +69,24 @@ body {
 
 /* 6. Estilo do Overlay de Fundo */
 .background-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
     z-index: -1;
-    background-color: rgba(0, 0, 0, 0.3); 
+    background-color: rgba(0, 0, 0, 0.3);
 }
 
-/* 7. Classe para a Assinatura (Corrigida) */
+/* 7. Classe para a Assinatura */
 .font-signature {
     font-family: 'Great Vibes', cursive;
-    color: var(--primary-color); /* CORREÇÃO: Usa a cor primária dinâmica */
+    color: var(--primary-color);
     font-size: 2.25rem;
     font-weight: normal;
 }
 
 /* 8. Animação de Carregamento (Spinner) */
 #page-loader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
     background-color: var(--background-color);
     display: flex;
     justify-content: center;
@@ -106,19 +94,55 @@ body {
     z-index: 9999;
     transition: opacity 0.5s ease;
 }
-
 .spinner {
-    width: 50px;
-    height: 50px;
+    width: 50px; height: 50px;
     border: 5px solid rgba(0, 0, 0, 0.1);
     border-top-color: var(--primary-color);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+
+/* 9. ESTILOS DE TEMA (NOVA SECÇÃO) */
+
+/* ------------------------------ */
+/* TEMA: Padrão (Clássico)        */
+/* ------------------------------ */
+body.theme-padrao .font-title {
+    font-family: 'Playfair Display', serif;
+}
+/* (Qualquer outro estilo específico do tema padrão pode ir aqui) */
+
+
+/* ------------------------------ */
+/* TEMA: Moderno (Exemplo de IA)  */
+/* ------------------------------ */
+body.theme-moderno .font-title {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+body.theme-moderno #hero-section {
+    min-height: 70vh;
+}
+body.theme-moderno #main-content {
+    border-radius: 0;
+}
+body.theme-moderno .card-shadow {
+    border-radius: 4px;
+    box-shadow: none;
+    border: 1px solid var(--border-color);
+}
+body.theme-moderno .btn-primary {
+    border-radius: 4px;
+}
+body.theme-moderno .font-signature {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
 }
 
