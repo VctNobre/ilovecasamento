@@ -1,0 +1,10 @@
+
+#page-content {
+    margin-top: -8rem;
+}
+
+@media (min-width: 768px) {
+    #page-content {
+        margin-top: -8rem;
+    }
+}

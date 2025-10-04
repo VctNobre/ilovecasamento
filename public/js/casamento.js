@@ -1,22 +1,156 @@
 // casamento.js
 import { supabaseClient } from './app.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-    // --- Seletores de Elementos ---
+// Mapeia os nomes dos temas aos seus ficheiros de módulo
+const layouts = {
+    padrao: {
+        css: '/css/classico.css',
+        // Importa o módulo do layout dinamicamente
+        render: () => import('./layouts/classico.js').then(module => module.render)
+    },
+    moderno: {
+        css: '/css/moderno.css',
+        render: () => import('./layouts/moderno.js').then(module => module.render)
+    }
+};
+
+// --- FUNÇÃO DE INICIALIZAÇÃO PRINCIPAL ---
+document.addEventListener('DOMContentLoaded', async () => {
     const pageLoader = document.getElementById('page-loader');
     const pageWrapper = document.getElementById('page-wrapper');
-    const weddingBody = document.getElementById('wedding-body');
-    const heroSection = document.getElementById('hero-section');
+    const themeStyleLink = document.getElementById('theme-style');
+
+    const getPageIdFromUrl = () => {
+        const path = window.location.pathname;
+        const parts = path.split('/');
+        return parts[parts.length - 1];
+    };
+
+    const pageId = getPageIdFromUrl();
+    if (!pageId || isNaN(pageId)) {
+        if(pageLoader) pageLoader.remove();
+        if(pageWrapper) {
+            pageWrapper.innerHTML = '<h1 class="text-center p-12 text-2xl font-title">Página não encontrada.</h1>';
+            pageWrapper.style.opacity = '1';
+        }
+        return;
+    }
+
+    try {
+        // 1. Busca os dados do casamento no Supabase
+        const { data, error } = await supabaseClient
+            .from('wedding_pages')
+            .select('*, gifts(*)')
+            .eq('id', pageId)
+            .single();
+
+        if (error || !data) throw new Error("Dados do casamento não encontrados.");
+
+        // 2. Determina qual layout usar
+        const themeName = data.layout_theme || 'padrao';
+        const layout = layouts[themeName];
+        if (!layout) throw new Error(`Layout "${themeName}" não definido.`);
+
+        // 3. Carrega o CSS do tema
+        if(themeStyleLink) themeStyleLink.setAttribute('href', layout.css);
+        
+        // 4. Carrega a função de renderização do módulo do tema
+        const renderFunction = await layout.render();
+
+        // 5. Gera o HTML do layout com os dados (ainda sem o conteúdo dinâmico)
+        const htmlContent = renderFunction(data);
+
+        // 6. Injeta o HTML "esqueleto" na página
+        if (pageWrapper) pageWrapper.innerHTML = htmlContent;
+
+        // 7. Depois de o HTML estar na página, preenchemos o conteúdo dinâmico
+        populateDynamicContent(data);
+
+        // 8. E adicionamos toda a interatividade
+        attachEventListeners(data);
+
+        // 9. Esconde o loader e mostra o conteúdo
+        if (pageLoader) {
+            pageLoader.style.opacity = '0';
+            setTimeout(() => pageLoader.remove(), 600);
+        }
+        if (pageWrapper) pageWrapper.style.opacity = '1';
+
+    } catch (err) {
+        console.error("Erro ao carregar a página:", err);
+        if(pageLoader) pageLoader.remove();
+        if(pageWrapper) {
+             pageWrapper.innerHTML = `<h1 class="text-center p-12 text-2xl font-title">Erro ao carregar a página.</h1>`;
+             pageWrapper.style.opacity = '1';
+        }
+    }
+});
+
+
+// --- Funções que correm DEPOIS de o HTML ser injetado ---
+
+/**
+ * Preenche o conteúdo dinâmico (textos, imagens, cores) do layout que foi injetado na página.
+ */
+function populateDynamicContent(data) {
     const heroTitle = document.getElementById('hero-title');
     const heroDate = document.getElementById('hero-date');
     const heroImage = document.getElementById('hero-image');
+    const introTextContainer = document.getElementById('intro-text-container');
     const monogramContainer = document.getElementById('monogram-container');
     const monogramInitial1 = document.getElementById('monogram-initial-1');
     const monogramInitial2 = document.getElementById('monogram-initial-2');
-    const introTextContainer = document.getElementById('intro-text-container');
+    const root = document.documentElement;
+
+    document.title = `${data.main_title || 'Nosso Casamento'} | Ilovecasamento`;
+    if (heroTitle) heroTitle.textContent = data.main_title;
+    if (heroDate) heroDate.textContent = new Date(data.wedding_date + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+    if (heroImage && data.hero_image_url) {
+        heroImage.src = data.hero_image_url;
+        heroImage.onload = () => { heroImage.classList.remove('opacity-0'); };
+    }
+
+    if (data.main_title && monogramContainer) {
+        const cleanedTitle = data.main_title.replace(/\s*&\s*|\s+e\s+|\s+and\s+/i, ' ').trim();
+        const names = cleanedTitle.split(/\s+/);
+        if (names.length >= 2 && monogramInitial1 && monogramInitial2) {
+            monogramInitial1.textContent = names[0].charAt(0).toUpperCase();
+            monogramInitial2.textContent = names[names.length - 1].charAt(0).toUpperCase();
+            monogramContainer.classList.remove('hidden');
+        }
+    }
+
+    if (introTextContainer) {
+        introTextContainer.innerHTML = '';
+        if (data.intro_text) {
+            data.intro_text.split('\n').forEach(pText => {
+                if (pText.trim() !== '') {
+                    const pElement = document.createElement('p');
+                    pElement.textContent = pText;
+                    introTextContainer.appendChild(pElement);
+                }
+            });
+        }
+        if (data.couple_signature) {
+            const signatureElement = document.createElement('p');
+            signatureElement.className = 'font-signature mt-8';
+            signatureElement.textContent = data.couple_signature;
+            introTextContainer.appendChild(signatureElement);
+        }
+    }
+
+    root.style.setProperty('--primary-color', data.primary_color || '#D9A8A4');
+    root.style.setProperty('--title-color', data.title_color || '#333333');
+    root.style.setProperty('--hero-title-color', data.hero_title_color || '#FFFFFF');
+}
+
+/**
+ * Adiciona a interatividade (carrinho, ordenação, rsvp) aos elementos que foram injetados.
+ */
+function attachEventListeners(data) {
+    // Seletores dos elementos interativos
     const giftListContainer = document.getElementById('gift-list-container');
     const sortSelect = document.getElementById('sort-gifts');
-    const root = document.documentElement;
     const cartIcon = document.getElementById('cart-icon');
     const cartCount = document.getElementById('cart-count');
     const cartModalOverlay = document.getElementById('cart-modal-overlay');
@@ -26,63 +160,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnAddMore = document.getElementById('btn-add-more');
     const btnCheckout = document.getElementById('btn-checkout');
     const rsvpSection = document.getElementById('rsvp-section');
-    const rsvpName = document.getElementById('rsvp-name');
-    const rsvpGuests = document.getElementById('rsvp-guests');
-    const rsvpMessage = document.getElementById('rsvp-message');
     const btnSubmitRsvp = document.getElementById('btn-submit-rsvp');
 
-    let originalGifts = [];
+    let originalGifts = data.gifts || [];
     let cart = [];
-    let currentPageId = null;
-
-    // --- Funções Auxiliares ---
-
-    const hideLoaderAndShowContent = () => {
-        if (pageLoader) {
-            pageLoader.style.opacity = '0';
-            // Garante que o loader é removido após a animação
-            setTimeout(() => {
-                if (pageLoader) pageLoader.remove();
-            }, 600); // Um pouco mais que a duração da transição (0.5s)
-        }
-        if (pageWrapper) {
-            pageWrapper.style.opacity = '1';
-        }
-    };
-
-    const getPageIdFromUrl = () => {
-        const path = window.location.pathname;
-        const parts = path.split('/');
-        const pageId = parts[parts.length - 1];
-        currentPageId = !isNaN(pageId) && pageId ? pageId : null;
-        return currentPageId;
-    };
-
-    const formatDate = (dateString) => {
-        if (!dateString) return '';
-        const date = new Date(dateString + 'T12:00:00');
-        return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
-    };
     
-    // --- Funções do Carrinho ---
-    const openCart = () => {
-        if (!cartModal || !cartModalOverlay) return;
+    // Funções do Carrinho
+    const openCart = () => {if (!cartModal || !cartModalOverlay) return;
         cartModalOverlay.classList.remove('hidden');
         cartModal.classList.remove('hidden');
-        setTimeout(() => cartModal.classList.remove('scale-95'), 10);
-    };
-
-    const closeCart = () => {
-        if (!cartModal || !cartModalOverlay) return;
+        setTimeout(() => cartModal.classList.remove('scale-95'), 10); };
+    const closeCart = () => { if (!cartModal || !cartModalOverlay) return;
         cartModal.classList.add('scale-95');
         setTimeout(() => {
             cartModalOverlay.classList.add('hidden');
             cartModal.classList.add('hidden');
-        }, 300);
-    };
-
-    const updateCartUI = () => {
-        if (!cartItemsContainer || !cartCount || !cartTotal) return;
+        }, 300); };
+    const updateCartUI = () => {     if (!cartItemsContainer || !cartCount || !cartTotal) return;
         cartItemsContainer.innerHTML = '';
         let total = 0;
         if (cart.length === 0) {
@@ -98,81 +192,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         cartCount.textContent = cart.length;
         cartTotal.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-        if (btnCheckout) btnCheckout.disabled = cart.length === 0;
-    };
-
-    // --- Função Principal de Carregamento ---
-    const loadPageData = async (pageId) => {
-        try {
-            const { data, error } = await supabaseClient.from('wedding_pages').select('*, gifts(*)').eq('id', pageId).single();
-
-            if (error || !data) {
-                throw new Error(error?.message || "Página não encontrada.");
-            }
-
-            weddingBody.className = 'transition-colors duration-500'; 
-            weddingBody.classList.add(`theme-${data.layout_theme || 'padrao'}`);    
-
-            document.title = `${data.main_title} | Ilovecasamento`;
-            if (heroTitle) heroTitle.textContent = data.main_title;
-            if (heroDate) heroDate.textContent = formatDate(data.wedding_date);
-            if (heroImage && data.hero_image_url) {
-                heroImage.src = data.hero_image_url;
-                heroImage.onload = () => { heroImage.classList.remove('hidden', 'opacity-0'); if (heroSection) heroSection.classList.remove('bg-gray-200'); };
-            }
-            if (data.main_title && monogramContainer) {
-                const cleanedTitle = data.main_title.replace(/\s*&\s*|\s+e\s+|\s+and\s+/i, ' ').trim();
-                const names = cleanedTitle.split(/\s+/);
-                if (names.length >= 2 && monogramInitial1 && monogramInitial2) {
-                    monogramInitial1.textContent = names[0].charAt(0).toUpperCase();
-                    monogramInitial2.textContent = names[names.length - 1].charAt(0).toUpperCase();
-                    monogramContainer.classList.remove('hidden');
-                }
-            }
-            if (introTextContainer) {
-                introTextContainer.innerHTML = '';
-                if (data.intro_text) {
-                    data.intro_text.split('\n').forEach(pText => {
-                        if (pText.trim() !== '') {
-                            const pElement = document.createElement('p');
-                            pElement.textContent = pText;
-                            introTextContainer.appendChild(pElement);
-                        }
-                    });
-                }
-                if (data.couple_signature) {
-                    const signatureElement = document.createElement('p');
-                    signatureElement.className = 'font-signature mt-8';
-                    signatureElement.textContent = data.couple_signature;
-                    introTextContainer.appendChild(signatureElement);
-                }
-            }
-            root.style.setProperty('--primary-color', data.primary_color || '#D9A8A4');
-            root.style.setProperty('--title-color', data.title_color || '#333333');
-            root.style.setProperty('--hero-title-color', data.hero_title_color || '#FFFFFF');
-            
-            originalGifts = data.gifts ? [...data.gifts].sort((a, b) => a.id - b.id) : [];
-            renderGifts(originalGifts);
-              
-            if (data.rsvp_enabled && rsvpSection) {
-                rsvpSection.classList.remove('hidden');
-            }
-
-            hideLoaderAndShowContent();
-
-
-
-
-
-        } catch (err) {
-            console.error("Erro ao buscar dados:", err);
-            if (heroTitle) {
-                heroTitle.textContent = "Erro ao carregar a página.";
-            }
-            hideLoaderAndShowContent();
-        }
-    };
+        if (btnCheckout) btnCheckout.disabled = cart.length === 0;};
     
+    // Função para renderizar os presentes
     const renderGifts = (gifts) => {
         if (!giftListContainer) return;
         giftListContainer.innerHTML = '';
@@ -186,9 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h3 class="text-2xl font-semibold mb-2 font-title">${gift.title}</h3>
                         <p class="text-gray-600 mb-4 flex-grow">${gift.description || ''}</p>
                         <p class="text-3xl font-light mb-6" style="color: var(--primary-color);">R$ ${Number(gift.value).toFixed(2).replace('.', ',')}</p>
-                        <button data-id="${gift.id}" class="add-to-cart-btn mt-auto w-full btn-primary">
-                            Adicionar ao Carrinho
-                        </button>
+                        <button data-id="${gift.id}" class="add-to-cart-btn mt-auto w-full btn-primary">Adicionar ao Carrinho</button>
                     </div>`;
                 giftListContainer.appendChild(giftCard);
             });
@@ -197,41 +217,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
-    // --- Event Listeners ---
-    
-    if (btnSubmitRsvp) {
-        btnSubmitRsvp.addEventListener('click', async () => {
-            const attendingRadio = document.querySelector('input[name="attending"]:checked');
-            if (!rsvpName.value || !attendingRadio) {
-                // Adicione uma notificação de erro mais elegante se desejar
-                return alert("Por favor, preencha o seu nome e confirme a sua presença.");
-            }
+    renderGifts(originalGifts);
 
-            btnSubmitRsvp.disabled = true;
-            btnSubmitRsvp.textContent = "Enviando...";
-
-            const rsvpData = {
-                wedding_page_id: currentPageId,
-                guest_name: rsvpName.value,
-                is_attending: attendingRadio.value === 'yes',
-                plus_ones: parseInt(rsvpGuests.value) || 1,
-                message: rsvpMessage.value,
-            };
-            
-            const { error } = await supabaseClient.from('rsvps').insert([rsvpData]);
-
-            if (error) {
-                alert("Ocorreu um erro ao enviar a sua confirmação. Por favor, tente novamente.");
-                btnSubmitRsvp.disabled = false;
-                btnSubmitRsvp.textContent = "Enviar Confirmação";
-            } else {
-                if (rsvpSection) {
-                    rsvpSection.innerHTML = '<p class="text-center text-lg text-green-600 font-semibold">Obrigado! A sua presença foi registada com sucesso.</p>';
-                }
-            }
-        });
-    }
-
+    // Event listeners
     if (sortSelect) {
         sortSelect.addEventListener('change', () => {
             const sortBy = sortSelect.value;
@@ -241,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'price-desc': sortedGifts.sort((a, b) => b.value - a.value); break;
                 case 'az': sortedGifts.sort((a, b) => a.title.localeCompare(b.title)); break;
                 case 'za': sortedGifts.sort((a, b) => b.title.localeCompare(a.title)); break;
-                default: sortedGifts.sort((a, b) => a.id - b.id); break;
+                default: sortedGifts.sort((a,b) => a.id - b.id); break;
             }
             renderGifts(sortedGifts);
         });
@@ -261,14 +249,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (cartItemsContainer) {
+    if(cartItemsContainer) {
         cartItemsContainer.addEventListener('click', (e) => {
-            const button = e.target.closest('.remove-item-btn');
-            if(button) {
-                const cartItemIdToRemove = Number(button.dataset.cartItemId);
-                cart = cart.filter(item => item.cartItemId !== cartItemIdToRemove);
-                updateCartUI();
-            }
+             const button = e.target.closest('.remove-item-btn');
+             if(button) {
+                 const cartItemIdToRemove = Number(button.dataset.cartItemId);
+                 cart = cart.filter(item => item.cartItemId !== cartItemIdToRemove);
+                 updateCartUI();
+             }
         });
     }
 
@@ -276,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cartModalOverlay) cartModalOverlay.addEventListener('click', closeCart);
     if (btnAddMore) btnAddMore.addEventListener('click', closeCart);
     if (btnCheckout) {
-        btnCheckout.addEventListener('click', async () => {
+         btnCheckout.addEventListener('click', async () => {
             if (cart.length === 0 || !currentPageId) return;
 
             btnCheckout.textContent = 'Processando...';
@@ -316,13 +304,42 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Inicialização ---
-    const pageId = getPageIdFromUrl();
-    if (pageId) {
-        loadPageData(pageId);
-    } else {
-        hideLoaderAndShowContent();
-        if (heroTitle) heroTitle.textContent = "Página não encontrada";
+    if (btnSubmitRsvp) {
+        btnSubmitRsvp.addEventListener('click', async () => {
+            const attendingRadio = document.querySelector('input[name="attending"]:checked');
+            if (!rsvpName.value || !attendingRadio) {
+                // Adicione uma notificação de erro mais elegante se desejar
+                return alert("Por favor, preencha o seu nome e confirme a sua presença.");
+            }
+
+            btnSubmitRsvp.disabled = true;
+            btnSubmitRsvp.textContent = "Enviando...";
+
+            const rsvpData = {
+                wedding_page_id: currentPageId,
+                guest_name: rsvpName.value,
+                is_attending: attendingRadio.value === 'yes',
+                plus_ones: parseInt(rsvpGuests.value) || 1,
+                message: rsvpMessage.value,
+            };
+            
+            const { error } = await supabaseClient.from('rsvps').insert([rsvpData]);
+
+            if (error) {
+                alert("Ocorreu um erro ao enviar a sua confirmação. Por favor, tente novamente.");
+                btnSubmitRsvp.disabled = false;
+                btnSubmitRsvp.textContent = "Enviar Confirmação";
+            } else {
+                if (rsvpSection) {
+                    rsvpSection.innerHTML = '<p class="text-center text-lg text-green-600 font-semibold">Obrigado! A sua presença foi registada com sucesso.</p>';
+                }
+            }
+        });
     }
-});
+
+    // Mostra a secção de RSVP se estiver ativada
+    if (data.rsvp_enabled && rsvpSection) {
+        rsvpSection.classList.remove('hidden');
+    }
+}
 

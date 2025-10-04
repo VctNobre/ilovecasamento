@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nosso Casamento</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" href="/images/favicon.svg" type="image/svg">
-    <link rel="alternate icon" href="/images/favicon.png" type="image/png">
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="icon" href="/images/logo.svg" type="image/svg">
-    <link rel="alternate icon" href="/images/logo.png" type="image/png">
+    <!-- Carrega os estilos base comuns a todos os temas -->
+    <link rel="stylesheet" href="/css/base.css">
+    <!-- O CSS do tema específico (ex: classico.css) será inserido aqui pelo JavaScript -->
+    <link id="theme-style" rel="stylesheet" href=""> 
+    <link rel="icon" href="/images/favicon.png" type="image/png">
 </head>
 <body id="wedding-body" class="transition-colors duration-500">
 
@@ -17,113 +17,20 @@
         <div class="spinner"></div>
     </div>
 
+ 
     <div id="page-wrapper" class="opacity-0 transition-opacity duration-500">
-
-    <header id="hero-section" class="relative w-full bg-gray-200">
-        <img id="hero-image" src="" alt="Foto do Casal" class="w-full h-auto object-cover hidden opacity-0 transition-opacity duration-500">
-        <div class="absolute inset-0 bg-black/50 flex items-center justify-center text-white">
-            <div class="text-center z-10 p-4">
-                
-                <!-- MONOGRAMA ATUALIZADO PARA USAR PNG -->
-                <div id="monogram-container" class="mb-4 hidden">
-                    <div class="relative w-[180px] h-[150px] mx-auto">
-                        
-                        <!-- Caixa e Iniciais (continua a ser SVG) -->
-                        <svg class="absolute inset-0" width="180" height="150" viewBox="0 0 180 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="40" y="25" width="100" height="100" stroke="white" stroke-width="2"/>
-                            <text id="monogram-initial-1" x="68" y="90" font-family="Playfair Display, serif" font-size="50" fill="white" text-anchor="middle"></text>
-                            <text id="monogram-initial-2" x="112" y="90" font-family="Playfair Display, serif" font-size="50" fill="white" text-anchor="middle"></text>
-                            <circle cx="90" cy="78" r="3" fill="white"/>
-                        </svg>
-                           <!-- Ramo Floral (usando a imagem PNG como máscara) -->
-                         <div id="monogram-branch" class="absolute -right-1 -top-9 w-[300px] h-[420px] bg-[color:white]" 
-                             style="-webkit-mask-image: url('/images/flor.png');
-                                    mask-image: url('/images/flor.png');
-                                    -webkit-mask-size: contain;
-                                    mask-size: contain;
-                                    -webkit-mask-repeat: no-repeat;
-                                    mask-repeat: no-repeat;">
-                        </div>
-                    </div>
-                </div>
-                
-               <h1 id="hero-title" class="text-5xl md:text-8xl font-title drop-shadow-lg" style="color: var(--hero-title-color, white);">Carregando...</h1>
-                <p id="hero-date" class="text-xl md:text-2xl mt-4 tracking-widest uppercase"></p>
-            </div>
-        </div>
-    </header>
-
-            <section id="intro-section" class="intro-section container mx-auto p-8 md:p-12">
-                <h2 class="text-3xl md:text-4xl mb-6 font-title text-center" style="color: var(--primary-color);">Bem-vindos!</h2>
-                
-                <div id="intro-text-container" class="text-gray-600 text-lg max-w-3xl mx-auto leading-relaxed text-center space-y-6">
-                  
-                </div>
-                
-            </section>
-           
-            <section id="rsvp-section" class="rsvp-section container mx-auto p-8 md:p-12 hidden">
-                <h2 class="text-3xl md:text-4xl mb-6 font-title">Confirme a sua Presença</h2>
-                <div class="max-w-xl mx-auto text-left space-y-4">
-                    <div>
-                        <label for="rsvp-name" class="block text-sm font-medium text-gray-700">O seu nome completo</label>
-                        <input type="text" id="rsvp-name" class="input-styled w-full mt-1">
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-700 mb-2">Você poderá comparecer?</p>
-                        <div class="flex gap-6">
-                            <label class="flex items-center"><input type="radio" name="attending" value="yes" class="mr-2 h-4 w-4 text-[color:var(--primary-color)] focus:ring-[color:var(--primary-color)]"> Sim, com certeza!</label>
-                            <label class="flex items-center"><input type="radio" name="attending" value="no" class="mr-2 h-4 w-4 text-[color:var(--primary-color)] focus:ring-[color:var(--primary-color)]"> Não poderei ir</label>
-                        </div>
-                    </div>
-                    <div>
-                        <label for="rsvp-guests" class="block text-sm font-medium text-gray-700">Número de convidados (incluindo você)</label>
-                        <input type="number" id="rsvp-guests" value="1" min="1" class="input-styled w-full mt-1">
-                    </div>
-                    <div>
-                        <label for="rsvp-message" class="block text-sm font-medium text-gray-700">Deixe uma mensagem para nós (opcional)</label>
-                        <textarea id="rsvp-message" rows="3" class="input-styled w-full mt-1"></textarea>
-                    </div>
-                    <button id="btn-submit-rsvp" class="btn-primary w-full !mt-6">Enviar Confirmação</button>
-                </div>
-            </section>
-
-            <section id="gifts-section" class="gifts-section container mx-auto p-8 md:p-12">
-                 <h2 class="text-3xl md:text-4xl mb-12 font-title">Nossa Lista de Presentes</h2>
-                <div class="flex justify-end mb-6">
-                    <div class="flex items-center space-x-2">
-                        <label for="sort-gifts" class="text-sm text-gray-600">Ordenar por:</label>
-                        <select id="sort-gifts" class="input-styled text-sm p-2">
-                            <option value="default">Padrão</option>
-                            <option value="price-asc">Preço (menor ao maior)</option>
-                            <option value="price-desc">Preço (maior ao menor)</option>
-                            <option value="az">Nome (A-Z)</option>
-                            <option value="za">Nome (Z-A)</option>
-                        </select>
-                    </div>
-                 </div>
-                <div id="gift-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
-          
-                </div>
-                
-            </section>  
-
-        </main>
+     
     </div>
-</div>
 
+    <!-- O Ícone e o Modal do Carrinho ficam fora do wrapper para estarem sempre visíveis -->
     <button id="cart-icon" class="fixed bottom-5 right-5 bg-[color:var(--primary-color)] text-white w-16 h-16 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform z-40">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
         <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center border-2 border-white">0</span>
     </button>
-
-  
     <div id="cart-modal-overlay" class="fixed inset-0 bg-black/60 z-40 hidden"></div>
     <div id="cart-modal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white w-full max-w-2xl rounded-xl shadow-2xl p-8 z-50 hidden transform scale-95 transition-transform duration-300">
         <h2 class="text-3xl font-title mb-6">Meu Carrinho</h2>
-        <div id="cart-items-container" class="space-y-4 max-h-80 overflow-y-auto pr-2">
-            <!-- Itens do carrinho serão inseridos aqui -->
-        </div>
+        <div id="cart-items-container" class="space-y-4 max-h-80 overflow-y-auto pr-2"></div>
         <div class="border-t pt-4 mt-6">
             <div class="flex justify-between items-center text-xl font-semibold">
                 <span>Total</span>

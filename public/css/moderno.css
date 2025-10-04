@@ -1,0 +1,39 @@
+/* css/moderno.css */
+/* Este tema cria um layout de ecrã dividido em desktops. */
+
+@media (min-width: 1024px) { /* Aplica-se apenas a ecrãs de computador */
+    #page-wrapper {
+        display: grid;
+        grid-template-columns: 45% 55%; /* Duas colunas, a da esquerda um pouco menor */
+        min-height: 100vh;
+    }
+    
+    .hero-section { 
+        height: 100vh; /* Ocupa toda a altura da tela */
+        position: sticky; /* Fica "colado" à esquerda enquanto se faz scroll */
+        top: 0;
+    }
+
+    #page-content {
+        margin-top: 0; /* Remove a margem negativa que o tema clássico usa */
+    }
+
+    #main-content {
+        border-radius: 0;
+        box-shadow: none;
+        background-color: var(--background-color);
+    }
+}
+
+/* Em ecrãs pequenos, o tema moderno comporta-se de forma semelhante ao clássico */
+.theme-moderno .font-title {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.theme-moderno .font-signature {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 1.25rem;
+}
