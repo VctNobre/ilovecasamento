@@ -26,14 +26,29 @@
             </div>
             <nav class="flex-grow p-4 overflow-y-auto">
                 <ul class="space-y-2">
-                    <li><a href="#" data-tab="edit-site" class="tab-link flex items-center p-3 rounded-lg text-gray-700">Editar meu Site</a></li>
-                    <li><a href="#" data-tab="guests" class="tab-link flex items-center p-3 rounded-lg text-gray-700">Convidados</a></li>
-                    <li><a href="#" data-tab="wallet" class="tab-link flex items-center p-3 rounded-lg text-gray-700">Minha Carteira</a></li>
-                    <li><a href="#" data-tab="account" class="tab-link flex items-center p-3 rounded-lg text-gray-700">Minha Conta</a></li>
+                    <li><a href="#" data-tab="edit-site" class="tab-link flex items-center p-3 rounded-lg text-gray-700">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.536L16.732 3.732z"></path></svg>
+                        <span>Editar meu Site</span>
+                    </a></li>
+                    <li><a href="#" data-tab="guests" class="tab-link flex items-center p-3 rounded-lg text-gray-700">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        <span>Convidados</span>
+                    </a></li>
+                    <li><a href="#" data-tab="wallet" class="tab-link flex items-center p-3 rounded-lg text-gray-700">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                        <span>Minha Carteira</span>
+                    </a></li>
+                    <li><a href="#" data-tab="account" class="tab-link flex items-center p-3 rounded-lg text-gray-700">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Minha Conta</span>
+                    </a></li>
                 </ul>
             </nav>
             <div class="p-4 border-t flex-shrink-0">
-                 <button id="btn-logout" class="w-full bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center">Sair</button>
+                 <button id="btn-logout" class="w-full bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    <span>Sair</span>
+                </button>
             </div>
         </aside>
 
@@ -130,38 +145,39 @@
                             <div class="space-y-4">
                         
                                 <div class="flex items-center justify-between p-4 border rounded-lg">
-                                <span class="flex-grow flex flex-col pr-4">
-                                    <span class="text-sm font-medium text-gray-900">Confirmação de Presença</span>
-                                    <span class="text-sm text-gray-500">Ative para mostrar um formulário de confirmação de presença na sua página pública.</span>
-                                </span>
-
-                    
-                                <button id="rsvp-toggle" type="button" role="switch" aria-checked="false" 
-                                        class="relative inline-flex items-center h-6 w-11 rounded-full bg-gray-200 transition-colors duration-200 ease-in-out p-0.5">
-                                    
-                                    <span class="sr-only">Ativar Confirmação de Presença</span>
-
-                   
-                                    <span class="toggle-knob inline-block w-4 h-4 transform bg-white rounded-full shadow transition-transform duration-200 ease-in-out translate-x-0"></span>
-                                </button>
+                                    <span class="flex-grow flex flex-col pr-4">
+                                        <span class="text-sm font-medium text-gray-900">Confirmação de Presença</span>
+                                        <span class="text-sm text-gray-500">Ative para mostrar um formulário de confirmação de presença na sua página pública.</span>
+                                    </span>
+                                    <button id="rsvp-toggle" type="button" role="switch" aria-checked="false" 
+                                            class="relative inline-flex items-center h-6 w-11 rounded-full bg-gray-200 transition-colors duration-200 ease-in-out p-0.5">
+                                        <span class="sr-only">Ativar Confirmação de Presença</span>
+                                        <span class="toggle-knob inline-block w-4 h-4 transform bg-white rounded-full shadow transition-transform duration-200 ease-in-out translate-x-0"></span>
+                                    </button>
                                 </div>
-                            </div>
 
-                             <!-- NOVO INTERRUPTOR: Nossa História -->
                                 <div class="flex items-center justify-between p-4 border rounded-lg">
                                     <span class="flex-grow flex flex-col pr-4">
                                         <span class="text-sm font-medium text-gray-900">Secção "Nossa História"</span>
                                         <span class="text-sm text-gray-500">Adiciona uma secção para contar a vossa história.</span>
                                     </span>
-                                    <button id="story-toggle" type="button" role="switch" aria-checked="false" class="..."></button>
+                                    <button id="story-toggle" type="button" role="switch" aria-checked="false" 
+                                            class="relative inline-flex items-center h-6 w-11 rounded-full bg-gray-200 transition-colors duration-200 ease-in-out p-0.5">
+                                        <span class="sr-only">Ativar Secção "Nossa História"</span>
+                                        <span class="toggle-knob inline-block w-4 h-4 transform bg-white rounded-full shadow transition-transform duration-200 ease-in-out translate-x-0"></span>
+                                    </button>
                                 </div>
-                                <!-- NOVO INTERRUPTOR: Galeria de Fotos -->
+                                
                                 <div class="flex items-center justify-between p-4 border rounded-lg">
                                     <span class="flex-grow flex flex-col pr-4">
                                         <span class="text-sm font-medium text-gray-900">Secção "Galeria de Fotos"</span>
                                         <span class="text-sm text-gray-500">Adiciona uma galeria de fotos ao seu site.</span>
                                     </span>
-                                    <button id="gallery-toggle" type="button" role="switch" aria-checked="false" class="..."></button>
+                                    <button id="gallery-toggle" type="button" role="switch" aria-checked="false" 
+                                            class="relative inline-flex items-center h-6 w-11 rounded-full bg-gray-200 transition-colors duration-200 ease-in-out p-0.5">
+                                        <span class="sr-only">Ativar Secção "Galeria de Fotos"</span>
+                                        <span class="toggle-knob inline-block w-4 h-4 transform bg-white rounded-full shadow transition-transform duration-200 ease-in-out translate-x-0"></span>
+                                    </button>
                                 </div>
                             </div>
                         </div>

@@ -233,12 +233,14 @@ document.addEventListener('DOMContentLoaded', () => {
         return publicUrl;
     };
 const setupSectionToggle = (toggleElement, wrapperElement, dataProperty) => {
-        if (!toggleElement || !wrapperElement) return;
+        if (!toggleElement) return;
 
         const setToggleState = (isEnabled) => {
-            const slider = toggleElement.querySelector('span:not(.sr-only)');
+            const slider = toggleElement.querySelector('.toggle-knob');
             toggleElement.setAttribute('aria-checked', String(isEnabled));
-            wrapperElement.classList.toggle('hidden', !isEnabled);
+            if (wrapperElement) {
+                wrapperElement.classList.toggle('hidden', !isEnabled);
+            }
 
             if (isEnabled) {
                 toggleElement.classList.remove('bg-gray-200');
@@ -262,6 +264,7 @@ const setupSectionToggle = (toggleElement, wrapperElement, dataProperty) => {
             setToggleState(!isCurrentlyEnabled);
         });
     };
+
    const loadWeddingPageData = async (userId) => {
         const { data, error } = await supabaseClient.from('wedding_pages').select('*, gifts(*)').eq('user_id', userId).single();
         if (error && error.code !== 'PGRST116') return showToast("Erro ao carregar dados.", 'error');
