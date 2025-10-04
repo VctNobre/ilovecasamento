@@ -18,75 +18,38 @@
     <link rel="alternate icon" href="/images/logo.png" type="image/png">
 </head>
 <body class="bg-gray-100">
-         <div id="couple-dashboard" class="relative min-h-screen">
-
-        <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-20 hidden md:hidden"></div>
-
-
-    <aside id="sidebar" class="bg-white w-64 text-gray-800 fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-30 flex flex-col shadow-lg">
+        <div id="couple-dashboard" class="relative h-screen overflow-hidden md:flex">
+        <!-- Menu Lateral (Sidebar) -->
+        <aside id="sidebar" class="bg-white w-64 text-gray-800 fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out z-30 flex flex-col shadow-lg">
             <div class="p-6 border-b flex items-center justify-center">
-                <img src="/images/logo.svg" alt="Ilovecasamento Logo" class="h-17 sm:h-22 w-full object-contain">
+                <img src="/images/logo.png" alt="Ilovecasamento Logo" class="h-12 w-auto">
             </div>
             <nav class="flex-grow p-4 overflow-y-auto">
                 <ul class="space-y-2">
-                    <li>
-                        <a href="#" data-tab="edit-site" class="tab-link flex items-center p-3 rounded-lg text-gray-700">
-                            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                            Editar meu Site
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" data-tab="guests" class="tab-link flex items-center p-3 rounded-lg text-gray-700">
-                            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                            Convidados
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" data-tab="wallet" class="tab-link flex items-center p-3 rounded-lg text-gray-700">
-                             <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
-                            Minha Carteira
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" data-tab="account" class="tab-link flex items-center p-3 rounded-lg text-gray-700">
-                            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                            Minha Conta
-                        </a>
-                    </li>
+                    <li><a href="#" data-tab="edit-site" class="tab-link flex items-center p-3 rounded-lg text-gray-700">Editar meu Site</a></li>
+                    <li><a href="#" data-tab="guests" class="tab-link flex items-center p-3 rounded-lg text-gray-700">Convidados</a></li>
+                    <li><a href="#" data-tab="wallet" class="tab-link flex items-center p-3 rounded-lg text-gray-700">Minha Carteira</a></li>
+                    <li><a href="#" data-tab="account" class="tab-link flex items-center p-3 rounded-lg text-gray-700">Minha Conta</a></li>
                 </ul>
             </nav>
             <div class="p-4 border-t flex-shrink-0">
-                 <button id="btn-logout" class="w-full bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                    Sair
-                </button>
+                 <button id="btn-logout" class="w-full bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center">Sair</button>
             </div>
         </aside>
 
-
-        <div class="md:ml-64 flex-grow flex flex-col">
-            <header class="bg-white shadow-sm sticky top-0 z-10">
+        <!-- Área de Conteúdo Principal -->
+        <div class="md:ml-64 flex-grow flex flex-col overflow-hidden">
+            <header class="bg-white shadow-sm sticky top-0 z-10 flex-shrink-0">
                 <div class="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
-           
-                    <div>
-                        <button id="menu-button" class="md:hidden text-gray-700 p-2">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                        </button>
-                    </div>
-                    
-            
+                    <div><button id="menu-button" class="md:hidden text-gray-700 p-2"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button></div>
                     <div class="flex items-center space-x-2 sm:space-x-4">
                         <a id="view-site-link" href="#" target="_blank" class="text-gray-600 hover:text-[color:var(--primary-color)] hidden md:inline-block">Ver meu site</a>
-                        <button id="btn-save-all" class="btn-primary whitespace-nowrap">
-                            <span class="md:hidden">Salvar</span>
-                            <span class="hidden md:inline">Salvar Todas as Alterações</span>
-                        </button>
+                        <button id="btn-save-all" class="btn-primary whitespace-nowrap"><span class="md:hidden">Salvar</span><span class="hidden md:inline">Salvar Todas as Alterações</span></button>
                     </div>
                 </div>
             </header>
-            
-            <main class="flex-grow p-4 sm:p-6 overflow-y-auto" style="scrollbar-gutter: stable;">
-       
+            <main class="flex-grow p-4 sm:p-6 overflow-y-auto main-content-scroll">
+                <!-- Painel 1: Editar Site -->
                 <div id="edit-site-panel" class="tab-panel">
                     <div class="space-y-8">
 
@@ -121,6 +84,47 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="bg-white p-6 rounded-xl card-shadow">
+                            <h2 class="text-2xl font-title mb-4">Nossa História</h2>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="story-how-we-met" class="block text-sm font-medium text-gray-600 mb-1">Como nos Conhecemos</label>
+                                        <textarea id="story-how-we-met" rows="5" class="input-styled w-full"></textarea>
+                                    </div>
+                                    <div>
+                                        <label for="story-proposal" class="block text-sm font-medium text-gray-600 mb-1">O Pedido</label>
+                                        <textarea id="story-proposal" rows="5" class="input-styled w-full"></textarea>
+                                    </div>
+                                </div>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="story-image-1-upload" class="block text-sm font-medium text-gray-600 mb-1">Foto 1 da História</label>
+                                        <input type="file" id="story-image-1-upload" class="input-styled w-full file:[...]" accept="image/*">
+                                        <img id="story-image-1-preview" class="mt-2 rounded-md max-h-24 hidden">
+                                    </div>
+                                    <div>
+                                        <label for="story-image-2-upload" class="block text-sm font-medium text-gray-600 mb-1">Foto 2 da História</label>
+                                        <input type="file" id="story-image-2-upload" class="input-styled w-full file:[...]" accept="image/*">
+                                        <img id="story-image-2-preview" class="mt-2 rounded-md max-h-24 hidden">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- NOVA SECÇÃO: GALERIA DE FOTOS -->
+                        <div class="bg-white p-6 rounded-xl card-shadow">
+                            <h2 class="text-2xl font-title mb-4">Galeria de Fotos</h2>
+                            <div>
+                                <label for="gallery-photos-upload" class="block text-sm font-medium text-gray-600 mb-1">Adicionar Fotos à Galeria (pode selecionar várias)</label>
+                                <input type="file" id="gallery-photos-upload" class="input-styled w-full file:[...]" accept="image/*" multiple>
+                            </div>
+                            <div id="gallery-preview-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 mt-4">
+                                <!-- As pré-visualizações das fotos da galeria aparecerão aqui -->
+                            </div>
+                        </div>
+
+
                        <div class="bg-white p-6 rounded-xl card-shadow">
                             <h2 class="text-2xl font-title mb-4">Funcionalidades Extras</h2>
                             <div class="space-y-4">
@@ -142,8 +146,40 @@
                                 </button>
                                 </div>
                             </div>
-                        </div>
 
+                             <!-- NOVO INTERRUPTOR: Nossa História -->
+                                <div class="flex items-center justify-between p-4 border rounded-lg">
+                                    <span class="flex-grow flex flex-col pr-4">
+                                        <span class="text-sm font-medium text-gray-900">Secção "Nossa História"</span>
+                                        <span class="text-sm text-gray-500">Adiciona uma secção para contar a vossa história.</span>
+                                    </span>
+                                    <button id="story-toggle" type="button" role="switch" aria-checked="false" class="..."></button>
+                                </div>
+                                <!-- NOVO INTERRUPTOR: Galeria de Fotos -->
+                                <div class="flex items-center justify-between p-4 border rounded-lg">
+                                    <span class="flex-grow flex flex-col pr-4">
+                                        <span class="text-sm font-medium text-gray-900">Secção "Galeria de Fotos"</span>
+                                        <span class="text-sm text-gray-500">Adiciona uma galeria de fotos ao seu site.</span>
+                                    </span>
+                                    <button id="gallery-toggle" type="button" role="switch" aria-checked="false" class="..."></button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Secção "Nossa História" (agora opcional) -->
+                        <div id="story-editor-wrapper" class="hidden">
+                            <div class="bg-white p-6 rounded-xl card-shadow">
+                                <h2 class="text-2xl font-title mb-4">Editar "Nossa História"</h2>
+                                <!-- ... (o seu formulário de edição da história vai aqui) ... -->
+                            </div>
+                        </div>
+                        
+                        <!-- Secção "Galeria de Fotos" (agora opcional) -->
+                        <div id="gallery-editor-wrapper" class="hidden">
+                             <div class="bg-white p-6 rounded-xl card-shadow">
+                                <h2 class="text-2xl font-title mb-4">Editar "Galeria de Fotos"</h2>
+                                <!-- ... (o seu formulário de edição da galeria vai aqui) ... -->
+                            </div>
+                        </div>
   
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             <div class="lg:col-span-2 bg-white p-6 rounded-xl card-shadow">

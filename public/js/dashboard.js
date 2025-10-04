@@ -70,6 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Seletores dos Painéis
     const viewSiteLink = document.getElementById('view-site-link');
     const rsvpToggle = document.getElementById('rsvp-toggle');
+    const storyToggle = document.getElementById('story-toggle');
+    const galleryToggle = document.getElementById('gallery-toggle');
+    const storyEditorWrapper = document.getElementById('story-editor-wrapper');
+    const galleryEditorWrapper = document.getElementById('gallery-editor-wrapper');
     const btnSaveAll = document.getElementById('btn-save-all');
     const giftsEditorList = document.getElementById('gifts-editor-list');
     const btnAddGift = document.getElementById('btn-add-gift');
@@ -228,7 +232,36 @@ document.addEventListener('DOMContentLoaded', () => {
         const { data: { publicUrl } } = supabaseClient.storage.from('wedding_photos').getPublicUrl(data.path);
         return publicUrl;
     };
+const setupSectionToggle = (toggleElement, wrapperElement, dataProperty) => {
+        if (!toggleElement || !wrapperElement) return;
 
+        const setToggleState = (isEnabled) => {
+            const slider = toggleElement.querySelector('span:not(.sr-only)');
+            toggleElement.setAttribute('aria-checked', String(isEnabled));
+            wrapperElement.classList.toggle('hidden', !isEnabled);
+
+            if (isEnabled) {
+                toggleElement.classList.remove('bg-gray-200');
+                toggleElement.classList.add('bg-green-500');
+                if (slider) slider.classList.add('translate-x-5');
+            } else {
+                toggleElement.classList.remove('bg-green-500');
+                toggleElement.classList.add('bg-gray-200');
+                if (slider) slider.classList.remove('translate-x-5');
+            }
+        };
+
+        // Define o estado inicial ao carregar a página
+        if (weddingPageData) {
+            setToggleState(Boolean(weddingPageData[dataProperty]));
+        }
+
+        // Adiciona o evento de clique
+        toggleElement.addEventListener('click', () => {
+            const isCurrentlyEnabled = toggleElement.getAttribute('aria-checked') === 'true';
+            setToggleState(!isCurrentlyEnabled);
+        });
+    };
    const loadWeddingPageData = async (userId) => {
         const { data, error } = await supabaseClient.from('wedding_pages').select('*, gifts(*)').eq('user_id', userId).single();
         if (error && error.code !== 'PGRST116') return showToast("Erro ao carregar dados.", 'error');
@@ -278,6 +311,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
             }
+            setupSectionToggle(storyToggle, storyEditorWrapper, 'story_section_enabled');
+            setupSectionToggle(galleryToggle, galleryEditorWrapper, 'gallery_section_enabled');
         } else {
             if (shareSection) shareSection.classList.add('hidden');
             if (viewSiteLink) viewSiteLink.classList.add('hidden');
@@ -364,6 +399,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     hero_image_url: heroImageUrl,
                     rsvp_enabled: rsvpToggle ? rsvpToggle.getAttribute('aria-checked') === 'true' : false,
                     layout_theme: selectedTheme,
+                    story_section_enabled: storyToggle ? storyToggle.getAttribute('aria-checked') === 'true' : false,
+                    gallery_section_enabled: galleryToggle ? galleryToggle.getAttribute('aria-checked') === 'true' : false,
                 };
                 const { data: pageResult, error: pageError } = await supabaseClient.from('wedding_pages').upsert(pageDataToSave, { onConflict: 'user_id' }).select().single();
                 if (pageError) throw pageError;
