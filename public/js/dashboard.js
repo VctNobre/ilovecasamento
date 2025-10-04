@@ -39,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.innerWidth < 768 && sidebar && !sidebar.classList.contains('-translate-x-full')) {
             toggleSidebar();
         }
-        // Chama a atualização da carteira apenas uma vez
         if (tabName === 'wallet') {
             walletPanel.updateStatus();
         }
@@ -89,13 +88,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const primaryColorInput = document.getElementById('primary-color');
     const titleColorInput = document.getElementById('title-color');
     const heroTitleColorInput = document.getElementById('hero-title-color');
-    const eventDescriptionInput = document.getElementById('event-description');
     const accountEmailInput = document.getElementById('account-email');
     const newPasswordInput = document.getElementById('new-password');
     const confirmPasswordInput = document.getElementById('confirm-password');
     const btnUpdatePassword = document.getElementById('btn-update-password');
     const btnUpdateEmail = document.getElementById('btn-update-email');
     const themeSelector = document.getElementById('theme-selector');
+
     // --- FUNÇÕES GLOBAIS ---
     const showToast = (message, type = 'success') => {
         if (!toastContainer) return;
@@ -113,32 +112,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- LÓGICA DO PAINEL "CONVIDADOS" (RSVP) ---
     const guestsPanel = {
         rsvpListContainer: document.getElementById('rsvp-list-container'),
-        
         async loadRsvpData() {
             if (!this.rsvpListContainer || !weddingPageData) {
                 if (this.rsvpListContainer) this.rsvpListContainer.innerHTML = '<p>Salve o seu site primeiro para ver a lista de convidados.</p>';
                 return;
             }
             this.rsvpListContainer.innerHTML = '<p>A carregar respostas...</p>';
-            
-            const { data: rsvps, error } = await supabaseClient
-                .from('rsvps')
-                .select('*')
-                .eq('wedding_page_id', weddingPageData.id);
-
+            const { data: rsvps, error } = await supabaseClient.from('rsvps').select('*').eq('wedding_page_id', weddingPageData.id);
             if (error) {
                 this.rsvpListContainer.innerHTML = '<p class="text-red-500">Erro ao carregar as respostas.</p>';
                 return;
             }
-
             if (rsvps.length === 0) {
                 this.rsvpListContainer.innerHTML = '<p>Ainda ninguém respondeu à sua confirmação de presença.</p>';
                 return;
             }
-
-            // Ordena as respostas: confirmados primeiro
             rsvps.sort((a, b) => b.is_attending - a.is_attending);
-
             this.rsvpListContainer.innerHTML = rsvps.map(rsvp => `
                 <div class="border p-4 rounded-lg ${rsvp.is_attending ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
                     <p class="font-bold text-gray-800">${rsvp.guest_name}</p>
@@ -149,22 +138,19 @@ document.addEventListener('DOMContentLoaded', () => {
             `).join('');
         }
     };
+
     // --- LÓGICA DO PAINEL "MINHA CARTEIRA" ---
-    
-     const walletPanel = {
+    const walletPanel = {
         container: document.getElementById('payment-status-container'),
-        
         updateStatus() {
             if (!this.container) return;
             this.container.innerHTML = `<p class="text-gray-500">A verificar estado da conexão...</p>`;
-            
             if (weddingPageData && weddingPageData.mp_credentials?.access_token) {
                 this.renderConnected();
             } else {
                 this.renderNotConnected();
             }
         },
-
         renderConnected() {
             this.container.innerHTML = `
                 <div class="space-y-6 text-center">
@@ -180,7 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>`;
         },
-        
         renderNotConnected() {
             if (!this.container) return;
             this.container.innerHTML = `
@@ -193,7 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnConnect.addEventListener('click', () => this.handleConnectMercadoPago());
             }
         },
-        
         async handleConnectMercadoPago() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) return showToast('Por favor, faça login novamente.', 'error');
@@ -216,7 +200,46 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
     };
+    
+    // --- LÓGICA DOS BOTÕES DE ATIVAÇÃO (TOGGLES) ---
+    const setupSectionToggle = (toggleElement, wrapperElement) => {
+        if (!toggleElement) return null;
 
+        const setToggleState = (isEnabled) => {
+            if (typeof isEnabled !== 'boolean') return;
+            const slider = toggleElement.querySelector('.toggle-knob');
+            toggleElement.setAttribute('aria-checked', String(isEnabled));
+            
+            if (wrapperElement) {
+                wrapperElement.classList.toggle('hidden', !isEnabled);
+            }
+
+            if (isEnabled) {
+                toggleElement.classList.remove('bg-gray-200');
+                toggleElement.classList.add('bg-green-500');
+                if (slider) slider.classList.add('translate-x-6');
+            } else {
+                toggleElement.classList.remove('bg-green-500');
+                toggleElement.classList.add('bg-gray-200');
+                if (slider) slider.classList.remove('translate-x-6');
+            }
+        };
+
+        toggleElement.addEventListener('click', () => {
+            const isCurrentlyEnabled = toggleElement.getAttribute('aria-checked') === 'true';
+            setToggleState(!isCurrentlyEnabled);
+        });
+        
+        return setToggleState;
+    };
+
+    // Prepara os botões e guarda as funções para definir o estado
+    const setRsvpState = setupSectionToggle(rsvpToggle, null);
+    const setStoryState = setupSectionToggle(storyToggle, storyEditorWrapper);
+    const setGalleryState = setupSectionToggle(galleryToggle, galleryEditorWrapper);
+
+
+    // --- FUNÇÕES DE UPLOAD E DADOS ---
     const sanitizeFilename = (filename) => {
         const withoutAccents = filename.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         return withoutAccents.replace(/[^a-zA-Z0-9.\-_]/g, '-').replace(/-+/g, '-');
@@ -232,40 +255,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const { data: { publicUrl } } = supabaseClient.storage.from('wedding_photos').getPublicUrl(data.path);
         return publicUrl;
     };
-const setupSectionToggle = (toggleElement, wrapperElement, dataProperty) => {
-        if (!toggleElement) return;
 
-        const setToggleState = (isEnabled) => {
-            const slider = toggleElement.querySelector('.toggle-knob');
-            toggleElement.setAttribute('aria-checked', String(isEnabled));
-            if (wrapperElement) {
-                wrapperElement.classList.toggle('hidden', !isEnabled);
-            }
-
-            if (isEnabled) {
-                toggleElement.classList.remove('bg-gray-200');
-                toggleElement.classList.add('bg-green-500');
-                if (slider) slider.classList.add('translate-x-5');
-            } else {
-                toggleElement.classList.remove('bg-green-500');
-                toggleElement.classList.add('bg-gray-200');
-                if (slider) slider.classList.remove('translate-x-5');
-            }
-        };
-
-        // Define o estado inicial ao carregar a página
-        if (weddingPageData) {
-            setToggleState(Boolean(weddingPageData[dataProperty]));
-        }
-
-        // Adiciona o evento de clique
-        toggleElement.addEventListener('click', () => {
-            const isCurrentlyEnabled = toggleElement.getAttribute('aria-checked') === 'true';
-            setToggleState(!isCurrentlyEnabled);
-        });
-    };
-
-   const loadWeddingPageData = async (userId) => {
+    const loadWeddingPageData = async (userId) => {
         const { data, error } = await supabaseClient.from('wedding_pages').select('*, gifts(*)').eq('user_id', userId).single();
         if (error && error.code !== 'PGRST116') return showToast("Erro ao carregar dados.", 'error');
         if (data) {
@@ -278,33 +269,22 @@ const setupSectionToggle = (toggleElement, wrapperElement, dataProperty) => {
             if (mainTitleInput) mainTitleInput.value = data.main_title || '';
             if (weddingDateInput) weddingDateInput.value = data.wedding_date || '';
             if (introTextInput) introTextInput.value = data.intro_text || '';
-            if (eventDescriptionInput) eventDescriptionInput.value = data.event_description || '';
             if (coupleSignatureInput) coupleSignatureInput.value = data.couple_signature || '';
             if (primaryColorInput) primaryColorInput.value = data.primary_color || '#D9A8A4';
             if (titleColorInput) titleColorInput.value = data.title_color || '#333333';
             if (heroTitleColorInput) heroTitleColorInput.value = data.hero_title_color || '#FFFFFF';
             if (heroImagePreview && data.hero_image_url) { heroImagePreview.src = data.hero_image_url; heroImagePreview.classList.remove('hidden'); }
             if (giftsEditorList) { giftsEditorList.innerHTML = ''; if (data.gifts) data.gifts.sort((a, b) => a.id - b.id).forEach(renderGiftEditor); }
-            if (rsvpToggle) {
-                const isEnabled = data.rsvp_enabled;
-                const slider = rsvpToggle.querySelector('.toggle-knob'); // Seleciona a "bolinha"
-                rsvpToggle.setAttribute('aria-checked', isEnabled);
-                if (isEnabled) {
-                    rsvpToggle.classList.remove('bg-gray-200', 'border-gray-300');
-                    rsvpToggle.classList.add('bg-green-500', 'border-green-600');
-                    if (slider) slider.classList.add('translate-x-6');
-                } else {
-                    rsvpToggle.classList.remove('bg-green-500', 'border-green-600');
-                    rsvpToggle.classList.add('bg-gray-200', 'border-gray-300');
-                    if (slider) slider.classList.remove('translate-x-6');
-                }
-            }
+            
+            // Define o estado inicial dos botões usando as funções preparadas
+            if (setRsvpState) setRsvpState(data.rsvp_enabled);
+            if (setStoryState) setStoryState(data.story_section_enabled);
+            if (setGalleryState) setGalleryState(data.gallery_section_enabled);
 
-             if (themeSelector && data.layout_theme) {
+            if (themeSelector && data.layout_theme) {
                 const selectedRadio = themeSelector.querySelector(`input[value="${data.layout_theme}"]`);
                 if (selectedRadio) {
                     selectedRadio.checked = true;
-                    // Atualiza o feedback visual para todos os cards
                     document.querySelectorAll('.theme-option').forEach(label => {
                         const radio = label.querySelector('input');
                         const indicator = label.querySelector('.selected-indicator');
@@ -314,8 +294,6 @@ const setupSectionToggle = (toggleElement, wrapperElement, dataProperty) => {
                     });
                 }
             }
-            setupSectionToggle(storyToggle, storyEditorWrapper, 'story_section_enabled');
-            setupSectionToggle(galleryToggle, galleryEditorWrapper, 'gallery_section_enabled');
         } else {
             if (shareSection) shareSection.classList.add('hidden');
             if (viewSiteLink) viewSiteLink.classList.add('hidden');
@@ -337,8 +315,7 @@ const setupSectionToggle = (toggleElement, wrapperElement, dataProperty) => {
     };
 
     // --- EVENT LISTENERS ---
-    if (btnLogout) btnLogout.addEventListener('click', async () => { clearTimeout(inactivityTimer); 
-        await supabaseClient.auth.signOut(); });
+    if (btnLogout) btnLogout.addEventListener('click', async () => { clearTimeout(inactivityTimer); await supabaseClient.auth.signOut(); });
     if (btnAddGift) btnAddGift.addEventListener('click', () => renderGiftEditor({}));
     if (heroImageUploadInput) {
         heroImageUploadInput.addEventListener('change', (event) => {
@@ -346,27 +323,13 @@ const setupSectionToggle = (toggleElement, wrapperElement, dataProperty) => {
             if (file && heroImagePreview) { heroImagePreview.src = URL.createObjectURL(file); heroImagePreview.classList.remove('hidden'); }
         });
     }
-   if (rsvpToggle) {
-        rsvpToggle.addEventListener('click', () => {
-            const isEnabled = rsvpToggle.getAttribute('aria-checked') === 'true';
-            rsvpToggle.setAttribute('aria-checked', !isEnabled);
-            rsvpToggle.classList.toggle('bg-gray-200');
-            rsvpToggle.classList.toggle('bg-green-500');
-            rsvpToggle.classList.toggle('border-gray-300');
-            rsvpToggle.classList.toggle('border-green-600');
-            // Garante que a bolinha se move
-            rsvpToggle.querySelector('.toggle-knob').classList.toggle('translate-x-6');
-        });
-    }
+
      if (themeSelector) {
         themeSelector.addEventListener('change', (e) => {
-            // Garante que o evento é de um dos nossos botões de rádio
             if (e.target.name === 'layout-theme') {
-                // Remove o anel de seleção de todas as opções
                 document.querySelectorAll('.theme-option .selected-indicator').forEach(indicator => {
                     indicator.style.opacity = '0';
                 });
-                // Adiciona o anel de seleção apenas à opção clicada
                 const indicator = e.target.closest('.theme-option').querySelector('.selected-indicator');
                 if (indicator) {
                     indicator.style.opacity = '1';
@@ -374,6 +337,7 @@ const setupSectionToggle = (toggleElement, wrapperElement, dataProperty) => {
             }
         });
     }
+
     if (btnSaveAll) {
         btnSaveAll.addEventListener('click', async () => {
             const { data: { user } } = await supabaseClient.auth.getUser();
@@ -394,7 +358,6 @@ const setupSectionToggle = (toggleElement, wrapperElement, dataProperty) => {
                     main_title: mainTitleInput ? mainTitleInput.value : null,
                     wedding_date: weddingDateInput ? weddingDateInput.value : null,
                     intro_text: introTextInput ? introTextInput.value : null,
-                    event_description: eventDescriptionInput ? eventDescriptionInput.value : null,
                     couple_signature: coupleSignatureInput ? coupleSignatureInput.value : null,
                     primary_color: primaryColorInput ? primaryColorInput.value : '#D9A8A4',
                     title_color: titleColorInput ? titleColorInput.value : '#333333',
@@ -429,8 +392,6 @@ const setupSectionToggle = (toggleElement, wrapperElement, dataProperty) => {
                 }
                 showToast("Site atualizado com sucesso!");
                 loadWeddingPageData(user.id);
-
-              
             } catch (error) {
                 console.error("ERRO DETALHADO AO SALVAR:", error);
                 showToast("Ocorreu um erro ao salvar: " + error.message, 'error');
@@ -440,8 +401,9 @@ const setupSectionToggle = (toggleElement, wrapperElement, dataProperty) => {
             }
         });
     }
+
     if (btnCopyLink) {        
-            btnCopyLink.addEventListener('click', () => {
+        btnCopyLink.addEventListener('click', () => {
             if (shareUrlInput) shareUrlInput.select();
             document.execCommand('copy');
             const originalText = btnCopyLink.textContent;
@@ -453,16 +415,15 @@ const setupSectionToggle = (toggleElement, wrapperElement, dataProperty) => {
                 btnCopyLink.classList.remove('bg-green-500');
                 btnCopyLink.classList.add('bg-blue-500', 'hover:bg-blue-600');
             }, 2000);
-        });}
-
+        });
+    }
     
-   // Lógica do painel "Minha Conta"
+    // Lógica do painel "Minha Conta"
     if (btnUpdateEmail) {
         btnUpdateEmail.addEventListener('click', async () => {
             if (!accountEmailInput) return;
             const newEmail = accountEmailInput.value;
             if (!newEmail || !newEmail.includes('@')) return showToast("Por favor, insira um email válido.", 'error');
-            
             const { error } = await supabaseClient.auth.updateUser({ email: newEmail });
             if (error) {
                 showToast(`Erro ao atualizar o email: ${error.message}`, 'error');
@@ -478,7 +439,6 @@ const setupSectionToggle = (toggleElement, wrapperElement, dataProperty) => {
             const newPassword = newPasswordInput.value;
             if (newPassword !== confirmPasswordInput.value) return showToast("As senhas não coincidem.", 'error');
             if (newPassword.length < 8) return showToast("A senha deve ter no mínimo 8 caracteres.", 'error');
-            
             const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
             if (error) {
                 showToast(`Erro: ${error.message}`, 'error');
@@ -489,6 +449,7 @@ const setupSectionToggle = (toggleElement, wrapperElement, dataProperty) => {
             }
         });
     }
+
     // --- INICIALIZAÇÃO ---
     (async () => {
         const { data: { user } } = await supabaseClient.auth.getUser();
@@ -501,4 +462,3 @@ const setupSectionToggle = (toggleElement, wrapperElement, dataProperty) => {
         }
     })();
 });
-
