@@ -53,7 +53,7 @@
         </aside>
 
         <!-- Área de Conteúdo Principal -->
-        <div class="md:ml-64 flex-grow flex flex-col overflow-hidden">
+        <div class="flex-grow flex flex-col overflow-hidden">
             <header class="bg-white shadow-sm sticky top-0 z-10 flex-shrink-0">
                 <div class="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
                     <div><button id="menu-button" class="md:hidden text-gray-700 p-2"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button></div>
@@ -99,48 +99,8 @@
                                 </div>
                             </div>
                         </div>
+                        
                         <div class="bg-white p-6 rounded-xl card-shadow">
-                            <h2 class="text-2xl font-title mb-4">Nossa História</h2>
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                <div class="space-y-4">
-                                    <div>
-                                        <label for="story-how-we-met" class="block text-sm font-medium text-gray-600 mb-1">Como nos Conhecemos</label>
-                                        <textarea id="story-how-we-met" rows="5" class="input-styled w-full"></textarea>
-                                    </div>
-                                    <div>
-                                        <label for="story-proposal" class="block text-sm font-medium text-gray-600 mb-1">O Pedido</label>
-                                        <textarea id="story-proposal" rows="5" class="input-styled w-full"></textarea>
-                                    </div>
-                                </div>
-                                <div class="space-y-4">
-                                    <div>
-                                        <label for="story-image-1-upload" class="block text-sm font-medium text-gray-600 mb-1">Foto 1 da História</label>
-                                        <input type="file" id="story-image-1-upload" class="input-styled w-full file:[...]" accept="image/*">
-                                        <img id="story-image-1-preview" class="mt-2 rounded-md max-h-24 hidden">
-                                    </div>
-                                    <div>
-                                        <label for="story-image-2-upload" class="block text-sm font-medium text-gray-600 mb-1">Foto 2 da História</label>
-                                        <input type="file" id="story-image-2-upload" class="input-styled w-full file:[...]" accept="image/*">
-                                        <img id="story-image-2-preview" class="mt-2 rounded-md max-h-24 hidden">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- NOVA SECÇÃO: GALERIA DE FOTOS -->
-                        <div class="bg-white p-6 rounded-xl card-shadow">
-                            <h2 class="text-2xl font-title mb-4">Galeria de Fotos</h2>
-                            <div>
-                                <label for="gallery-photos-upload" class="block text-sm font-medium text-gray-600 mb-1">Adicionar Fotos à Galeria (pode selecionar várias)</label>
-                                <input type="file" id="gallery-photos-upload" class="input-styled w-full file:[...]" accept="image/*" multiple>
-                            </div>
-                            <div id="gallery-preview-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 mt-4">
-                                <!-- As pré-visualizações das fotos da galeria aparecerão aqui -->
-                            </div>
-                        </div>
-
-
-                       <div class="bg-white p-6 rounded-xl card-shadow">
                             <h2 class="text-2xl font-title mb-4">Funcionalidades Extras</h2>
                             <div class="space-y-4">
                         
@@ -181,11 +141,35 @@
                                 </div>
                             </div>
                         </div>
+
                         <!-- Secção "Nossa História" (agora opcional) -->
                         <div id="story-editor-wrapper" class="hidden">
-                            <div class="bg-white p-6 rounded-xl card-shadow">
+                             <div class="bg-white p-6 rounded-xl card-shadow">
                                 <h2 class="text-2xl font-title mb-4">Editar "Nossa História"</h2>
-                                <!-- ... (o seu formulário de edição da história vai aqui) ... -->
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label for="story-how-we-met" class="block text-sm font-medium text-gray-600 mb-1">Como nos Conhecemos</label>
+                                            <textarea id="story-how-we-met" rows="5" class="input-styled w-full"></textarea>
+                                        </div>
+                                        <div>
+                                            <label for="story-proposal" class="block text-sm font-medium text-gray-600 mb-1">O Pedido</label>
+                                            <textarea id="story-proposal" rows="5" class="input-styled w-full"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label for="story-image-1-upload" class="block text-sm font-medium text-gray-600 mb-1">Foto 1 da História</label>
+                                            <input type="file" id="story-image-1-upload" class="input-styled w-full file:[...]" accept="image/*">
+                                            <img id="story-image-1-preview" class="mt-2 rounded-md max-h-24 hidden">
+                                        </div>
+                                        <div>
+                                            <label for="story-image-2-upload" class="block text-sm font-medium text-gray-600 mb-1">Foto 2 da História</label>
+                                            <input type="file" id="story-image-2-upload" class="input-styled w-full file:[...]" accept="image/*">
+                                            <img id="story-image-2-preview" class="mt-2 rounded-md max-h-24 hidden">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
@@ -193,7 +177,13 @@
                         <div id="gallery-editor-wrapper" class="hidden">
                              <div class="bg-white p-6 rounded-xl card-shadow">
                                 <h2 class="text-2xl font-title mb-4">Editar "Galeria de Fotos"</h2>
-                                <!-- ... (o seu formulário de edição da galeria vai aqui) ... -->
+                                <div>
+                                    <label for="gallery-photos-upload" class="block text-sm font-medium text-gray-600 mb-1">Adicionar Fotos à Galeria (pode selecionar várias)</label>
+                                    <input type="file" id="gallery-photos-upload" class="input-styled w-full file:[...]" accept="image/*" multiple>
+                                </div>
+                                <div id="gallery-preview-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 mt-4">
+                                    <!-- As pré-visualizações das fotos da galeria aparecerão aqui -->
+                                </div>
                             </div>
                         </div>
   
