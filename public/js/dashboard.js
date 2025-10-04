@@ -94,6 +94,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnUpdatePassword = document.getElementById('btn-update-password');
     const btnUpdateEmail = document.getElementById('btn-update-email');
     const themeSelector = document.getElementById('theme-selector');
+    const storyImage1Upload = document.getElementById('story-image-1-upload');
+    const storyImage1Preview = document.getElementById('story-image-1-preview');
+    const storyImage2Upload = document.getElementById('story-image-2-upload');
+    const storyImage2Preview = document.getElementById('story-image-2-preview');
+    const galleryPhotosUpload = document.getElementById('gallery-photos-upload');
+    const galleryPreviewGrid = document.getElementById('gallery-preview-grid');
 
     // --- FUNÇÕES GLOBAIS ---
     const showToast = (message, type = 'success') => {
@@ -324,6 +330,40 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (storyImage1Upload) {
+        storyImage1Upload.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file && storyImage1Preview) {
+                storyImage1Preview.src = URL.createObjectURL(file);
+                storyImage1Preview.classList.remove('hidden');
+            }
+        });
+    }
+
+    if (storyImage2Upload) {
+        storyImage2Upload.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file && storyImage2Preview) {
+                storyImage2Preview.src = URL.createObjectURL(file);
+                storyImage2Preview.classList.remove('hidden');
+            }
+        });
+    }
+
+    if (galleryPhotosUpload) {
+        galleryPhotosUpload.addEventListener('change', (event) => {
+            if (galleryPreviewGrid) {
+                galleryPreviewGrid.innerHTML = ''; // Limpa as pré-visualizações antigas
+                Array.from(event.target.files).forEach(file => {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    img.className = 'w-full h-24 object-cover rounded-md';
+                    galleryPreviewGrid.appendChild(img);
+                });
+            }
+        });
+    }
+
      if (themeSelector) {
         themeSelector.addEventListener('change', (e) => {
             if (e.target.name === 'layout-theme') {
@@ -456,9 +496,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (user) {
             if (accountEmailInput) accountEmailInput.value = user.email;
             await loadWeddingPageData(user.id);
-            switchTab('edit-site');
+            switchTab('layouts'); // Abre na nova aba de Layouts por padrão
         } else {
             window.location.href = '/login';
         }
     })();
 });
+
