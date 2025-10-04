@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnLogout = document.getElementById('btn-logout');
     const toastContainer = document.getElementById('toast-container');
     let weddingPageData = null;
-    let galleryFiles = []; // Array para gerir os ficheiros da galeria
+    let galleryFiles = [];
     
     // Seletores dos Painéis
     const viewSiteLink = document.getElementById('view-site-link');
@@ -96,20 +96,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnUpdateEmail = document.getElementById('btn-update-email');
     const themeSelector = document.getElementById('theme-selector');
     
-    // Seletores da secção "Nossa História"
+    // Seletores de "Nossa História" e "Galeria"
+    const storyHowWeMetInput = document.getElementById('story-how-we-met');
+    const storyProposalInput = document.getElementById('story-proposal');
     const storyImage1Upload = document.getElementById('story-image-1-upload');
-    const storyImage1Container = document.getElementById('story-image-1-container');
     const storyImage1Preview = document.getElementById('story-image-1-preview');
-    const btnDeleteStory1 = document.getElementById('btn-delete-story-1');
-
+    const storyImage1Container = document.getElementById('story-image-1-container');
     const storyImage2Upload = document.getElementById('story-image-2-upload');
-    const storyImage2Container = document.getElementById('story-image-2-container');
     const storyImage2Preview = document.getElementById('story-image-2-preview');
-    const btnDeleteStory2 = document.getElementById('btn-delete-story-2');
-    
-    // Seletores da Galeria
+    const storyImage2Container = document.getElementById('story-image-2-container');
     const galleryPhotosUpload = document.getElementById('gallery-photos-upload');
     const galleryPreviewGrid = document.getElementById('gallery-preview-grid');
+    const btnDeleteStory1 = document.getElementById('btn-delete-story-1');
+    const btnDeleteStory2 = document.getElementById('btn-delete-story-2');
+
 
     // --- FUNÇÕES GLOBAIS ---
     const showToast = (message, type = 'success') => {
@@ -220,16 +220,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- LÓGICA DOS BOTÕES DE ATIVAÇÃO (TOGGLES) ---
     const setupSectionToggle = (toggleElement, wrapperElement) => {
         if (!toggleElement) return null;
-
         const setToggleState = (isEnabled) => {
             if (typeof isEnabled !== 'boolean') return;
             const slider = toggleElement.querySelector('.toggle-knob');
             toggleElement.setAttribute('aria-checked', String(isEnabled));
-            
             if (wrapperElement) {
                 wrapperElement.classList.toggle('hidden', !isEnabled);
             }
-
             if (isEnabled) {
                 toggleElement.classList.remove('bg-gray-200');
                 toggleElement.classList.add('bg-green-500');
@@ -240,19 +237,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (slider) slider.classList.remove('translate-x-6');
             }
         };
-
         toggleElement.addEventListener('click', () => {
             const isCurrentlyEnabled = toggleElement.getAttribute('aria-checked') === 'true';
             setToggleState(!isCurrentlyEnabled);
         });
-        
         return setToggleState;
     };
 
     const setRsvpState = setupSectionToggle(rsvpToggle, null);
     const setStoryState = setupSectionToggle(storyToggle, storyEditorWrapper);
     const setGalleryState = setupSectionToggle(galleryToggle, galleryEditorWrapper);
-
 
     // --- FUNÇÕES DE UPLOAD E DADOS ---
     const sanitizeFilename = (filename) => {
@@ -291,6 +285,26 @@ document.addEventListener('DOMContentLoaded', () => {
             if (heroImagePreview && data.hero_image_url) { heroImagePreview.src = data.hero_image_url; heroImagePreview.classList.remove('hidden'); }
             if (giftsEditorList) { giftsEditorList.innerHTML = ''; if (data.gifts) data.gifts.sort((a, b) => a.id - b.id).forEach(renderGiftEditor); }
             
+            if (storyHowWeMetInput) storyHowWeMetInput.value = data.story_how_we_met || '';
+            if (storyProposalInput) storyProposalInput.value = data.story_proposal || '';
+            
+            if (storyImage1Preview && data.story_image_1_url) {
+                storyImage1Preview.src = data.story_image_1_url;
+                storyImage1Container.classList.remove('hidden');
+                storyImage1Upload.classList.add('hidden');
+            }
+             if (storyImage2Preview && data.story_image_2_url) {
+                storyImage2Preview.src = data.story_image_2_url;
+                storyImage2Container.classList.remove('hidden');
+                storyImage2Upload.classList.add('hidden');
+            }
+
+            if (galleryPreviewGrid && data.gallery_photos) {
+                galleryFiles = data.gallery_photos.map(url => ({ isUrl: true, content: url }));
+                renderGalleryPreviews();
+            }
+
+
             if (setRsvpState) setRsvpState(data.rsvp_enabled);
             if (setStoryState) setStoryState(data.story_section_enabled);
             if (setGalleryState) setGalleryState(data.gallery_section_enabled);
@@ -328,68 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // --- LÓGICA DE UPLOAD E EXCLUSÃO DE IMAGENS ---
-
-    const setupDeletableImageUpload = (inputEl, containerEl, previewEl, deleteBtnEl) => {
-        if (!inputEl || !containerEl || !previewEl || !deleteBtnEl) return;
-
-        inputEl.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                previewEl.src = URL.createObjectURL(file);
-                containerEl.classList.remove('hidden');
-                inputEl.classList.add('hidden');
-            }
-        });
-
-        deleteBtnEl.addEventListener('click', () => {
-            inputEl.value = '';
-            previewEl.src = '';
-            containerEl.classList.add('hidden');
-            inputEl.classList.remove('hidden');
-        });
-    };
-    
-    setupDeletableImageUpload(storyImage1Upload, storyImage1Container, storyImage1Preview, btnDeleteStory1);
-    setupDeletableImageUpload(storyImage2Upload, storyImage2Container, storyImage2Preview, btnDeleteStory2);
-
-    const renderGalleryPreviews = () => {
-        if (!galleryPreviewGrid) return;
-        galleryPreviewGrid.innerHTML = '';
-        galleryFiles.forEach((file, index) => {
-            const previewWrapper = document.createElement('div');
-            previewWrapper.className = 'relative group';
-            previewWrapper.innerHTML = `
-                <img src="${URL.createObjectURL(file)}" alt="${file.name}" class="w-full h-24 object-cover rounded-md">
-                <button type="button" data-index="${index}" class="btn-delete-gallery-img absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 leading-none opacity-0 group-hover:opacity-100 transition-opacity">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            `;
-            galleryPreviewGrid.appendChild(previewWrapper);
-        });
-    };
-
-    if (galleryPhotosUpload) {
-        galleryPhotosUpload.addEventListener('change', (event) => {
-            galleryFiles.push(...Array.from(event.target.files));
-            galleryPhotosUpload.value = '';
-            renderGalleryPreviews();
-        });
-    }
-
-    if (galleryPreviewGrid) {
-        galleryPreviewGrid.addEventListener('click', (e) => {
-            const deleteButton = e.target.closest('.btn-delete-gallery-img');
-            if (deleteButton) {
-                const indexToRemove = parseInt(deleteButton.dataset.index, 10);
-                galleryFiles.splice(indexToRemove, 1);
-                renderGalleryPreviews();
-            }
-        });
-    }
-
-
-    // --- EVENT LISTENERS GERAIS ---
+    // --- EVENT LISTENERS ---
     if (btnLogout) btnLogout.addEventListener('click', async () => { clearTimeout(inactivityTimer); await supabaseClient.auth.signOut(); });
     if (btnAddGift) btnAddGift.addEventListener('click', () => renderGiftEditor({}));
     if (heroImageUploadInput) {
@@ -399,16 +352,64 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const setupStoryImageUpload = (uploadEl, previewEl, containerEl, deleteBtn) => {
+        uploadEl.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                previewEl.src = URL.createObjectURL(file);
+                containerEl.classList.remove('hidden');
+                uploadEl.classList.add('hidden');
+            }
+        });
+        deleteBtn.addEventListener('click', () => {
+            uploadEl.value = '';
+            previewEl.src = '';
+            containerEl.classList.add('hidden');
+            uploadEl.classList.remove('hidden');
+        });
+    };
+
+    if (storyImage1Upload) setupStoryImageUpload(storyImage1Upload, storyImage1Preview, storyImage1Container, btnDeleteStory1);
+    if (storyImage2Upload) setupStoryImageUpload(storyImage2Upload, storyImage2Preview, storyImage2Container, btnDeleteStory2);
+
+    const renderGalleryPreviews = () => {
+        if (!galleryPreviewGrid) return;
+        galleryPreviewGrid.innerHTML = '';
+        galleryFiles.forEach((fileItem, index) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'relative';
+            const img = document.createElement('img');
+            img.src = fileItem.isUrl ? fileItem.content : URL.createObjectURL(fileItem.content);
+            img.className = 'w-full h-24 object-cover rounded-md';
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.className = 'absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 leading-none hover:bg-red-700 transition-colors';
+            deleteBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+            deleteBtn.onclick = () => {
+                galleryFiles.splice(index, 1);
+                renderGalleryPreviews();
+            };
+            wrapper.appendChild(img);
+            wrapper.appendChild(deleteBtn);
+            galleryPreviewGrid.appendChild(wrapper);
+        });
+    };
+
+    if (galleryPhotosUpload) {
+        galleryPhotosUpload.addEventListener('change', (event) => {
+            const newFiles = Array.from(event.target.files).map(file => ({ isUrl: false, content: file }));
+            galleryFiles.push(...newFiles);
+            renderGalleryPreviews();
+            galleryPhotosUpload.value = '';
+        });
+    }
+
     if (themeSelector) {
         themeSelector.addEventListener('change', (e) => {
             if (e.target.name === 'layout-theme') {
-                document.querySelectorAll('.theme-option .selected-indicator').forEach(indicator => {
-                    indicator.style.opacity = '0';
-                });
+                document.querySelectorAll('.theme-option .selected-indicator').forEach(indicator => { indicator.style.opacity = '0'; });
                 const indicator = e.target.closest('.theme-option').querySelector('.selected-indicator');
-                if (indicator) {
-                    indicator.style.opacity = '1';
-                }
+                if (indicator) { indicator.style.opacity = '1'; }
             }
         });
     }
@@ -421,28 +422,60 @@ document.addEventListener('DOMContentLoaded', () => {
             btnSaveAll.disabled = true;
             try {
                 let heroImageUrl = weddingPageData?.hero_image_url || null;
-                if (heroImageUploadInput && heroImageUploadInput.files[0]) {
-                    const file = heroImageUploadInput.files[0];
-                    const sanitizedFileName = sanitizeFilename(file.name);
-                    const filePath = `${user.id}/hero-${Date.now()}-${sanitizedFileName}`;
-                    heroImageUrl = await uploadFile(file, filePath);
+                if (heroImageUploadInput.files[0]) {
+                    heroImageUrl = await uploadFile(heroImageUploadInput.files[0], `${user.id}/hero-${Date.now()}`);
                 }
+
+                let storyImageUrl1 = weddingPageData?.story_image_1_url || null;
+                if (storyImage1Upload.files[0]) {
+                    storyImageUrl1 = await uploadFile(storyImage1Upload.files[0], `${user.id}/story-1-${Date.now()}`);
+                } else if (!storyImage1Container.classList.contains('hidden') && storyImage1Preview.src.startsWith('http')) {
+                    storyImageUrl1 = storyImage1Preview.src;
+                } else {
+                    storyImageUrl1 = null;
+                }
+                
+                let storyImageUrl2 = weddingPageData?.story_image_2_url || null;
+                if (storyImage2Upload.files[0]) {
+                    storyImageUrl2 = await uploadFile(storyImage2Upload.files[0], `${user.id}/story-2-${Date.now()}`);
+                } else if (!storyImage2Container.classList.contains('hidden') && storyImage2Preview.src.startsWith('http')) {
+                    storyImageUrl2 = storyImage2Preview.src;
+                } else {
+                    storyImageUrl2 = null;
+                }
+                
+                const galleryUrls = [];
+                for(const fileItem of galleryFiles){
+                    if(fileItem.isUrl){
+                        galleryUrls.push(fileItem.content);
+                    } else {
+                        const url = await uploadFile(fileItem.content, `${user.id}/gallery/${Date.now()}-${sanitizeFilename(fileItem.content.name)}`);
+                        if(url) galleryUrls.push(url);
+                    }
+                }
+
                 const selectedTheme = themeSelector ? themeSelector.querySelector('input[name="layout-theme"]:checked')?.value : 'padrao';
                 const pageDataToSave = {
                     user_id: user.id,
-                    main_title: mainTitleInput ? mainTitleInput.value : null,
-                    wedding_date: weddingDateInput ? weddingDateInput.value : null,
-                    intro_text: introTextInput ? introTextInput.value : null,
-                    couple_signature: coupleSignatureInput ? coupleSignatureInput.value : null,
-                    primary_color: primaryColorInput ? primaryColorInput.value : '#D9A8A4',
-                    title_color: titleColorInput ? titleColorInput.value : '#333333',
-                    hero_title_color: heroTitleColorInput ? heroTitleColorInput.value : '#FFFFFF',
+                    main_title: mainTitleInput.value,
+                    wedding_date: weddingDateInput.value,
+                    intro_text: introTextInput.value,
+                    couple_signature: coupleSignatureInput.value,
+                    primary_color: primaryColorInput.value,
+                    title_color: titleColorInput.value,
+                    hero_title_color: heroTitleColorInput.value,
                     hero_image_url: heroImageUrl,
-                    rsvp_enabled: rsvpToggle ? rsvpToggle.getAttribute('aria-checked') === 'true' : false,
-                    layout_theme: selectedTheme,
-                    story_section_enabled: storyToggle ? storyToggle.getAttribute('aria-checked') === 'true' : false,
-                    gallery_section_enabled: galleryToggle ? galleryToggle.getAttribute('aria-checked') === 'true' : false,
+                    rsvp_enabled: rsvpToggle.getAttribute('aria-checked') === 'true',
+                    story_section_enabled: storyToggle.getAttribute('aria-checked') === 'true',
+                    gallery_section_enabled: galleryToggle.getAttribute('aria-checked') === 'true',
+                    story_how_we_met: storyHowWeMetInput.value,
+                    story_proposal: storyProposalInput.value,
+                    story_image_1_url: storyImageUrl1,
+                    story_image_2_url: storyImageUrl2,
+                    gallery_photos: galleryUrls,
+                    layout_theme: selectedTheme
                 };
+
                 const { data: pageResult, error: pageError } = await supabaseClient.from('wedding_pages').upsert(pageDataToSave, { onConflict: 'user_id' }).select().single();
                 if (pageError) throw pageError;
                 const pageId = pageResult.id;
@@ -451,12 +484,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 for (const editor of giftEditors) {
                     const imageInput = editor.querySelector('.image-input');
                     let imageUrl = editor.querySelector('.image-preview').src;
-                    if (imageInput && imageInput.files[0]) {
-                        const file = imageInput.files[0];
-                        const sanitizedFileName = sanitizeFilename(file.name);
-                        const filePath = `${user.id}/gift-${Date.now()}-${sanitizedFileName}`;
-                        const uploadedUrl = await uploadFile(file, filePath);
-                        if (uploadedUrl) imageUrl = uploadedUrl;
+                    if (imageInput.files[0]) {
+                        imageUrl = await uploadFile(imageInput.files[0], `${user.id}/gift-${Date.now()}`);
                     }
                     giftsToSave.push({ page_id: pageId, title: editor.querySelector('.title-input')?.value || '', description: editor.querySelector('.description-input')?.value || '', value: parseFloat(editor.querySelector('.value-input')?.value) || 0, image_url: imageUrl.startsWith('https://placehold.co') ? null : imageUrl });
                 }
@@ -477,34 +506,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (btnCopyLink) {        
-        btnCopyLink.addEventListener('click', () => {
-            if (shareUrlInput) shareUrlInput.select();
-            document.execCommand('copy');
-            const originalText = btnCopyLink.textContent;
-            btnCopyLink.textContent = 'Copiado!';
-            btnCopyLink.classList.remove('bg-blue-500', 'hover:bg-blue-600');
-            btnCopyLink.classList.add('bg-green-500');
-            setTimeout(() => {
-                btnCopyLink.textContent = originalText;
-                btnCopyLink.classList.remove('bg-green-500');
-                btnCopyLink.classList.add('bg-blue-500', 'hover:bg-blue-600');
-            }, 2000);
-        });
-    }
+    if (btnCopyLink) { btnCopyLink.addEventListener('click', () => { if (shareUrlInput) shareUrlInput.select(); document.execCommand('copy'); const originalText = btnCopyLink.textContent; btnCopyLink.textContent = 'Copiado!'; btnCopyLink.classList.add('bg-green-500'); setTimeout(() => { btnCopyLink.textContent = originalText; btnCopyLink.classList.remove('bg-green-500'); }, 2000); }); }
     
-    // Lógica do painel "Minha Conta"
     if (btnUpdateEmail) {
         btnUpdateEmail.addEventListener('click', async () => {
             if (!accountEmailInput) return;
             const newEmail = accountEmailInput.value;
             if (!newEmail || !newEmail.includes('@')) return showToast("Por favor, insira um email válido.", 'error');
             const { error } = await supabaseClient.auth.updateUser({ email: newEmail });
-            if (error) {
-                showToast(`Erro ao atualizar o email: ${error.message}`, 'error');
-            } else {
-                showToast("Verifique o seu email antigo e o novo para confirmar a alteração.", 'success');
-            }
+            if (error) { showToast(`Erro ao atualizar o email: ${error.message}`, 'error'); } 
+            else { showToast("Verifique o seu email antigo e o novo para confirmar a alteração.", 'success'); }
         });
     }
 
@@ -515,17 +526,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (newPassword !== confirmPasswordInput.value) return showToast("As senhas não coincidem.", 'error');
             if (newPassword.length < 8) return showToast("A senha deve ter no mínimo 8 caracteres.", 'error');
             const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
-            if (error) {
-                showToast(`Erro: ${error.message}`, 'error');
-            } else {
-                showToast("Senha atualizada com sucesso!");
-                newPasswordInput.value = '';
-                confirmPasswordInput.value = '';
-            }
+            if (error) { showToast(`Erro: ${error.message}`, 'error'); } 
+            else { showToast("Senha atualizada com sucesso!"); newPasswordInput.value = ''; confirmPasswordInput.value = ''; }
         });
     }
 
-    // --- INICIALIZAÇÃO ---
     (async () => {
         const { data: { user } } = await supabaseClient.auth.getUser();
         if (user) {
