@@ -6,21 +6,25 @@ function createStorySection(data) {
     const hasText = data.story_how_we_met || data.story_proposal;
     if (!data.story_image_1_url && !hasText) return '';
 
+    // Adiciona um container flex principal para alinhar itens verticalmente
     return `
         <section id="story-section" class="py-16 md:py-20">
             <h2 class="text-3xl md:text-4xl mb-12 font-title text-center md:text-left">Nossa História</h2>
             <div class="flex flex-col md:flex-row items-center gap-12 md:gap-16">
+                
                 ${data.story_image_1_url ? `
                     <div class="flex-shrink-0 w-full md:w-1/3">
-                        <img src="${data.story_image_1_url}" alt="Nossa história" class="rounded-full w-64 h-64 md:w-full md:h-auto object-cover mx-auto shadow-2xl">
+                        <img src="${data.story_image_1_url}" alt="Nossa história" class="rounded-full w-64 h-64 md:w-full md:h-auto object-cover mx-auto shadow-2xl aspect-square">
                     </div>
                 ` : ''}
+
                 <div class="flex-grow text-center md:text-left text-gray-600 leading-relaxed space-y-6">
                     ${data.story_how_we_met ? `<div><h3 class="text-2xl font-title mb-3" style="color: var(--primary-color);">Como nos Conhecemos</h3><p>${data.story_how_we_met.replace(/\n/g, '<br>')}</p></div>` : ''}
                     ${data.story_proposal ? `<div><h3 class="text-2xl font-title mb-3" style="color: var(--primary-color);">O Pedido</h3><p>${data.story_proposal.replace(/\n/g, '<br>')}</p></div>` : ''}
                 </div>
+                
                  ${data.story_image_2_url ? `
-                    <div class="flex-shrink-0 w-full md:w-1/4 hidden lg:block">
+                    <div class="flex-shrink-0 w-full md:w-1/5 mt-8 md:mt-0">
                         <img src="${data.story_image_2_url}" alt="Detalhe da nossa história" class="rounded-lg w-full object-cover mx-auto shadow-xl">
                     </div>
                 ` : ''}
@@ -99,3 +103,4 @@ export function render(data) {
         </div>
     `;
 }
+
