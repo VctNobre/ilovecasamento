@@ -65,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnLogout = document.getElementById('btn-logout');
     const toastContainer = document.getElementById('toast-container');
     let weddingPageData = null;
+    let galleryFiles = []; // Array para gerir os ficheiros da galeria
     
     // Seletores dos Painéis
     const viewSiteLink = document.getElementById('view-site-link');
@@ -94,10 +95,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnUpdatePassword = document.getElementById('btn-update-password');
     const btnUpdateEmail = document.getElementById('btn-update-email');
     const themeSelector = document.getElementById('theme-selector');
+    
+    // Seletores da secção "Nossa História"
     const storyImage1Upload = document.getElementById('story-image-1-upload');
+    const storyImage1Container = document.getElementById('story-image-1-container');
     const storyImage1Preview = document.getElementById('story-image-1-preview');
+    const btnDeleteStory1 = document.getElementById('btn-delete-story-1');
+
     const storyImage2Upload = document.getElementById('story-image-2-upload');
+    const storyImage2Container = document.getElementById('story-image-2-container');
     const storyImage2Preview = document.getElementById('story-image-2-preview');
+    const btnDeleteStory2 = document.getElementById('btn-delete-story-2');
+    
+    // Seletores da Galeria
     const galleryPhotosUpload = document.getElementById('gallery-photos-upload');
     const galleryPreviewGrid = document.getElementById('gallery-preview-grid');
 
@@ -239,7 +249,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return setToggleState;
     };
 
-    // Prepara os botões e guarda as funções para definir o estado
     const setRsvpState = setupSectionToggle(rsvpToggle, null);
     const setStoryState = setupSectionToggle(storyToggle, storyEditorWrapper);
     const setGalleryState = setupSectionToggle(galleryToggle, galleryEditorWrapper);
@@ -282,7 +291,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (heroImagePreview && data.hero_image_url) { heroImagePreview.src = data.hero_image_url; heroImagePreview.classList.remove('hidden'); }
             if (giftsEditorList) { giftsEditorList.innerHTML = ''; if (data.gifts) data.gifts.sort((a, b) => a.id - b.id).forEach(renderGiftEditor); }
             
-            // Define o estado inicial dos botões usando as funções preparadas
             if (setRsvpState) setRsvpState(data.rsvp_enabled);
             if (setStoryState) setStoryState(data.story_section_enabled);
             if (setGalleryState) setGalleryState(data.gallery_section_enabled);
@@ -320,7 +328,68 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // --- EVENT LISTENERS ---
+    // --- LÓGICA DE UPLOAD E EXCLUSÃO DE IMAGENS ---
+
+    const setupDeletableImageUpload = (inputEl, containerEl, previewEl, deleteBtnEl) => {
+        if (!inputEl || !containerEl || !previewEl || !deleteBtnEl) return;
+
+        inputEl.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                previewEl.src = URL.createObjectURL(file);
+                containerEl.classList.remove('hidden');
+                inputEl.classList.add('hidden');
+            }
+        });
+
+        deleteBtnEl.addEventListener('click', () => {
+            inputEl.value = '';
+            previewEl.src = '';
+            containerEl.classList.add('hidden');
+            inputEl.classList.remove('hidden');
+        });
+    };
+    
+    setupDeletableImageUpload(storyImage1Upload, storyImage1Container, storyImage1Preview, btnDeleteStory1);
+    setupDeletableImageUpload(storyImage2Upload, storyImage2Container, storyImage2Preview, btnDeleteStory2);
+
+    const renderGalleryPreviews = () => {
+        if (!galleryPreviewGrid) return;
+        galleryPreviewGrid.innerHTML = '';
+        galleryFiles.forEach((file, index) => {
+            const previewWrapper = document.createElement('div');
+            previewWrapper.className = 'relative group';
+            previewWrapper.innerHTML = `
+                <img src="${URL.createObjectURL(file)}" alt="${file.name}" class="w-full h-24 object-cover rounded-md">
+                <button type="button" data-index="${index}" class="btn-delete-gallery-img absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 leading-none opacity-0 group-hover:opacity-100 transition-opacity">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            `;
+            galleryPreviewGrid.appendChild(previewWrapper);
+        });
+    };
+
+    if (galleryPhotosUpload) {
+        galleryPhotosUpload.addEventListener('change', (event) => {
+            galleryFiles.push(...Array.from(event.target.files));
+            galleryPhotosUpload.value = '';
+            renderGalleryPreviews();
+        });
+    }
+
+    if (galleryPreviewGrid) {
+        galleryPreviewGrid.addEventListener('click', (e) => {
+            const deleteButton = e.target.closest('.btn-delete-gallery-img');
+            if (deleteButton) {
+                const indexToRemove = parseInt(deleteButton.dataset.index, 10);
+                galleryFiles.splice(indexToRemove, 1);
+                renderGalleryPreviews();
+            }
+        });
+    }
+
+
+    // --- EVENT LISTENERS GERAIS ---
     if (btnLogout) btnLogout.addEventListener('click', async () => { clearTimeout(inactivityTimer); await supabaseClient.auth.signOut(); });
     if (btnAddGift) btnAddGift.addEventListener('click', () => renderGiftEditor({}));
     if (heroImageUploadInput) {
@@ -330,41 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (storyImage1Upload) {
-        storyImage1Upload.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file && storyImage1Preview) {
-                storyImage1Preview.src = URL.createObjectURL(file);
-                storyImage1Preview.classList.remove('hidden');
-            }
-        });
-    }
-
-    if (storyImage2Upload) {
-        storyImage2Upload.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file && storyImage2Preview) {
-                storyImage2Preview.src = URL.createObjectURL(file);
-                storyImage2Preview.classList.remove('hidden');
-            }
-        });
-    }
-
-    if (galleryPhotosUpload) {
-        galleryPhotosUpload.addEventListener('change', (event) => {
-            if (galleryPreviewGrid) {
-                galleryPreviewGrid.innerHTML = ''; // Limpa as pré-visualizações antigas
-                Array.from(event.target.files).forEach(file => {
-                    const img = document.createElement('img');
-                    img.src = URL.createObjectURL(file);
-                    img.className = 'w-full h-24 object-cover rounded-md';
-                    galleryPreviewGrid.appendChild(img);
-                });
-            }
-        });
-    }
-
-     if (themeSelector) {
+    if (themeSelector) {
         themeSelector.addEventListener('change', (e) => {
             if (e.target.name === 'layout-theme') {
                 document.querySelectorAll('.theme-option .selected-indicator').forEach(indicator => {
@@ -496,7 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (user) {
             if (accountEmailInput) accountEmailInput.value = user.email;
             await loadWeddingPageData(user.id);
-            switchTab('layouts'); // Abre na nova aba de Layouts por padrão
+            switchTab('layouts');
         } else {
             window.location.href = '/login';
         }
