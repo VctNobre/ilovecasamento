@@ -1,43 +1,99 @@
-/* css/moderno.css */
+/* css/moderno.css - Estilo Elegante e Minimalista */
 
-#page-content {
-    margin-top: 0; 
+/* Importação das Fontes */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@400;500&display=swap');
+
+/* Variáveis de Cores e Tipografia */
+:root {
+    --font-serif: 'Playfair Display', serif;
+    --font-sans: 'Montserrat', sans-serif;
+    --color-text: #5C5C5C;
+    --color-heading: #333333;
+    --color-primary: #BFA89E; /* Tom de rose/dourado suave */
+    --color-background-extralight: #F9F5F2; /* Bege muito claro */
+    --color-background-light: #EADFD6;      /* Bege um pouco mais escuro */
 }
 
-/* Define uma largura máxima para o conteúdo principal e centra-o */
-#main-content {
-    background-color: var(--background-color);
-    max-width: 1280px; /* 80rem - um bom ponto de partida */
-    margin-left: auto;
-    margin-right: auto;
+/* Aplica a fonte base e cor de texto */
+body.theme-moderno {
+    font-family: var(--font-sans);
+    color: var(--color-text);
+    background-color: var(--color-background-extralight);
 }
 
-/* A imagem de capa ocupa a altura do ecrã em ecrãs grandes */
-@media (min-width: 768px) {
-    .hero-section { 
-        height: 100vh;
-    }
+/* Estilo para Títulos */
+.theme-moderno .font-serif {
+    font-family: var(--font-serif);
+    color: var(--color-heading);
 }
 
-/* Em ecrãs pequenos, o tema moderno comporta-se de forma semelhante ao clássico */
-.theme-moderno .font-title {
-    font-family: 'Inter', sans-serif;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
+/* Estilo para a Assinatura (usando a mesma fonte dos títulos) */
 .theme-moderno .font-signature {
-    font-family: 'Inter', sans-serif;
-    font-weight: 600;
-    font-size: 1.25rem;
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-style: italic;
 }
 
-/* Estilo para o recorte hexagonal da imagem da história */
-.story-image-clip {
-    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+/* Cabeçalho Fixo */
+.modern-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 30; /* Abaixo do carrinho de compras */
+    background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
 }
 
-.gallery-item:hover .absolute {
-    opacity: 1;
+.modern-header h1 {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    color: var(--color-heading);
+}
+
+/* Botão de Contribuir / Enviar */
+.btn-contribute {
+    background-color: var(--color-primary);
+    color: white;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px; /* Bordas bem arredondadas */
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-contribute:hover {
+    background-color: #a8928a; /* Tom mais escuro para hover */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Estilos para o Formulário RSVP */
+.bg-beige-light {
+    background-color: var(--color-background-light);
+}
+
+.rsvp-input {
+    width: 100%;
+    background-color: white;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.rsvp-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(191, 168, 158, 0.4);
 }
 
