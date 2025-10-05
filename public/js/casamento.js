@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         populateDynamicContent(data);
 
         // 8. E adicionamos toda a interatividade
-        attachEventListeners(data);
+        attachEventListeners(data, pageId); // CORREÇÃO: Passando o pageId
 
         // 9. Esconde o loader e mostra o conteúdo
         if (pageLoader) {
@@ -147,7 +147,7 @@ function populateDynamicContent(data) {
 /**
  * Adiciona a interatividade (carrinho, ordenação, rsvp) aos elementos que foram injetados.
  */
-function attachEventListeners(data) {
+function attachEventListeners(data, currentPageId) { // CORREÇÃO: Recebendo o currentPageId
     // Seletores dos elementos interativos
     const giftListContainer = document.getElementById('gift-list-container');
     const sortSelect = document.getElementById('sort-gifts');
@@ -306,7 +306,13 @@ function attachEventListeners(data) {
 
     if (btnSubmitRsvp) {
         btnSubmitRsvp.addEventListener('click', async () => {
+            const rsvpName = document.getElementById('rsvp-name');
+            const rsvpGuests = document.getElementById('rsvp-guests');
+            const rsvpMessage = document.getElementById('rsvp-message');
             const attendingRadio = document.querySelector('input[name="attending"]:checked');
+
+            if (!rsvpName || !rsvpGuests || !rsvpMessage) return;
+
             if (!rsvpName.value || !attendingRadio) {
                 // Adicione uma notificação de erro mais elegante se desejar
                 return alert("Por favor, preencha o seu nome e confirme a sua presença.");
@@ -342,4 +348,3 @@ function attachEventListeners(data) {
         rsvpSection.classList.remove('hidden');
     }
 }
-

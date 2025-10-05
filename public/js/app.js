@@ -1,12 +1,15 @@
 // app.js (Versão Módulo Corrigida e Robusta)
-// Importamos a função 'createClient' diretamente do módulo Supabase via CDN.
+
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-// --- CONFIGURAÇÃO DO SUPABASE ---
-// Cole aqui as chaves PÚBLICAS do seu projeto Supabase
 const SUPABASE_URL = 'https://usqlbfemsriqdohrslck.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzcWxiZmVtc3JpcWRvaHJzbGNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4Nzg0NjIsImV4cCI6MjA3MzQ1NDQ2Mn0.12Cg9TJF1ENQcxloS9N--DlH2UzdjgUDpv2-gqUFNho';
 
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+
+        storage: window.sessionStorage,
+    }
+});
 
 // --- FUNÇÃO DE NOTIFICAÇÃO TOAST GLOBAL ---
 const showToast = (message, type = 'success') => {
@@ -43,4 +46,3 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
         }
     }
 });
-
