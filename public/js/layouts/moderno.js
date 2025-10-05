@@ -132,15 +132,29 @@ function createRsvpSection(data) {
 }
 
 export function render(data) {
+    // Formata a data para um estilo mais elegante, ex: "25 de Novembro de 2025"
+    const formattedDate = data.wedding_date 
+        ? new Date(data.wedding_date + 'T12:00:00').toLocaleDateString('pt-BR', {
+            day: '2-digit', 
+            month: 'long', 
+            year: 'numeric' 
+          })
+        : 'Data do Casamento';
+
     return `
-        <!-- Imagem Principal (Hero) -->
-        <header id="hero-section" class="relative w-full h-[70vh] md:h-screen bg-gray-200">
-            <img id="hero-image" src="${data.hero_image_url || 'https://images.pexels.com/photos/1024989/pexels-photo-1024989.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'}" alt="Foto do Casal" class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-black/30"></div>
-            <div class="absolute inset-0 flex items-center justify-center text-white text-center">
-                <div>
-                    <h1 id="hero-title" class="text-6xl md:text-8xl font-serif">${data.main_title || 'Felipe & Caroline'}</h1>
-                    <p id="hero-date" class="font-signature text-3xl md:text-4xl mt-4">${data.couple_signature || 'Felipe & Caroline'}</p>
+        <!-- Cabeçalho com Imagem e Bloco de Introdução -->
+        <header>
+            <div id="hero-image-container" class="w-full h-auto">
+                <img id="hero-image" src="${data.hero_image_url || 'https://images.pexels.com/photos/1024989/pexels-photo-1024989.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'}" alt="Foto do Casal" class="w-full h-full object-cover">
+            </div>
+            <div id="intro-block" class="bg-beige-extralight text-center py-12 md:py-16">
+                <div class="container mx-auto px-6">
+                    <h1 class="text-5xl md:text-6xl font-serif text-gray-800">${data.main_title || 'Felipe & Caroline'}</h1>
+                    <p class="text-lg text-gray-500 mt-4">${formattedDate}</p>
+                    <div class="text-gray-600 max-w-2xl mx-auto mt-6 leading-relaxed">
+                        ${data.intro_text ? data.intro_text.replace(/\n/g, '<br>') : 'Um texto de apresentação para os convidados.'}
+                    </div>
+                    <p class="font-signature text-3xl md:text-4xl text-gray-700 mt-8">${data.couple_signature || 'Felipe & Caroline'}</p>
                 </div>
             </div>
         </header>
@@ -153,7 +167,7 @@ export function render(data) {
             ${createRsvpSection(data)}
         </main>
         
-        <footer class="py-8 text-center text-gray-600">
+        <footer class="py-8 text-center text-gray-600 bg-beige-extralight">
             <p>Com amor, ${data.couple_signature || 'Felipe & Caroline'} ♥</p>
         </footer>
     `;
