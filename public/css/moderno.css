@@ -1,27 +1,21 @@
 /* css/moderno.css */
-/* Este tema cria um layout de ecrã dividido em desktops. */
 
-@media (min-width: 1024px) { /* Aplica-se apenas a ecrãs de computador */
-    #page-wrapper {
-        display: grid;
-        grid-template-columns: 45% 55%; /* Duas colunas, a da esquerda um pouco menor */
-        min-height: 100vh;
-    }
-    
+#page-content {
+    margin-top: 0; 
+}
+
+/* Define uma largura máxima para o conteúdo principal e centra-o */
+#main-content {
+    background-color: var(--background-color);
+    max-width: 1280px; /* 80rem - um bom ponto de partida */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* A imagem de capa ocupa a altura do ecrã em ecrãs grandes */
+@media (min-width: 768px) {
     .hero-section { 
-        height: 100vh; /* Ocupa toda a altura da tela */
-        position: sticky; /* Fica "colado" à esquerda enquanto se faz scroll */
-        top: 0;
-    }
-
-    #page-content {
-        margin-top: 0; /* Remove a margem negativa que o tema clássico usa */
-    }
-
-    #main-content {
-        border-radius: 0;
-        box-shadow: none;
-        background-color: var(--background-color);
+        height: 100vh;
     }
 }
 
@@ -37,3 +31,13 @@
     font-weight: 600;
     font-size: 1.25rem;
 }
+
+/* Estilo para o recorte hexagonal da imagem da história */
+.story-image-clip {
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+.gallery-item:hover .absolute {
+    opacity: 1;
+}
+
