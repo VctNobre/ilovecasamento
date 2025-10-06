@@ -8,8 +8,150 @@
     <link rel="stylesheet" href="/css/base.css">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
-       <link rel="icon" href="/images/logo.svg" type="image/svg+xml">
+    <link rel="icon" href="/images/logo.svg" type="image/svg+xml">
     <link rel="alternate icon" href="/images/logo.png" type="image/png">
+      <style>
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body class="bg-background-color">
+
+    <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-20 shadow-sm">
+        <nav class="container mx-auto px-6 sm:px-8 py-3 flex justify-between items-center">
+            <a href="/">
+                <img src="/images/logo.png" alt="Ilovecasamento Logo" class="h-16 sm:h-20 w-auto object-contain">
+            </a>
+            <div class="space-x-2 sm:space-x-4 flex items-center">
+                <a href="/login" class="text-gray-600 font-semibold hover:text-[color:var(--primary-color)] transition-colors px-3 py-2 text-sm sm:text-base">Entrar</a>
+                <a href="/login?action=register" class="btn-primary text-sm sm:text-base whitespace-nowrap">
+                    <span>Criar Conta Grátis</span>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+       
+        <section class="relative text-white py-24 md:py-32 px-4 sm:px-6 bg-cover bg-center" style="background-image: url('/images/image-landpage.webp');">
+            <div class="absolute inset-0 bg-black/50"></div>
+            <div class="relative z-10 container mx-auto text-center">
+                <h1 class="text-4xl md:text-6xl font-title max-w-4xl mx-auto leading-tight drop-shadow-md text-white">O site de casamento que celebra a vossa história de amor</h1>
+                <p class="mt-6 text-base md:text-lg text-gray-200 max-w-2xl mx-auto drop-shadow">Crie uma página única com lista de presentes em dinheiro, confirmação de presença (RSVP), galeria de fotos e muito mais. Fácil, rápido e com o vosso estilo.</p>
+                <a href="/login?action=register" class="btn-primary mt-10 inline-block text-base md:text-lg">Comece a criar agora</a>
+            </div>
+        </section>
+
+        <section class="py-16 md:py-24 px-4 sm:px-6 bg-white">
+            <div class="container mx-auto text-center">
+                <h2 class="text-3xl md:text-4xl font-title mb-4">Recursos incríveis para o vosso grande dia</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto mb-16">Tudo o que precisam, num só lugar, para tornar a jornada do casamento mais simples e especial.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+                    
+                    <div class="feature-card bg-gray-50 p-8 rounded-xl text-left">
+                        <svg class="w-12 h-12 mb-4" style="color: var(--primary-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <h3 class="text-xl md:text-2xl font-title mb-3">Site Personalizável</h3>
+                        <p>Escolham entre layouts elegantes, alterem cores, fontes e coloquem as vossas fotos para deixar o site com a cara do casal.</p>
+                    </div>
+
+                    <div class="feature-card bg-gray-50 p-8 rounded-xl text-left">
+                        <svg class="w-12 h-12 mb-4" style="color: var(--primary-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0-1V4m0 2.01v.01M12 14c-1.11 0-2.08-.402-2.599-1M12 14v1m0-1v-.01M12 16v1m0 1v1m0-2.01v-.01M6 9.599c1.11.998 2.599 1.401 4 1.401m0-2.802c-1.11-.998-2.599-1.401-4-1.401m12 2.802c-1.11.998-2.599 1.401-4 1.401m0-2.802c1.11-.998 2.599-1.401 4-1.401"></path></svg>
+                        <h3 class="text-xl md:text-2xl font-title mb-3">Lista de Presentes em Dinheiro</h3>
+                        <p>Criem uma lista de presentes virtuais e recebam o valor total em dinheiro, diretamente na vossa conta, para usar como quiserem.</p>
+                    </div>
+
+                    <div class="feature-card bg-gray-50 p-8 rounded-xl text-left">
+                         <svg class="w-12 h-12 mb-4" style="color: var(--primary-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                        <h3 class="text-xl md:text-2xl font-title mb-3">Pagamentos Flexíveis</h3>
+                        <p>Os vossos convidados podem presentear com facilidade, utilizando Pix, boleto ou parcelando no cartão de crédito.</p>
+                    </div>
+
+                    <div class="feature-card bg-gray-50 p-8 rounded-xl text-left">
+                        <svg class="w-12 h-12 mb-4" style="color: var(--primary-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                        <h3 class="text-xl md:text-2xl font-title mb-3">Confirmação de Presença (RSVP)</h3>
+                        <p>Gerenciem a vossa lista de convidados de forma online. Os convidados confirmam presença diretamente no site, de forma rápida e prática.</p>
+                    </div>
+                    
+                    <div class="feature-card bg-gray-50 p-8 rounded-xl text-left">
+                        <svg class="w-12 h-12 mb-4" style="color: var(--primary-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <h3 class="text-xl md:text-2xl font-title mb-3">Galeria de Fotos e História</h3>
+                        <p>Contem a vossa história de amor e partilhem os vossos melhores momentos numa galeria de fotos elegante para todos os convidados verem.</p>
+                    </div>
+
+                    <div class="feature-card bg-gray-50 p-8 rounded-xl text-left">
+                        <svg class="w-12 h-12 mb-4" style="color: var(--primary-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <h3 class="text-xl md:text-2xl font-title mb-3">Domínio Personalizado</h3>
+                        <p>Tenham um link único e fácil de partilhar (ex: ilovecasamento.com.br/noivos) para colocar no vosso convite de casamento.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-16 md:py-24 px-4 sm:px-6">
+            <div class="container mx-auto">
+                 <div class="text-center">
+                    <h2 class="text-3xl md:text-4xl font-title mb-4">Escolha um layout que combine com vocês</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto mb-12">Seja clássico ou moderno, o vosso site terá um design elegante e responsivo, perfeito em qualquer dispositivo.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="text-center">
+                        <img src="https://placehold.co/800x600/F4F0E8/3C4A5A?text=Layout+Clássico" alt="Exemplo de Layout Clássico" class="rounded-lg shadow-xl mb-4">
+                        <h3 class="text-2xl font-title">Clássico & Atemporal</h3>
+                    </div>
+                     <div class="text-center">
+                        <img src="https://placehold.co/800x600/3C4A5A/FFFFFF?text=Layout+Moderno" alt="Exemplo de Layout Moderno" class="rounded-lg shadow-xl mb-4">
+                        <h3 class="text-2xl font-title">Moderno & Minimalista</h3>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-16 md:py-24 px-4 sm:px-6 bg-white">
+            <div class="container mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h2 class="text-3xl md:text-4xl font-title mb-4">Recebam presentes em dinheiro com total liberdade</h2>
+                        <p class="text-gray-600 mb-6 leading-relaxed">A nossa lista de presentes converte tudo em dinheiro para vocês. Sem presentes repetidos e com a liberdade para usar o valor como sonharam: na lua de mel, na casa nova ou onde a felicidade vos levar.</p>
+                        <p class="font-semibold text-gray-700">Os vossos convidados podem pagar via:</p>
+                        <div class="flex items-center space-x-4 mt-4 text-gray-500">
+                            <span>Pix</span>
+                            <span class="font-bold text-2xl">&middot;</span>
+                            <span>Boleto</span>
+                             <span class="font-bold text-2xl">&middot;</span>
+                            <span>Cartão de Crédito (parcelado)</span>
+                        </div>
+                    </div>
+                     <div>
+                        <img src="https://placehold.co/600x400/D9A8A4/FFFFFF?text=Presentes+em+Dinheiro" alt="Ilustração de presentes" class="rounded-lg shadow-xl">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+         <section class="bg-[color:var(--primary-color)] text-white py-20">
+            <div class="container mx-auto text-center px-4">
+                <h2 class="text-3xl md:text-4xl font-title mb-4">Prontos para criar o site dos vossos sonhos?</h2>
+                <p class="mb-8 max-w-xl mx-auto">Juntem-se a milhares de casais e comecem hoje mesmo a vossa jornada.</p>
+                <a href="/login?action=register" class="bg-white text-[color:var(--primary-color)] font-bold py-3 px-8 rounded-lg text-lg hover:bg-gray-100 transition-colors">Criar meu site grátis</a>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto text-center px-4">
+            <p>&copy; 2025 Ilovecasamento. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
+
 
 </head>
 <body class="bg-background-color">
