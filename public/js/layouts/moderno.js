@@ -37,15 +37,9 @@ function createStorySection(data) {
 function createGallerySection(data) {
     if (!data.gallery_section_enabled || !data.gallery_photos || data.gallery_photos.length === 0) return '';
     
-    let galleryItems = data.gallery_photos.slice(0, 8).map((photoUrl, index) => 
+    const galleryItems = data.gallery_photos.map((photoUrl, index) => 
         `<div class="overflow-hidden"><img src="${photoUrl}" alt="Foto da galeria ${index + 1}" class="w-full h-full object-cover rounded-lg shadow-lg transform transition-transform duration-300 hover:scale-105"></div>`
     ).join('');
-
-    // Preenche com placeholders se tiver menos de 8 fotos
-    for (let i = data.gallery_photos.length; i < 8; i++) {
-        galleryItems += `<div class="bg-gray-200 rounded-lg shadow-lg"><img src="https://placehold.co/400x400/EADFD6/967E76?text=Foto" class="w-full h-full object-cover"></div>`;
-    }
-
 
     return `
         <section id="gallery-section" class="py-20 md:py-28 bg-white">
