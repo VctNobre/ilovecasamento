@@ -6,12 +6,12 @@ function createStorySection(data) {
     return `
         <section id="story-section" class="py-20 md:py-28">
             <div class="container mx-auto px-6 md:px-8 max-w-4xl">
-                <h2 class="text-4xl md:text-5xl font-serif text-center text-gray-800 mb-16">Nossa História</h2>
+                <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">Nossa História</h2>
                 
                 <!-- Como nos Conhecemos -->
                 <div class="flex flex-col md:flex-row items-center gap-12 md:gap-16 mb-20">
                     <div class="md:w-1/2 text-gray-600 text-center md:text-left">
-                        <h3 class="text-3xl font-serif text-gray-700 mb-4">Como nos Conhecemos</h3>
+                        <h3 class="text-3xl font-serif mb-4" style="color: ${data.title_color || '#333333'};">Como nos Conhecemos</h3>
                         <p class="leading-relaxed">${data.story_how_we_met ? data.story_how_we_met.replace(/\n/g, '<br>') : 'Texto sobre como nos conhecemos...'}</p>
                     </div>
                     <div class="md:w-1/2">
@@ -22,7 +22,7 @@ function createStorySection(data) {
                 <!-- O Pedido -->
                 <div class="flex flex-col md:flex-row-reverse items-center gap-12 md:gap-16">
                     <div class="md:w-1/2 text-gray-600 text-center md:text-left">
-                        <h3 class="text-3xl font-serif text-gray-700 mb-4">O Pedido</h3>
+                        <h3 class="text-3xl font-serif mb-4" style="color: ${data.title_color || '#333333'};">O Pedido</h3>
                         <p class="leading-relaxed">${data.story_proposal ? data.story_proposal.replace(/\n/g, '<br>') : 'Texto sobre o pedido de casamento...'}</p>
                     </div>
                     <div class="md:w-1/2">
@@ -50,7 +50,7 @@ function createGallerySection(data) {
     return `
         <section id="gallery-section" class="py-20 md:py-28 bg-white">
             <div class="container mx-auto px-6 md:px-8 max-w-5xl">
-                <h2 class="text-4xl md:text-5xl font-serif text-center text-gray-800 mb-16">Galeria de Fotos</h2>
+                <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">Galeria de Fotos</h2>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                     ${galleryItems}
                 </div>
@@ -64,7 +64,7 @@ function createGiftsSection(data) {
         return `
         <section id="gifts-section" class="py-20 md:py-28">
              <div class="container mx-auto px-6 md:px-8 max-w-5xl">
-                <h2 class="text-4xl md:text-5xl font-serif text-center text-gray-800 mb-16">Lista de Presentes</h2>
+                <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">Lista de Presentes</h2>
                 <p class="text-center text-gray-500">A lista de presentes ainda não foi adicionada.</p>
             </div>
         </section>
@@ -85,7 +85,7 @@ function createGiftsSection(data) {
     return `
         <section id="gifts-section" class="py-20 md:py-28">
              <div class="container mx-auto px-6 md:px-8 max-w-5xl">
-                <h2 class="text-4xl md:text-5xl font-serif text-center text-gray-800 mb-16">Lista de Presentes</h2>
+                <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">Lista de Presentes</h2>
                 <div id="gift-list-container" class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
                     ${giftItems}
                 </div>
@@ -101,7 +101,7 @@ function createRsvpSection(data) {
     return `
         <section id="rsvp-section" class="py-20 md:py-28 bg-beige-light">
             <div class="container mx-auto px-6 md:px-8 max-w-2xl">
-                <h2 class="text-4xl md:text-5xl font-serif text-center text-gray-800 mb-12">Confirme sua Presença</h2>
+                <h2 class="text-4xl md:text-5xl font-serif text-center mb-12" style="color: ${data.title_color || '#333333'};">Confirme sua Presença</h2>
                 <form id="rsvp-form" class="space-y-6">
                     <div>
                         <label for="rsvp-name" class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
@@ -149,12 +149,14 @@ export function render(data) {
             </div>
             <div id="intro-block" class="bg-beige-extralight text-center py-12 md:py-16">
                 <div class="container mx-auto px-6">
-                    <h1 class="text-5xl md:text-6xl font-serif text-gray-800">${data.main_title || 'Felipe & Caroline'}</h1>
+                    <h1 class="text-5xl md:text-6xl font-serif" style="color: ${data.hero_title_color || '#333333'};">${data.main_title || 'Felipe & Caroline'}</h1>
                     <p class="text-lg text-gray-500 mt-4">${formattedDate}</p>
-                    <div class="text-gray-600 max-w-2xl mx-auto mt-6 leading-relaxed">
-                        ${data.intro_text ? data.intro_text.replace(/\n/g, '<br>') : 'Um texto de apresentação para os convidados.'}
-                    </div>
-                    <p class="font-signature text-3xl md:text-4xl text-gray-700 mt-8">${data.couple_signature || 'Felipe & Caroline'}</p>
+                    ${data.intro_text ? `
+                        <div class="text-gray-600 max-w-2xl mx-auto mt-6 leading-relaxed">
+                            ${data.intro_text.replace(/\n/g, '<br>')}
+                        </div>
+                    ` : ''}
+                    <p class="font-signature text-3xl md:text-4xl mt-8" style="color: ${data.hero_title_color || '#333333'};">${data.couple_signature || 'Felipe & Caroline'}</p>
                 </div>
             </div>
         </header>
