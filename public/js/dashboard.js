@@ -290,7 +290,24 @@ document.addEventListener('DOMContentLoaded', () => {
             if (heroImagePreview && data.hero_image_url) { heroImagePreview.src = data.hero_image_url; heroImagePreview.classList.remove('hidden'); }
             if (giftsEditorList) { giftsEditorList.innerHTML = ''; if (data.gifts) data.gifts.sort((a, b) => a.id - b.id).forEach(renderGiftEditor); }
             
-            // Define o estado inicial dos botões usando as funções preparadas
+            if (data.story_image_1_url) {
+                storyImage1Preview.src = data.story_image_1_url;
+                storyImage1Container.classList.remove('hidden');
+                storyImage1Upload.classList.add('hidden');
+            } else {
+                storyImage1Container.classList.add('hidden');
+                storyImage1Upload.classList.remove('hidden');
+            }
+
+            if (data.story_image_2_url) {
+                storyImage2Preview.src = data.story_image_2_url;
+                storyImage2Container.classList.remove('hidden');
+                storyImage2Upload.classList.add('hidden');
+            } else {
+                storyImage2Container.classList.add('hidden');
+                storyImage2Upload.classList.remove('hidden');
+            }
+
             if (setRsvpState) setRsvpState(data.rsvp_enabled);
             if (setStoryState) setStoryState(data.story_section_enabled);
             if (setGalleryState) setGalleryState(data.gallery_section_enabled);
@@ -426,22 +443,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     heroImageUrl = await uploadFile(file, filePath);
                 }
 
-                let storyImg1Url = weddingPageData?.story_image_1_url || null;
+                let storyImg1Url;
                 if (storyImage1Upload && storyImage1Upload.files[0]) {
                     const file = storyImage1Upload.files[0];
                     const filePath = `${user.id}/story-1-${Date.now()}-${sanitizeFilename(file.name)}`;
                     storyImg1Url = await uploadFile(file, filePath);
-                } else if (storyImage1Upload && !storyImage1Upload.files[0] && !storyImage1Preview.src.startsWith('https://')) {
-                    storyImg1Url = null; // Foi apagada
+                } else if (storyImage1Container && storyImage1Container.classList.contains('hidden')) {
+                    storyImg1Url = null;
+                } else {
+                    storyImg1Url = weddingPageData?.story_image_1_url || null;
                 }
 
-                let storyImg2Url = weddingPageData?.story_image_2_url || null;
+                let storyImg2Url;
                 if (storyImage2Upload && storyImage2Upload.files[0]) {
                     const file = storyImage2Upload.files[0];
                     const filePath = `${user.id}/story-2-${Date.now()}-${sanitizeFilename(file.name)}`;
                     storyImg2Url = await uploadFile(file, filePath);
-                } else if (storyImage2Upload && !storyImage2Upload.files[0] && !storyImage2Preview.src.startsWith('https://')) {
-                     storyImg2Url = null;
+                } else if (storyImage2Container && storyImage2Container.classList.contains('hidden')) {
+                    storyImg2Url = null;
+                } else {
+                    storyImg2Url = weddingPageData?.story_image_2_url || null;
                 }
 
                 const galleryUrls = [];
@@ -568,3 +589,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     })();
 });
+
