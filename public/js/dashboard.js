@@ -65,7 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnLogout = document.getElementById('btn-logout');
     const toastContainer = document.getElementById('toast-container');
     let weddingPageData = null;
-    let galleryFiles = [];
     
     // Seletores dos Painéis
     const viewSiteLink = document.getElementById('view-site-link');
@@ -95,21 +94,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnUpdatePassword = document.getElementById('btn-update-password');
     const btnUpdateEmail = document.getElementById('btn-update-email');
     const themeSelector = document.getElementById('theme-selector');
-    
-    // Seletores de "Nossa História" e "Galeria"
     const storyHowWeMetInput = document.getElementById('story-how-we-met');
     const storyProposalInput = document.getElementById('story-proposal');
     const storyImage1Upload = document.getElementById('story-image-1-upload');
     const storyImage1Preview = document.getElementById('story-image-1-preview');
     const storyImage1Container = document.getElementById('story-image-1-container');
+    const btnDeleteStory1 = document.getElementById('btn-delete-story-1');
     const storyImage2Upload = document.getElementById('story-image-2-upload');
     const storyImage2Preview = document.getElementById('story-image-2-preview');
     const storyImage2Container = document.getElementById('story-image-2-container');
+    const btnDeleteStory2 = document.getElementById('btn-delete-story-2');
     const galleryPhotosUpload = document.getElementById('gallery-photos-upload');
     const galleryPreviewGrid = document.getElementById('gallery-preview-grid');
-    const btnDeleteStory1 = document.getElementById('btn-delete-story-1');
-    const btnDeleteStory2 = document.getElementById('btn-delete-story-2');
-
 
     // --- FUNÇÕES GLOBAIS ---
     const showToast = (message, type = 'success') => {
@@ -220,13 +216,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- LÓGICA DOS BOTÕES DE ATIVAÇÃO (TOGGLES) ---
     const setupSectionToggle = (toggleElement, wrapperElement) => {
         if (!toggleElement) return null;
+
         const setToggleState = (isEnabled) => {
             if (typeof isEnabled !== 'boolean') return;
             const slider = toggleElement.querySelector('.toggle-knob');
             toggleElement.setAttribute('aria-checked', String(isEnabled));
+            
             if (wrapperElement) {
                 wrapperElement.classList.toggle('hidden', !isEnabled);
             }
+
             if (isEnabled) {
                 toggleElement.classList.remove('bg-gray-200');
                 toggleElement.classList.add('bg-green-500');
@@ -237,16 +236,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (slider) slider.classList.remove('translate-x-6');
             }
         };
+
         toggleElement.addEventListener('click', () => {
             const isCurrentlyEnabled = toggleElement.getAttribute('aria-checked') === 'true';
             setToggleState(!isCurrentlyEnabled);
         });
+        
         return setToggleState;
     };
 
+    // Prepara os botões e guarda as funções para definir o estado
     const setRsvpState = setupSectionToggle(rsvpToggle, null);
     const setStoryState = setupSectionToggle(storyToggle, storyEditorWrapper);
     const setGalleryState = setupSectionToggle(galleryToggle, galleryEditorWrapper);
+
 
     // --- FUNÇÕES DE UPLOAD E DADOS ---
     const sanitizeFilename = (filename) => {
@@ -279,32 +282,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (weddingDateInput) weddingDateInput.value = data.wedding_date || '';
             if (introTextInput) introTextInput.value = data.intro_text || '';
             if (coupleSignatureInput) coupleSignatureInput.value = data.couple_signature || '';
+            if (storyHowWeMetInput) storyHowWeMetInput.value = data.story_how_we_met || '';
+            if (storyProposalInput) storyProposalInput.value = data.story_proposal || '';
             if (primaryColorInput) primaryColorInput.value = data.primary_color || '#D9A8A4';
             if (titleColorInput) titleColorInput.value = data.title_color || '#333333';
             if (heroTitleColorInput) heroTitleColorInput.value = data.hero_title_color || '#FFFFFF';
             if (heroImagePreview && data.hero_image_url) { heroImagePreview.src = data.hero_image_url; heroImagePreview.classList.remove('hidden'); }
             if (giftsEditorList) { giftsEditorList.innerHTML = ''; if (data.gifts) data.gifts.sort((a, b) => a.id - b.id).forEach(renderGiftEditor); }
             
-            if (storyHowWeMetInput) storyHowWeMetInput.value = data.story_how_we_met || '';
-            if (storyProposalInput) storyProposalInput.value = data.story_proposal || '';
-            
-            if (storyImage1Preview && data.story_image_1_url) {
-                storyImage1Preview.src = data.story_image_1_url;
-                storyImage1Container.classList.remove('hidden');
-                storyImage1Upload.classList.add('hidden');
-            }
-             if (storyImage2Preview && data.story_image_2_url) {
-                storyImage2Preview.src = data.story_image_2_url;
-                storyImage2Container.classList.remove('hidden');
-                storyImage2Upload.classList.add('hidden');
-            }
-
-            if (galleryPreviewGrid && data.gallery_photos) {
-                galleryFiles = data.gallery_photos.map(url => ({ isUrl: true, content: url }));
-                renderGalleryPreviews();
-            }
-
-
+            // Define o estado inicial dos botões usando as funções preparadas
             if (setRsvpState) setRsvpState(data.rsvp_enabled);
             if (setStoryState) setStoryState(data.story_section_enabled);
             if (setGalleryState) setGalleryState(data.gallery_section_enabled);
@@ -352,64 +338,75 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const setupStoryImageUpload = (uploadEl, previewEl, containerEl, deleteBtn) => {
-        uploadEl.addEventListener('change', (event) => {
+    const setupImagePreviewAndDelete = (uploadInput, previewContainer, previewImg, deleteBtn) => {
+        if (!uploadInput || !previewContainer || !previewImg || !deleteBtn) return;
+        uploadInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (file) {
-                previewEl.src = URL.createObjectURL(file);
-                containerEl.classList.remove('hidden');
-                uploadEl.classList.add('hidden');
+                previewImg.src = URL.createObjectURL(file);
+                previewContainer.classList.remove('hidden');
+                uploadInput.classList.add('hidden');
             }
         });
         deleteBtn.addEventListener('click', () => {
-            uploadEl.value = '';
-            previewEl.src = '';
-            containerEl.classList.add('hidden');
-            uploadEl.classList.remove('hidden');
+            uploadInput.value = ''; // Limpa o input
+            previewImg.src = '';
+            previewContainer.classList.add('hidden');
+            uploadInput.classList.remove('hidden');
         });
     };
 
-    if (storyImage1Upload) setupStoryImageUpload(storyImage1Upload, storyImage1Preview, storyImage1Container, btnDeleteStory1);
-    if (storyImage2Upload) setupStoryImageUpload(storyImage2Upload, storyImage2Preview, storyImage2Container, btnDeleteStory2);
-
-    const renderGalleryPreviews = () => {
-        if (!galleryPreviewGrid) return;
-        galleryPreviewGrid.innerHTML = '';
-        galleryFiles.forEach((fileItem, index) => {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'relative';
-            const img = document.createElement('img');
-            img.src = fileItem.isUrl ? fileItem.content : URL.createObjectURL(fileItem.content);
-            img.className = 'w-full h-24 object-cover rounded-md';
-            const deleteBtn = document.createElement('button');
-            deleteBtn.type = 'button';
-            deleteBtn.className = 'absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 leading-none hover:bg-red-700 transition-colors';
-            deleteBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
-            deleteBtn.onclick = () => {
-                galleryFiles.splice(index, 1);
-                renderGalleryPreviews();
-            };
-            wrapper.appendChild(img);
-            wrapper.appendChild(deleteBtn);
-            galleryPreviewGrid.appendChild(wrapper);
-        });
-    };
+    setupImagePreviewAndDelete(storyImage1Upload, storyImage1Container, storyImage1Preview, btnDeleteStory1);
+    setupImagePreviewAndDelete(storyImage2Upload, storyImage2Container, storyImage2Preview, btnDeleteStory2);
 
     if (galleryPhotosUpload) {
         galleryPhotosUpload.addEventListener('change', (event) => {
-            const newFiles = Array.from(event.target.files).map(file => ({ isUrl: false, content: file }));
-            galleryFiles.push(...newFiles);
-            renderGalleryPreviews();
-            galleryPhotosUpload.value = '';
+            if (galleryPreviewGrid) {
+                galleryPreviewGrid.innerHTML = '';
+                Array.from(event.target.files).forEach((file, index) => {
+                    const previewWrapper = document.createElement('div');
+                    previewWrapper.className = 'relative';
+                    previewWrapper.innerHTML = `
+                        <img src="${URL.createObjectURL(file)}" class="w-full h-24 object-cover rounded-md">
+                        <button type="button" data-index="${index}" class="btn-delete-gallery-item absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 leading-none hover:bg-red-700">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    `;
+                    galleryPreviewGrid.appendChild(previewWrapper);
+                });
+            }
         });
     }
 
-    if (themeSelector) {
+    if (galleryPreviewGrid) {
+        galleryPreviewGrid.addEventListener('click', (e) => {
+            const deleteBtn = e.target.closest('.btn-delete-gallery-item');
+            if (deleteBtn && galleryPhotosUpload.files.length > 0) {
+                const indexToRemove = parseInt(deleteBtn.dataset.index, 10);
+                const newFiles = Array.from(galleryPhotosUpload.files).filter((_, i) => i !== indexToRemove);
+                
+                // Criar um novo DataTransfer para manipular a lista de arquivos
+                const dataTransfer = new DataTransfer();
+                newFiles.forEach(file => dataTransfer.items.add(file));
+                galleryPhotosUpload.files = dataTransfer.files;
+                
+                // Dispara o evento 'change' para re-renderizar as pré-visualizações
+                galleryPhotosUpload.dispatchEvent(new Event('change', { 'bubbles': true }));
+            }
+        });
+    }
+
+
+     if (themeSelector) {
         themeSelector.addEventListener('change', (e) => {
             if (e.target.name === 'layout-theme') {
-                document.querySelectorAll('.theme-option .selected-indicator').forEach(indicator => { indicator.style.opacity = '0'; });
+                document.querySelectorAll('.theme-option .selected-indicator').forEach(indicator => {
+                    indicator.style.opacity = '0';
+                });
                 const indicator = e.target.closest('.theme-option').querySelector('.selected-indicator');
-                if (indicator) { indicator.style.opacity = '1'; }
+                if (indicator) {
+                    indicator.style.opacity = '1';
+                }
             }
         });
     }
@@ -422,60 +419,61 @@ document.addEventListener('DOMContentLoaded', () => {
             btnSaveAll.disabled = true;
             try {
                 let heroImageUrl = weddingPageData?.hero_image_url || null;
-                if (heroImageUploadInput.files[0]) {
-                    heroImageUrl = await uploadFile(heroImageUploadInput.files[0], `${user.id}/hero-${Date.now()}`);
+                if (heroImageUploadInput && heroImageUploadInput.files[0]) {
+                    const file = heroImageUploadInput.files[0];
+                    const sanitizedFileName = sanitizeFilename(file.name);
+                    const filePath = `${user.id}/hero-${Date.now()}-${sanitizedFileName}`;
+                    heroImageUrl = await uploadFile(file, filePath);
                 }
 
-                let storyImageUrl1 = weddingPageData?.story_image_1_url || null;
-                if (storyImage1Upload.files[0]) {
-                    storyImageUrl1 = await uploadFile(storyImage1Upload.files[0], `${user.id}/story-1-${Date.now()}`);
-                } else if (!storyImage1Container.classList.contains('hidden') && storyImage1Preview.src.startsWith('http')) {
-                    storyImageUrl1 = storyImage1Preview.src;
-                } else {
-                    storyImageUrl1 = null;
+                let storyImg1Url = weddingPageData?.story_image_1_url || null;
+                if (storyImage1Upload && storyImage1Upload.files[0]) {
+                    const file = storyImage1Upload.files[0];
+                    const filePath = `${user.id}/story-1-${Date.now()}-${sanitizeFilename(file.name)}`;
+                    storyImg1Url = await uploadFile(file, filePath);
+                } else if (storyImage1Upload && !storyImage1Upload.files[0] && !storyImage1Preview.src.startsWith('https://')) {
+                    storyImg1Url = null; // Foi apagada
                 }
-                
-                let storyImageUrl2 = weddingPageData?.story_image_2_url || null;
-                if (storyImage2Upload.files[0]) {
-                    storyImageUrl2 = await uploadFile(storyImage2Upload.files[0], `${user.id}/story-2-${Date.now()}`);
-                } else if (!storyImage2Container.classList.contains('hidden') && storyImage2Preview.src.startsWith('http')) {
-                    storyImageUrl2 = storyImage2Preview.src;
-                } else {
-                    storyImageUrl2 = null;
+
+                let storyImg2Url = weddingPageData?.story_image_2_url || null;
+                if (storyImage2Upload && storyImage2Upload.files[0]) {
+                    const file = storyImage2Upload.files[0];
+                    const filePath = `${user.id}/story-2-${Date.now()}-${sanitizeFilename(file.name)}`;
+                    storyImg2Url = await uploadFile(file, filePath);
+                } else if (storyImage2Upload && !storyImage2Upload.files[0] && !storyImage2Preview.src.startsWith('https://')) {
+                     storyImg2Url = null;
                 }
-                
+
                 const galleryUrls = [];
-                for(const fileItem of galleryFiles){
-                    if(fileItem.isUrl){
-                        galleryUrls.push(fileItem.content);
-                    } else {
-                        const url = await uploadFile(fileItem.content, `${user.id}/gallery/${Date.now()}-${sanitizeFilename(fileItem.content.name)}`);
-                        if(url) galleryUrls.push(url);
+                if (galleryPhotosUpload && galleryPhotosUpload.files.length > 0) {
+                    for (const file of Array.from(galleryPhotosUpload.files)) {
+                        const filePath = `${user.id}/gallery-${Date.now()}-${sanitizeFilename(file.name)}`;
+                        const url = await uploadFile(file, filePath);
+                        if (url) galleryUrls.push(url);
                     }
                 }
 
                 const selectedTheme = themeSelector ? themeSelector.querySelector('input[name="layout-theme"]:checked')?.value : 'padrao';
                 const pageDataToSave = {
                     user_id: user.id,
-                    main_title: mainTitleInput.value,
-                    wedding_date: weddingDateInput.value,
-                    intro_text: introTextInput.value,
-                    couple_signature: coupleSignatureInput.value,
-                    primary_color: primaryColorInput.value,
-                    title_color: titleColorInput.value,
-                    hero_title_color: heroTitleColorInput.value,
+                    main_title: mainTitleInput ? mainTitleInput.value : null,
+                    wedding_date: weddingDateInput ? weddingDateInput.value : null,
+                    intro_text: introTextInput ? introTextInput.value : null,
+                    couple_signature: coupleSignatureInput ? coupleSignatureInput.value : null,
+                    primary_color: primaryColorInput ? primaryColorInput.value : '#D9A8A4',
+                    title_color: titleColorInput ? titleColorInput.value : '#333333',
+                    hero_title_color: heroTitleColorInput ? heroTitleColorInput.value : '#FFFFFF',
                     hero_image_url: heroImageUrl,
-                    rsvp_enabled: rsvpToggle.getAttribute('aria-checked') === 'true',
-                    story_section_enabled: storyToggle.getAttribute('aria-checked') === 'true',
-                    gallery_section_enabled: galleryToggle.getAttribute('aria-checked') === 'true',
-                    story_how_we_met: storyHowWeMetInput.value,
-                    story_proposal: storyProposalInput.value,
-                    story_image_1_url: storyImageUrl1,
-                    story_image_2_url: storyImageUrl2,
-                    gallery_photos: galleryUrls,
-                    layout_theme: selectedTheme
+                    rsvp_enabled: rsvpToggle ? rsvpToggle.getAttribute('aria-checked') === 'true' : false,
+                    layout_theme: selectedTheme,
+                    story_section_enabled: storyToggle ? storyToggle.getAttribute('aria-checked') === 'true' : false,
+                    gallery_section_enabled: galleryToggle ? galleryToggle.getAttribute('aria-checked') === 'true' : false,
+                    story_how_we_met: storyHowWeMetInput ? storyHowWeMetInput.value : null,
+                    story_proposal: storyProposalInput ? storyProposalInput.value : null,
+                    story_image_1_url: storyImg1Url,
+                    story_image_2_url: storyImg2Url,
+                    gallery_photos: galleryUrls.length > 0 ? galleryUrls : null
                 };
-
                 const { data: pageResult, error: pageError } = await supabaseClient.from('wedding_pages').upsert(pageDataToSave, { onConflict: 'user_id' }).select().single();
                 if (pageError) throw pageError;
                 const pageId = pageResult.id;
@@ -484,8 +482,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 for (const editor of giftEditors) {
                     const imageInput = editor.querySelector('.image-input');
                     let imageUrl = editor.querySelector('.image-preview').src;
-                    if (imageInput.files[0]) {
-                        imageUrl = await uploadFile(imageInput.files[0], `${user.id}/gift-${Date.now()}`);
+                    if (imageInput && imageInput.files[0]) {
+                        const file = imageInput.files[0];
+                        const sanitizedFileName = sanitizeFilename(file.name);
+                        const filePath = `${user.id}/gift-${Date.now()}-${sanitizedFileName}`;
+                        const uploadedUrl = await uploadFile(file, filePath);
+                        if (uploadedUrl) imageUrl = uploadedUrl;
                     }
                     giftsToSave.push({ page_id: pageId, title: editor.querySelector('.title-input')?.value || '', description: editor.querySelector('.description-input')?.value || '', value: parseFloat(editor.querySelector('.value-input')?.value) || 0, image_url: imageUrl.startsWith('https://placehold.co') ? null : imageUrl });
                 }
@@ -495,7 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (giftsError) throw giftsError;
                 }
                 showToast("Site atualizado com sucesso!");
-                loadWeddingPageData(user.id);
+                await loadWeddingPageData(user.id);
             } catch (error) {
                 console.error("ERRO DETALHADO AO SALVAR:", error);
                 showToast("Ocorreu um erro ao salvar: " + error.message, 'error');
@@ -506,16 +508,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (btnCopyLink) { btnCopyLink.addEventListener('click', () => { if (shareUrlInput) shareUrlInput.select(); document.execCommand('copy'); const originalText = btnCopyLink.textContent; btnCopyLink.textContent = 'Copiado!'; btnCopyLink.classList.add('bg-green-500'); setTimeout(() => { btnCopyLink.textContent = originalText; btnCopyLink.classList.remove('bg-green-500'); }, 2000); }); }
+    if (btnCopyLink) {        
+        btnCopyLink.addEventListener('click', () => {
+            if (shareUrlInput) shareUrlInput.select();
+            document.execCommand('copy');
+            const originalText = btnCopyLink.textContent;
+            btnCopyLink.textContent = 'Copiado!';
+            btnCopyLink.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+            btnCopyLink.classList.add('bg-green-500');
+            setTimeout(() => {
+                btnCopyLink.textContent = originalText;
+                btnCopyLink.classList.remove('bg-green-500');
+                btnCopyLink.classList.add('bg-blue-500', 'hover:bg-blue-600');
+            }, 2000);
+        });
+    }
     
+    // Lógica do painel "Minha Conta"
     if (btnUpdateEmail) {
         btnUpdateEmail.addEventListener('click', async () => {
             if (!accountEmailInput) return;
             const newEmail = accountEmailInput.value;
             if (!newEmail || !newEmail.includes('@')) return showToast("Por favor, insira um email válido.", 'error');
             const { error } = await supabaseClient.auth.updateUser({ email: newEmail });
-            if (error) { showToast(`Erro ao atualizar o email: ${error.message}`, 'error'); } 
-            else { showToast("Verifique o seu email antigo e o novo para confirmar a alteração.", 'success'); }
+            if (error) {
+                showToast(`Erro ao atualizar o email: ${error.message}`, 'error');
+            } else {
+                showToast("Verifique o seu email antigo e o novo para confirmar a alteração.", 'success');
+            }
         });
     }
 
@@ -526,11 +546,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (newPassword !== confirmPasswordInput.value) return showToast("As senhas não coincidem.", 'error');
             if (newPassword.length < 8) return showToast("A senha deve ter no mínimo 8 caracteres.", 'error');
             const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
-            if (error) { showToast(`Erro: ${error.message}`, 'error'); } 
-            else { showToast("Senha atualizada com sucesso!"); newPasswordInput.value = ''; confirmPasswordInput.value = ''; }
+            if (error) {
+                showToast(`Erro: ${error.message}`, 'error');
+            } else {
+                showToast("Senha atualizada com sucesso!");
+                newPasswordInput.value = '';
+                confirmPasswordInput.value = '';
+            }
         });
     }
 
+    // --- INICIALIZAÇÃO ---
     (async () => {
         const { data: { user } } = await supabaseClient.auth.getUser();
         if (user) {
