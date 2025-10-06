@@ -98,13 +98,14 @@
                 <div id="edit-site-panel" class="tab-panel">
                     <div class="space-y-8">
                         <div class="bg-white p-6 rounded-xl card-shadow">
-                             <div class="flex flex-wrap justify-between items-end gap-4">
-                                <div id="share-section" class="flex-grow hidden">
-                                    <label for="share-url-input" class="block text-sm font-medium text-gray-600 mb-1">Link de Compartilhamento do seu site</label>
-                                    <div class="flex">
-                                        <input readonly id="share-url-input" type="text" class="input-styled w-full rounded-r-none">
-                                        <button id="btn-copy-link" class="btn-primary rounded-l-none whitespace-nowrap">Copiar Link</button>
+                            <div class="flex flex-wrap justify-between items-end gap-4">
+                                <div id="share-section" class="flex-grow">
+                                    <label for="page-slug-input" class="block text-sm font-medium text-gray-600 mb-1">URL Personalizada do seu Site</label>
+                                    <div class="flex items-center">
+                                        <span class="text-gray-500 text-sm p-2 bg-gray-100 rounded-l-md border border-r-0 h-11 flex items-center">ilovecasamento.com.br/</span>
+                                        <input id="page-slug-input" type="text" class="input-styled w-full rounded-l-none" placeholder="ex: bianca-e-eduardo">
                                     </div>
+                                    <p class="text-xs text-gray-500 mt-1">Use apenas letras minúsculas, números e hífens (-). Este será o link público do seu site.</p>
                                 </div>
                             </div>
                         </div>
@@ -300,4 +301,3 @@
     <script type="module" src="/js/dashboard.js"></script>
 </body>
 </html>
-

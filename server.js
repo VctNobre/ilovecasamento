@@ -55,6 +55,7 @@ app.get("/login", (req, res) =>
 app.get("/dashboard", (req, res) =>
   res.sendFile(path.join(__dirname, "public", "dashboard.html"))
 );
+// Rota antiga para manter a compatibilidade, se necessário
 app.get("/casamento/:pageId", (req, res) =>
   res.sendFile(path.join(__dirname, "public", "casamento.html"))
 );
@@ -106,7 +107,6 @@ app.post('/get-mp-balance', async (req, res) => {
     }
 
     try {
-        // 1. Busca as credenciais do casal no Supabase
         const { data: pageData, error: dbError } = await supabase
             .from('wedding_pages')
             .select('mp_credentials')
@@ -120,7 +120,6 @@ app.post('/get-mp-balance', async (req, res) => {
         const coupleAccessToken = pageData.mp_credentials.access_token;
         const coupleUserId = pageData.mp_credentials.user_id;
 
-        // 2. Faz a chamada à API do Mercado Pago para buscar o saldo
         const response = await fetch(`https://api.mercadopago.com/users/${coupleUserId}/mercadopago_account/balance`, {
             headers: {
                 'Authorization': `Bearer ${coupleAccessToken}`
@@ -134,7 +133,6 @@ app.post('/get-mp-balance', async (req, res) => {
 
         const balanceData = await response.json();
         
-        // 3. Envia o saldo de volta para o frontend
         res.json({
             available_balance: balanceData.available_balance,
             unavailable_balance: balanceData.unavailable_balance
@@ -153,10 +151,9 @@ app.post('/create-payment-preference', async (req, res) => {
     }
 
     try {
-        // 1. Busca as credenciais E a taxa personalizada do casal
         const { data: pageData, error: pageError } = await supabase
             .from('wedding_pages')
-            .select('mp_credentials, custom_fee_percentage') // Pede a nova coluna
+            .select('mp_credentials, custom_fee_percentage')
             .eq('id', weddingPageId)
             .single();
 
@@ -169,10 +166,9 @@ app.post('/create-payment-preference', async (req, res) => {
         
         const coupleAccessToken = pageData.mp_credentials.access_token;
         
-        // 2. Decide qual taxa usar
         const feePercentage = (typeof pageData.custom_fee_percentage === 'number')
-            ? pageData.custom_fee_percentage // Usa a taxa personalizada se existir
-            : DEFAULT_PLATFORM_FEE;          // Caso contrário, usa a padrão
+            ? pageData.custom_fee_percentage
+            : DEFAULT_PLATFORM_FEE;
 
         const coupleClient = new mercadopago.MercadoPagoConfig({ accessToken: coupleAccessToken });
         const couplePreference = new mercadopago.Preference(coupleClient);
@@ -186,9 +182,11 @@ app.post('/create-payment-preference', async (req, res) => {
         }));
 
         const totalAmount = items.reduce((acc, item) => acc + item.unit_price, 0);
-        // 3. Calcula a comissão com base na taxa correta
         const feeAmount = parseFloat((totalAmount * feePercentage).toFixed(2));
         const siteUrl = process.env.SITE_URL || "https://ilovecasamento.com.br";
+
+        const { data: pageSlugData } = await supabase.from('wedding_pages').select('slug').eq('id', weddingPageId).single();
+        const successUrl = pageSlugData?.slug ? `${siteUrl}/${pageSlugData.slug}?status=success` : `${siteUrl}/casamento/${weddingPageId}?status=success`;
 
 
         const result = await couplePreference.create({
@@ -196,9 +194,9 @@ app.post('/create-payment-preference', async (req, res) => {
                 items: items,
                 marketplace_fee: feeAmount,
                 back_urls: {
-                    success: `${siteUrl}/casamento/${weddingPageId}?status=success`,
-                    failure: `${siteUrl}/casamento/${weddingPageId}?status=failure`,
-                    pending: `${siteUrl}/casamento/${weddingPageId}?status=pending`,
+                    success: successUrl,
+                    failure: successUrl.replace('success', 'failure'),
+                    pending: successUrl.replace('success', 'pending'),
                 },
                 auto_return: "approved",
             }     
@@ -220,9 +218,20 @@ app.post('/create-payment-preference', async (req, res) => {
     }
 });
 
+// --- Nova Rota para links personalizados ---
+// Esta rota deve vir DEPOIS das outras rotas específicas (/, /login, /dashboard)
+app.get("/:slug", (req, res, next) => {
+    // Evita que esta rota capture pedidos de ficheiros estáticos ou outras rotas
+    const reservedPaths = ['login', 'dashboard', 'mp-callback'];
+    if (req.params.slug.includes('.') || reservedPaths.includes(req.params.slug)) {
+        return next();
+    }
+    res.sendFile(path.join(__dirname, "public", "casamento.html"));
+});
+
+
 // --- Start server ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>
   console.log(`Servidor a correr na porta ${PORT}`)
 );
-
