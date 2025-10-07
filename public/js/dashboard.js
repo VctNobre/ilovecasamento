@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Seletores dos Painéis
     const viewSiteLink = document.getElementById('view-site-link');
+    const pageSlugInput = document.getElementById('page-slug-input');
     const rsvpToggle = document.getElementById('rsvp-toggle');
     const storyToggle = document.getElementById('story-toggle');
     const galleryToggle = document.getElementById('gallery-toggle');
@@ -77,8 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const giftsEditorList = document.getElementById('gifts-editor-list');
     const btnAddGift = document.getElementById('btn-add-gift');
     const shareSection = document.getElementById('share-section');
-    const shareUrlInput = document.getElementById('share-url-input');
-    const btnCopyLink = document.getElementById('btn-copy-link');
     const mainTitleInput = document.getElementById('main-title');
     const weddingDateInput = document.getElementById('wedding-date');
     const introTextInput = document.getElementById('intro-text');
@@ -257,6 +256,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return withoutAccents.replace(/[^a-zA-Z0-9.\-_]/g, '-').replace(/-+/g, '-');
     };
 
+    const sanitizeSlug = (slug) => {
+        const withoutAccents = slug.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return withoutAccents.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-');
+    }
+
     const uploadFile = async (file, path) => {
         const { data, error } = await supabaseClient.storage.from('wedding_photos').upload(path, file, { cacheControl: '3600', upsert: true });
         if (error) {
@@ -273,11 +277,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (error && error.code !== 'PGRST116') return showToast("Erro ao carregar dados.", 'error');
         if (data) {
             weddingPageData = data;
-            const pageUrl = `/casamento/${data.id}`;
-            const absoluteUrl = new URL(pageUrl, window.location.origin).href;
+            const pageUrl = data.slug ? `/${data.slug}` : `/casamento/${data.id}`;
             if (viewSiteLink) { viewSiteLink.href = pageUrl; viewSiteLink.classList.remove('hidden'); }
-            if (shareUrlInput) shareUrlInput.value = absoluteUrl;
-            if (shareSection) shareSection.classList.remove('hidden');
+            
+            if(pageSlugInput) pageSlugInput.value = data.slug || '';
+
             if (mainTitleInput) mainTitleInput.value = data.main_title || '';
             if (weddingDateInput) weddingDateInput.value = data.wedding_date || '';
             if (introTextInput) introTextInput.value = data.intro_text || '';
@@ -297,6 +301,8 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 storyImage1Container.classList.add('hidden');
                 storyImage1Upload.classList.remove('hidden');
+                storyImage1Upload.value = '';
+                storyImage1Preview.src = '';
             }
 
             if (data.story_image_2_url) {
@@ -306,6 +312,8 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 storyImage2Container.classList.add('hidden');
                 storyImage2Upload.classList.remove('hidden');
+                storyImage2Upload.value = '';
+                storyImage2Preview.src = '';
             }
 
             if (setRsvpState) setRsvpState(data.rsvp_enabled);
@@ -402,12 +410,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const indexToRemove = parseInt(deleteBtn.dataset.index, 10);
                 const newFiles = Array.from(galleryPhotosUpload.files).filter((_, i) => i !== indexToRemove);
                 
-                // Criar um novo DataTransfer para manipular a lista de arquivos
                 const dataTransfer = new DataTransfer();
                 newFiles.forEach(file => dataTransfer.items.add(file));
                 galleryPhotosUpload.files = dataTransfer.files;
                 
-                // Dispara o evento 'change' para re-renderizar as pré-visualizações
                 galleryPhotosUpload.dispatchEvent(new Event('change', { 'bubbles': true }));
             }
         });
@@ -434,7 +440,25 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!user) return showToast("Sessão expirada.", 'error');
             btnSaveAll.textContent = 'Salvando...';
             btnSaveAll.disabled = true;
+            
             try {
+                const newSlug = sanitizeSlug(pageSlugInput.value);
+                if (!newSlug) {
+                    throw new Error("O link personalizado não pode estar vazio.");
+                }
+
+                if (newSlug !== (weddingPageData?.slug || '')) {
+                    const { data: existingPage, error: slugError } = await supabaseClient
+                        .from('wedding_pages')
+                        .select('slug')
+                        .eq('slug', newSlug)
+                        .single();
+
+                    if (existingPage) {
+                        throw new Error("Este link já está em uso. Por favor, escolha outro.");
+                    }
+                }
+
                 let heroImageUrl = weddingPageData?.hero_image_url || null;
                 if (heroImageUploadInput && heroImageUploadInput.files[0]) {
                     const file = heroImageUploadInput.files[0];
@@ -477,6 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const selectedTheme = themeSelector ? themeSelector.querySelector('input[name="layout-theme"]:checked')?.value : 'padrao';
                 const pageDataToSave = {
                     user_id: user.id,
+                    slug: newSlug,
                     main_title: mainTitleInput ? mainTitleInput.value : null,
                     wedding_date: weddingDateInput ? weddingDateInput.value : null,
                     intro_text: introTextInput ? introTextInput.value : null,
@@ -529,22 +554,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (btnCopyLink) {        
-        btnCopyLink.addEventListener('click', () => {
-            if (shareUrlInput) shareUrlInput.select();
-            document.execCommand('copy');
-            const originalText = btnCopyLink.textContent;
-            btnCopyLink.textContent = 'Copiado!';
-            btnCopyLink.classList.remove('bg-blue-500', 'hover:bg-blue-600');
-            btnCopyLink.classList.add('bg-green-500');
-            setTimeout(() => {
-                btnCopyLink.textContent = originalText;
-                btnCopyLink.classList.remove('bg-green-500');
-                btnCopyLink.classList.add('bg-blue-500', 'hover:bg-blue-600');
-            }, 2000);
-        });
-    }
-    
     // Lógica do painel "Minha Conta"
     if (btnUpdateEmail) {
         btnUpdateEmail.addEventListener('click', async () => {

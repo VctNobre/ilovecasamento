@@ -153,7 +153,7 @@ app.post('/create-payment-preference', async (req, res) => {
     try {
         const { data: pageData, error: pageError } = await supabase
             .from('wedding_pages')
-            .select('mp_credentials, custom_fee_percentage')
+            .select('slug, mp_credentials, custom_fee_percentage')
             .eq('id', weddingPageId)
             .single();
 
@@ -183,11 +183,10 @@ app.post('/create-payment-preference', async (req, res) => {
 
         const totalAmount = items.reduce((acc, item) => acc + item.unit_price, 0);
         const feeAmount = parseFloat((totalAmount * feePercentage).toFixed(2));
-        const siteUrl = process.env.SITE_URL || "https://ilovecasamento.com.br";
+        const siteUrl = process.env.SITE_URL || `http://localhost:${PORT}`;
 
-        const { data: pageSlugData } = await supabase.from('wedding_pages').select('slug').eq('id', weddingPageId).single();
-        const successUrl = pageSlugData?.slug ? `${siteUrl}/${pageSlugData.slug}?status=success` : `${siteUrl}/casamento/${weddingPageId}?status=success`;
-
+        const basePath = pageData.slug ? `/${pageData.slug}` : `/casamento/${weddingPageId}`;
+        const successUrl = `${siteUrl}${basePath}?status=success`;
 
         const result = await couplePreference.create({
             body: {
@@ -219,11 +218,11 @@ app.post('/create-payment-preference', async (req, res) => {
 });
 
 // --- Nova Rota para links personalizados ---
-// Esta rota deve vir DEPOIS das outras rotas específicas (/, /login, /dashboard)
 app.get("/:slug", (req, res, next) => {
-    // Evita que esta rota capture pedidos de ficheiros estáticos ou outras rotas
-    const reservedPaths = ['login', 'dashboard', 'mp-callback'];
-    if (req.params.slug.includes('.') || reservedPaths.includes(req.params.slug)) {
+    const reservedPaths = ['login', 'dashboard', 'mp-callback', 'casamento'];
+    const isFileRequest = req.params.slug.includes('.');
+    
+    if (isFileRequest || reservedPaths.includes(req.params.slug)) {
         return next();
     }
     res.sendFile(path.join(__dirname, "public", "casamento.html"));
@@ -235,3 +234,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>
   console.log(`Servidor a correr na porta ${PORT}`)
 );
+

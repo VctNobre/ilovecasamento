@@ -23,10 +23,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         const parts = path.split('/');
         const identifier = parts[parts.length - 1];
         
+     
         if (parts[1] === 'casamento' && !isNaN(identifier)) {
             return { type: 'id', value: identifier };
         }
-        return { type: 'slug', value: identifier };
+        
+        if (identifier) {
+             return { type: 'slug', value: identifier };
+        }
+        return { type: null, value: null };
     };
 
     const identifier = getIdentifierFromUrl();
@@ -77,7 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error("Erro ao carregar a página:", err);
         if(pageLoader) pageLoader.remove();
         if(pageWrapper) {
-             pageWrapper.innerHTML = `<h1 class="text-center p-12 text-2xl font-title">Erro ao carregar a página.</h1>`;
+             pageWrapper.innerHTML = `<h1 class="text-center p-12 text-2xl font-title">Página de Casamento não encontrada.</h1>`;
              pageWrapper.style.opacity = '1';
         }
     }
@@ -239,3 +244,4 @@ function attachEventListeners(data, currentPageId) {
         });
     }
 }
+
