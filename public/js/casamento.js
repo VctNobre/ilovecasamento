@@ -23,11 +23,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const parts = path.split('/');
         const identifier = parts[parts.length - 1];
         
-     
+
         if (parts[1] === 'casamento' && !isNaN(identifier)) {
             return { type: 'id', value: identifier };
         }
-        
+
         if (identifier) {
              return { type: 'slug', value: identifier };
         }
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         populateDynamicContent(data);
 
-        attachEventListeners(data, data.id);
+        attachEventListeners(data);
 
         if (pageLoader) {
             pageLoader.style.opacity = '0';
@@ -96,7 +96,7 @@ function populateDynamicContent(data) {
     document.title = `${data.main_title || 'Nosso Casamento'} | Ilovecasamento`;
 }
 
-function attachEventListeners(data, currentPageId) {
+function attachEventListeners(data) {
     const giftListContainer = document.getElementById('gift-list-container');
     const cartIcon = document.getElementById('cart-icon');
     const cartCount = document.getElementById('cart-count');
@@ -141,7 +141,7 @@ function attachEventListeners(data, currentPageId) {
     
     if (giftListContainer) {
         giftListContainer.addEventListener('click', (e) => {
-            const button = e.target.closest('.add-to-cart-btn');
+            const button = e.target.closest('.add-to-cart-btn, .btn-contribute');
             if (button) {
                 const giftId = Number(button.dataset.id);
                 const giftToAdd = originalGifts.find(g => g.id === giftId);
@@ -169,7 +169,7 @@ function attachEventListeners(data, currentPageId) {
     if (btnAddMore) btnAddMore.addEventListener('click', closeCart);
     if (btnCheckout) {
          btnCheckout.addEventListener('click', async () => {
-            if (cart.length === 0 || !currentPageId) return;
+            if (cart.length === 0) return;
 
             btnCheckout.textContent = 'Processando...';
             btnCheckout.disabled = true;
@@ -180,12 +180,13 @@ function attachEventListeners(data, currentPageId) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         cartItems: cart,
-                        weddingPageId: currentPageId,
+                        weddingPageId: data.id, // CORREÇÃO: Usar data.id que está no escopo
                     }),
                 });
 
                 if (!response.ok) {
-                    throw new Error('Falha ao criar a preferência de pagamento.');
+                    const errorDetails = await response.json();
+                    throw new Error(`Falha ao criar a preferência de pagamento: ${errorDetails.error}`);
                 }
 
                 const preference = await response.json();
@@ -223,7 +224,7 @@ function attachEventListeners(data, currentPageId) {
             btnSubmitRsvp.textContent = "Enviando...";
 
             const rsvpData = {
-                wedding_page_id: currentPageId,
+                wedding_page_id: data.id,
                 guest_name: rsvpName.value,
                 is_attending: attendingRadio.value === 'yes',
                 plus_ones: parseInt(rsvpGuests.value) || 0,
