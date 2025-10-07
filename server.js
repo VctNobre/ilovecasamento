@@ -183,10 +183,11 @@ app.post('/create-payment-preference', async (req, res) => {
 
         const totalAmount = items.reduce((acc, item) => acc + item.unit_price, 0);
         const feeAmount = parseFloat((totalAmount * feePercentage).toFixed(2));
-        const siteUrl = process.env.SITE_URL || `http://localhost:${PORT}`;
+        const siteUrl = process.env.SITE_URL || "https://ilovecasamento.com.br";
 
-        const basePath = pageData.slug ? `/${pageData.slug}` : `/casamento/${weddingPageId}`;
-        const successUrl = `${siteUrl}${basePath}?status=success`;
+        const successPath = pageData.slug ? `/${pageData.slug}` : `/casamento/${weddingPageId}`;
+        const successUrl = `${siteUrl}${successPath}?status=success`;
+
 
         const result = await couplePreference.create({
             body: {
@@ -220,9 +221,9 @@ app.post('/create-payment-preference', async (req, res) => {
 // --- Nova Rota para links personalizados ---
 app.get("/:slug", (req, res, next) => {
     const reservedPaths = ['login', 'dashboard', 'mp-callback', 'casamento'];
-    const isFileRequest = req.params.slug.includes('.');
-    
-    if (isFileRequest || reservedPaths.includes(req.params.slug)) {
+    const slug = req.params.slug;
+
+    if (slug.includes('.') || reservedPaths.includes(slug) || slug === 'favicon.ico') {
         return next();
     }
     res.sendFile(path.join(__dirname, "public", "casamento.html"));
