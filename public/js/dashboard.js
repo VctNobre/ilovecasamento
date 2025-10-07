@@ -1,4 +1,3 @@
-// dashboard.js
 import { supabaseClient } from './app.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -65,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnLogout = document.getElementById('btn-logout');
     const toastContainer = document.getElementById('toast-container');
     let weddingPageData = null;
+    let currentGalleryFiles = []; // Armazena URLs existentes e novos ficheiros
     
     // Seletores dos Painéis
     const viewSiteLink = document.getElementById('view-site-link');
@@ -315,7 +315,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 storyImage2Upload.value = '';
                 storyImage2Preview.src = '';
             }
-
+            currentGalleryFiles = (data.gallery_photos && Array.isArray(data.gallery_photos)) ? [...data.gallery_photos] : [];
+            renderGalleryPreviews();
+            galleryPhotosUpload.value = '';
             if (setRsvpState) setRsvpState(data.rsvp_enabled);
             if (setStoryState) setStoryState(data.story_section_enabled);
             if (setGalleryState) setGalleryState(data.gallery_section_enabled);
@@ -353,6 +355,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+        const renderGalleryPreviews = () => {
+        galleryPreviewGrid.innerHTML = '';
+        currentGalleryFiles.forEach((fileOrUrl, index) => {
+            const previewWrapper = document.createElement('div');
+            previewWrapper.className = 'relative';
+            const src = (typeof fileOrUrl === 'string') ? fileOrUrl : URL.createObjectURL(fileOrUrl);
+            previewWrapper.innerHTML = `
+                <img src="${src}" class="w-full h-24 object-cover rounded-md">
+                <button type="button" data-index="${index}" class="btn-delete-gallery-item absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 leading-none hover:bg-red-700">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            `;
+            galleryPreviewGrid.appendChild(previewWrapper);
+        });
+    };
+    
+
     // --- EVENT LISTENERS ---
     if (btnLogout) btnLogout.addEventListener('click', async () => { clearTimeout(inactivityTimer); await supabaseClient.auth.signOut(); });
     if (btnAddGift) btnAddGift.addEventListener('click', () => renderGiftEditor({}));
@@ -386,35 +405,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (galleryPhotosUpload) {
         galleryPhotosUpload.addEventListener('change', (event) => {
-            if (galleryPreviewGrid) {
-                galleryPreviewGrid.innerHTML = '';
-                Array.from(event.target.files).forEach((file, index) => {
-                    const previewWrapper = document.createElement('div');
-                    previewWrapper.className = 'relative';
-                    previewWrapper.innerHTML = `
-                        <img src="${URL.createObjectURL(file)}" class="w-full h-24 object-cover rounded-md">
-                        <button type="button" data-index="${index}" class="btn-delete-gallery-item absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 leading-none hover:bg-red-700">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </button>
-                    `;
-                    galleryPreviewGrid.appendChild(previewWrapper);
-                });
-            }
+            const newFiles = Array.from(event.target.files);
+            currentGalleryFiles.push(...newFiles);
+            renderGalleryPreviews();
+            event.target.value = ''; // Limpa o input
         });
     }
 
-    if (galleryPreviewGrid) {
+   if (galleryPreviewGrid) {
         galleryPreviewGrid.addEventListener('click', (e) => {
             const deleteBtn = e.target.closest('.btn-delete-gallery-item');
-            if (deleteBtn && galleryPhotosUpload.files.length > 0) {
+            if (deleteBtn) {
                 const indexToRemove = parseInt(deleteBtn.dataset.index, 10);
-                const newFiles = Array.from(galleryPhotosUpload.files).filter((_, i) => i !== indexToRemove);
-                
-                const dataTransfer = new DataTransfer();
-                newFiles.forEach(file => dataTransfer.items.add(file));
-                galleryPhotosUpload.files = dataTransfer.files;
-                
-                galleryPhotosUpload.dispatchEvent(new Event('change', { 'bubbles': true }));
+                currentGalleryFiles.splice(indexToRemove, 1);
+                renderGalleryPreviews();
             }
         });
     }
@@ -489,12 +493,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     storyImg2Url = weddingPageData?.story_image_2_url || null;
                 }
 
-                const galleryUrls = [];
-                if (galleryPhotosUpload && galleryPhotosUpload.files.length > 0) {
-                    for (const file of Array.from(galleryPhotosUpload.files)) {
-                        const filePath = `${user.id}/gallery-${Date.now()}-${sanitizeFilename(file.name)}`;
-                        const url = await uploadFile(file, filePath);
-                        if (url) galleryUrls.push(url);
+              
+                const galleryUrlsToSave = [];
+                for (const fileOrUrl of currentGalleryFiles) {
+                    if (typeof fileOrUrl === 'string') {
+                        galleryUrlsToSave.push(fileOrUrl);
+                    } else {
+                        const filePath = `${user.id}/gallery-${Date.now()}-${sanitizeFilename(fileOrUrl.name)}`;
+                        const url = await uploadFile(fileOrUrl, filePath);
+                        if (url) galleryUrlsToSave.push(url);
                     }
                 }
 
