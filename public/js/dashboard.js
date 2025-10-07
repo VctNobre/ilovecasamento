@@ -525,7 +525,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     story_proposal: storyProposalInput ? storyProposalInput.value : null,
                     story_image_1_url: storyImg1Url,
                     story_image_2_url: storyImg2Url,
-                    gallery_photos: galleryUrls.length > 0 ? galleryUrls : null
+                    gallery_photos: galleryUrlsToSave.length > 0 ? galleryUrlsToSave : null
                 };
                 const { data: pageResult, error: pageError } = await supabaseClient.from('wedding_pages').upsert(pageDataToSave, { onConflict: 'user_id' }).select().single();
                 if (pageError) throw pageError;
