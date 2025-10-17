@@ -55,9 +55,10 @@ app.get("/login", (req, res) =>
 app.get("/dashboard", (req, res) =>
   res.sendFile(path.join(__dirname, "public", "dashboard.html"))
 );
-// Rota antiga para manter a compatibilidade, se necessário
-app.get("/casamento/:pageId", (req, res) =>
-  res.sendFile(path.join(__dirname, "public", "casamento.html"))
+
+// Rota antiga para manter a compatibilidade
+app.get("/casamento/:eventId", (req, res) =>
+  res.sendFile(path.join(__dirname, "public", "evento.html"))
 );
 
 // --- ROTAS DE API ---
@@ -88,7 +89,7 @@ app.get("/mp-callback", async (req, res) => {
     });
 
     const { error } = await supabase
-      .from("wedding_pages")
+      .from("events")
       .update({ mp_credentials: credentials })
       .eq("user_id", userId);
 
@@ -100,74 +101,30 @@ app.get("/mp-callback", async (req, res) => {
   }
 });
 
-app.post('/get-mp-balance', async (req, res) => {
-    const { userId } = req.body;
-    if (!userId) {
-        return res.status(400).json({ error: 'User ID não fornecido.' });
-    }
-
-    try {
-        const { data: pageData, error: dbError } = await supabase
-            .from('wedding_pages')
-            .select('mp_credentials')
-            .eq('user_id', userId)
-            .single();
-
-        if (dbError || !pageData || !pageData.mp_credentials?.access_token) {
-            throw new Error('Credenciais do Mercado Pago não encontradas para este utilizador.');
-        }
-
-        const coupleAccessToken = pageData.mp_credentials.access_token;
-        const coupleUserId = pageData.mp_credentials.user_id;
-
-        const response = await fetch(`https://api.mercadopago.com/users/${coupleUserId}/mercadopago_account/balance`, {
-            headers: {
-                'Authorization': `Bearer ${coupleAccessToken}`
-            }
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(`Erro na API do Mercado Pago: ${errorData.message || response.statusText}`);
-        }
-
-        const balanceData = await response.json();
-        
-        res.json({
-            available_balance: balanceData.available_balance,
-            unavailable_balance: balanceData.unavailable_balance
-        });
-
-    } catch (error) {
-        console.error("Erro ao buscar saldo do MP:", error.message);
-        res.status(500).json({ error: 'Não foi possível buscar o saldo.' });
-    }
-});
-
 app.post('/create-payment-preference', async (req, res) => {
-    const { cartItems, weddingPageId } = req.body;
-    if (!cartItems || cartItems.length === 0 || !weddingPageId) {
+    const { cartItems, eventId } = req.body;
+    if (!cartItems || cartItems.length === 0 || !eventId) {
         return res.status(400).json({ error: 'Dados inválidos.' });
     }
 
     try {
-        const { data: pageData, error: pageError } = await supabase
-            .from('wedding_pages')
+        const { data: eventData, error: pageError } = await supabase
+            .from('events')
             .select('slug, mp_credentials, custom_fee_percentage')
-            .eq('id', weddingPageId)
+            .eq('id', eventId)
             .single();
 
-        if (pageError || !pageData) {
-            return res.status(500).json({ error: 'Página de casamento não encontrada.' });
+        if (pageError || !eventData) {
+            return res.status(500).json({ error: 'Página do evento não encontrada.' });
         }
-        if (!pageData.mp_credentials?.access_token) {
+        if (!eventData.mp_credentials?.access_token) {
             return res.status(500).json({ error: 'O criador da página não está configurado para receber pagamentos.' });
         }
         
-        const coupleAccessToken = pageData.mp_credentials.access_token;
+        const coupleAccessToken = eventData.mp_credentials.access_token;
         
-        const feePercentage = (typeof pageData.custom_fee_percentage === 'number')
-            ? pageData.custom_fee_percentage
+        const feePercentage = (typeof eventData.custom_fee_percentage === 'number')
+            ? eventData.custom_fee_percentage
             : DEFAULT_PLATFORM_FEE;
 
         const coupleClient = new mercadopago.MercadoPagoConfig({ accessToken: coupleAccessToken });
@@ -185,7 +142,7 @@ app.post('/create-payment-preference', async (req, res) => {
         const feeAmount = parseFloat((totalAmount * feePercentage).toFixed(2));
         const siteUrl = process.env.SITE_URL || "https://ilovecasamento.com.br";
 
-        const successPath = pageData.slug ? `/${pageData.slug}` : `/casamento/${weddingPageId}`;
+        const successPath = eventData.slug ? `/${eventData.slug}` : `/evento/${eventId}`;
         const successUrl = `${siteUrl}${successPath}?status=success`;
 
 
@@ -220,13 +177,13 @@ app.post('/create-payment-preference', async (req, res) => {
 
 // --- Nova Rota para links personalizados ---
 app.get("/:slug", (req, res, next) => {
-    const reservedPaths = ['login', 'dashboard', 'mp-callback', 'casamento'];
+    const reservedPaths = ['login', 'dashboard', 'mp-callback', 'casamento', 'evento'];
     const slug = req.params.slug;
 
     if (slug.includes('.') || reservedPaths.includes(slug) || slug === 'favicon.ico') {
         return next();
     }
-    res.sendFile(path.join(__dirname, "public", "casamento.html"));
+    res.sendFile(path.join(__dirname, "public", "evento.html"));
 });
 
 

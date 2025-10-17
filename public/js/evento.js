@@ -1,4 +1,4 @@
-// casamento.js
+// evento.js
 import { supabaseClient } from './app.js';
 
 // Mapeia os nomes dos temas aos seus ficheiros de módulo
@@ -23,11 +23,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const parts = path.split('/');
         const identifier = parts[parts.length - 1];
         
-
-        if (parts[1] === 'casamento' && !isNaN(identifier)) {
+        // Rota antiga: /casamento/123
+        if ((parts[1] === 'casamento' || parts[1] === 'evento') && !isNaN(identifier)) {
             return { type: 'id', value: identifier };
         }
-
+        // Nova rota: /slug-do-evento
         if (identifier) {
              return { type: 'slug', value: identifier };
         }
@@ -47,14 +47,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         const query = supabaseClient
-            .from('wedding_pages')
+            .from('events')
             .select('*, gifts(*)')
             .eq(identifier.type, identifier.value)
             .single();
 
         const { data, error } = await query;
 
-        if (error || !data) throw new Error("Dados do casamento não encontrados.");
+        if (error || !data) throw new Error("Dados do evento não encontrados.");
 
         const themeName = data.layout_theme || 'padrao';
         const layout = layouts[themeName];
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error("Erro ao carregar a página:", err);
         if(pageLoader) pageLoader.remove();
         if(pageWrapper) {
-             pageWrapper.innerHTML = `<h1 class="text-center p-12 text-2xl font-title">Página de Casamento não encontrada.</h1>`;
+             pageWrapper.innerHTML = `<h1 class="text-center p-12 text-2xl font-title">Página do Evento não encontrada.</h1>`;
              pageWrapper.style.opacity = '1';
         }
     }
@@ -92,8 +92,8 @@ function populateDynamicContent(data) {
     const root = document.documentElement;
     root.style.setProperty('--primary-color', data.primary_color || '#D9A8A4');
     root.style.setProperty('--title-color', data.title_color || '#333333');
-    root.style.setProperty('--hero-title-color', data.hero_title_color || '#FFFFFF');
-    document.title = `${data.main_title || 'Nosso Casamento'} | Ilovecasamento`;
+    root.style.setProperty('--main-title-color', data.main_title_color || '#FFFFFF');
+    document.title = `${data.main_title || 'Nosso Evento'} | Welovepresente`;
 }
 
 function attachEventListeners(data) {
@@ -180,7 +180,7 @@ function attachEventListeners(data) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         cartItems: cart,
-                        weddingPageId: data.id, // CORREÇÃO: Usar data.id que está no escopo
+                        eventId: data.id,
                     }),
                 });
 
@@ -224,7 +224,7 @@ function attachEventListeners(data) {
             btnSubmitRsvp.textContent = "Enviando...";
 
             const rsvpData = {
-                wedding_page_id: data.id,
+                event_id: data.id,
                 guest_name: rsvpName.value,
                 is_attending: attendingRadio.value === 'yes',
                 plus_ones: parseInt(rsvpGuests.value) || 0,
