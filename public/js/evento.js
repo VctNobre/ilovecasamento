@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const parts = path.split('/');
         const identifier = parts[parts.length - 1];
         
-        // Rota antiga: /casamento/123
+        // Rota antiga: /casamento/123 ou /evento/123
         if ((parts[1] === 'casamento' || parts[1] === 'evento') && !isNaN(identifier)) {
             return { type: 'id', value: identifier };
         }
