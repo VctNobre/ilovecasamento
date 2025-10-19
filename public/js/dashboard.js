@@ -1,3 +1,4 @@
+// dashboard.js
 import { supabaseClient } from './app.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -63,10 +64,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- SELETORES E VARIÁVEIS GLOBAIS ---
     const btnLogout = document.getElementById('btn-logout');
     const toastContainer = document.getElementById('toast-container');
-    let weddingPageData = null;
-    let currentGalleryFiles = []; // Armazena URLs existentes e novos ficheiros
+    let eventData = null;
+    let currentGalleryFiles = [];
     
-    // Seletores dos Painéis
     const viewSiteLink = document.getElementById('view-site-link');
     const pageSlugInput = document.getElementById('page-slug-input');
     const rsvpToggle = document.getElementById('rsvp-toggle');
@@ -77,24 +77,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSaveAll = document.getElementById('btn-save-all');
     const giftsEditorList = document.getElementById('gifts-editor-list');
     const btnAddGift = document.getElementById('btn-add-gift');
-    const shareSection = document.getElementById('share-section');
     const mainTitleInput = document.getElementById('main-title');
-    const weddingDateInput = document.getElementById('wedding-date');
+    const eventDateInput = document.getElementById('event-date');
     const introTextInput = document.getElementById('intro-text');
-    const coupleSignatureInput = document.getElementById('couple-signature');
+    const signatureInput = document.getElementById('signature');
     const heroImageUploadInput = document.getElementById('hero-image-upload');
     const heroImagePreview = document.getElementById('hero-image-preview');
     const primaryColorInput = document.getElementById('primary-color');
     const titleColorInput = document.getElementById('title-color');
-    const heroTitleColorInput = document.getElementById('hero-title-color');
+    const mainTitleColorInput = document.getElementById('main-title-color');
     const accountEmailInput = document.getElementById('account-email');
     const newPasswordInput = document.getElementById('new-password');
     const confirmPasswordInput = document.getElementById('confirm-password');
     const btnUpdatePassword = document.getElementById('btn-update-password');
     const btnUpdateEmail = document.getElementById('btn-update-email');
     const themeSelector = document.getElementById('theme-selector');
-    const storyHowWeMetInput = document.getElementById('story-how-we-met');
-    const storyProposalInput = document.getElementById('story-proposal');
+    const storyTitle1Input = document.getElementById('story-title-1');
+    const storyContent1Input = document.getElementById('story-how-we-met');
+    const storyTitle2Input = document.getElementById('story-title-2');
+    const storyContent2Input = document.getElementById('story-proposal');
     const storyImage1Upload = document.getElementById('story-image-1-upload');
     const storyImage1Preview = document.getElementById('story-image-1-preview');
     const storyImage1Container = document.getElementById('story-image-1-container');
@@ -124,12 +125,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const guestsPanel = {
         rsvpListContainer: document.getElementById('rsvp-list-container'),
         async loadRsvpData() {
-            if (!this.rsvpListContainer || !weddingPageData) {
+            if (!this.rsvpListContainer || !eventData) {
                 if (this.rsvpListContainer) this.rsvpListContainer.innerHTML = '<p>Salve o seu site primeiro para ver a lista de convidados.</p>';
                 return;
             }
             this.rsvpListContainer.innerHTML = '<p>A carregar respostas...</p>';
-            const { data: rsvps, error } = await supabaseClient.from('rsvps').select('*').eq('wedding_page_id', weddingPageData.id);
+            const { data: rsvps, error } = await supabaseClient.from('rsvps').select('*').eq('event_id', eventData.id);
             if (error) {
                 this.rsvpListContainer.innerHTML = '<p class="text-red-500">Erro ao carregar as respostas.</p>';
                 return;
@@ -156,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateStatus() {
             if (!this.container) return;
             this.container.innerHTML = `<p class="text-gray-500">A verificar estado da conexão...</p>`;
-            if (weddingPageData && weddingPageData.mp_credentials?.access_token) {
+            if (eventData && eventData.mp_credentials?.access_token) {
                 this.renderConnected();
             } else {
                 this.renderNotConnected();
@@ -215,16 +216,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- LÓGICA DOS BOTÕES DE ATIVAÇÃO (TOGGLES) ---
     const setupSectionToggle = (toggleElement, wrapperElement) => {
         if (!toggleElement) return null;
-
         const setToggleState = (isEnabled) => {
             if (typeof isEnabled !== 'boolean') return;
             const slider = toggleElement.querySelector('.toggle-knob');
             toggleElement.setAttribute('aria-checked', String(isEnabled));
-            
-            if (wrapperElement) {
-                wrapperElement.classList.toggle('hidden', !isEnabled);
-            }
-
+            if (wrapperElement) wrapperElement.classList.toggle('hidden', !isEnabled);
             if (isEnabled) {
                 toggleElement.classList.remove('bg-gray-200');
                 toggleElement.classList.add('bg-green-500');
@@ -235,32 +231,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (slider) slider.classList.remove('translate-x-6');
             }
         };
-
         toggleElement.addEventListener('click', () => {
             const isCurrentlyEnabled = toggleElement.getAttribute('aria-checked') === 'true';
             setToggleState(!isCurrentlyEnabled);
         });
-        
         return setToggleState;
     };
 
-    // Prepara os botões e guarda as funções para definir o estado
     const setRsvpState = setupSectionToggle(rsvpToggle, null);
     const setStoryState = setupSectionToggle(storyToggle, storyEditorWrapper);
     const setGalleryState = setupSectionToggle(galleryToggle, galleryEditorWrapper);
 
-
     // --- FUNÇÕES DE UPLOAD E DADOS ---
-    const sanitizeFilename = (filename) => {
-        const withoutAccents = filename.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        return withoutAccents.replace(/[^a-zA-Z0-9.\-_]/g, '-').replace(/-+/g, '-');
-    };
-
-    const sanitizeSlug = (slug) => {
-        const withoutAccents = slug.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        return withoutAccents.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-');
-    }
-
+    const sanitizeFilename = (filename) => filename.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9.\-_]/g, '-').replace(/-+/g, '-');
+    const sanitizeSlug = (slug) => slug.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-');
     const uploadFile = async (file, path) => {
         const { data, error } = await supabaseClient.storage.from('wedding_photos').upload(path, file, { cacheControl: '3600', upsert: true });
         if (error) {
@@ -272,25 +256,27 @@ document.addEventListener('DOMContentLoaded', () => {
         return publicUrl;
     };
 
-    const loadWeddingPageData = async (userId) => {
-        const { data, error } = await supabaseClient.from('wedding_pages').select('*, gifts(*)').eq('user_id', userId).single();
+    const loadEventData = async (userId) => {
+        const { data, error } = await supabaseClient.from('events').select('*, gifts(*)').eq('user_id', userId).single();
         if (error && error.code !== 'PGRST116') return showToast("Erro ao carregar dados.", 'error');
         if (data) {
-            weddingPageData = data;
-            const pageUrl = data.slug ? `/${data.slug}` : `/casamento/${data.id}`;
+            eventData = data;
+            const pageUrl = data.slug ? `/${data.slug}` : `/evento/${data.id}`;
             if (viewSiteLink) { viewSiteLink.href = pageUrl; viewSiteLink.classList.remove('hidden'); }
             
             if(pageSlugInput) pageSlugInput.value = data.slug || '';
 
             if (mainTitleInput) mainTitleInput.value = data.main_title || '';
-            if (weddingDateInput) weddingDateInput.value = data.wedding_date || '';
+            if (eventDateInput) eventDateInput.value = data.event_date || '';
             if (introTextInput) introTextInput.value = data.intro_text || '';
-            if (coupleSignatureInput) coupleSignatureInput.value = data.couple_signature || '';
-            if (storyHowWeMetInput) storyHowWeMetInput.value = data.story_how_we_met || '';
-            if (storyProposalInput) storyProposalInput.value = data.story_proposal || '';
+            if (signatureInput) signatureInput.value = data.signature || '';
+            if (storyTitle1Input) storyTitle1Input.value = data.story_title_1 || '';
+            if (storyContent1Input) storyContent1Input.value = data.story_how_we_met || '';
+            if (storyTitle2Input) storyTitle2Input.value = data.story_title_2 || '';
+            if (storyContent2Input) storyContent2Input.value = data.story_proposal || '';
             if (primaryColorInput) primaryColorInput.value = data.primary_color || '#D9A8A4';
             if (titleColorInput) titleColorInput.value = data.title_color || '#333333';
-            if (heroTitleColorInput) heroTitleColorInput.value = data.hero_title_color || '#FFFFFF';
+            if (mainTitleColorInput) mainTitleColorInput.value = data.main_title_color || '#FFFFFF';
             if (heroImagePreview && data.hero_image_url) { heroImagePreview.src = data.hero_image_url; heroImagePreview.classList.remove('hidden'); }
             if (giftsEditorList) { giftsEditorList.innerHTML = ''; if (data.gifts) data.gifts.sort((a, b) => a.id - b.id).forEach(renderGiftEditor); }
             
@@ -306,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (data.story_image_2_url) {
-                storyImage2Preview.src = data.story_image_2_url;
+                 storyImage2Preview.src = data.story_image_2_url;
                 storyImage2Container.classList.remove('hidden');
                 storyImage2Upload.classList.add('hidden');
             } else {
@@ -315,9 +301,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 storyImage2Upload.value = '';
                 storyImage2Preview.src = '';
             }
+            
             currentGalleryFiles = (data.gallery_photos && Array.isArray(data.gallery_photos)) ? [...data.gallery_photos] : [];
             renderGalleryPreviews();
             galleryPhotosUpload.value = '';
+
             if (setRsvpState) setRsvpState(data.rsvp_enabled);
             if (setStoryState) setStoryState(data.story_section_enabled);
             if (setGalleryState) setGalleryState(data.gallery_section_enabled);
@@ -335,9 +323,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
             }
-        } else {
-            if (shareSection) shareSection.classList.add('hidden');
-            if (viewSiteLink) viewSiteLink.classList.add('hidden');
         }
     };
     
@@ -354,8 +339,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (file) editorDiv.querySelector('.image-preview').src = URL.createObjectURL(file);
         });
     };
-
-        const renderGalleryPreviews = () => {
+    
+    const renderGalleryPreviews = () => {
         galleryPreviewGrid.innerHTML = '';
         currentGalleryFiles.forEach((fileOrUrl, index) => {
             const previewWrapper = document.createElement('div');
@@ -370,7 +355,6 @@ document.addEventListener('DOMContentLoaded', () => {
             galleryPreviewGrid.appendChild(previewWrapper);
         });
     };
-    
 
     // --- EVENT LISTENERS ---
     if (btnLogout) btnLogout.addEventListener('click', async () => { clearTimeout(inactivityTimer); await supabaseClient.auth.signOut(); });
@@ -412,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-   if (galleryPreviewGrid) {
+    if (galleryPreviewGrid) {
         galleryPreviewGrid.addEventListener('click', (e) => {
             const deleteBtn = e.target.closest('.btn-delete-gallery-item');
             if (deleteBtn) {
@@ -422,7 +406,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
 
      if (themeSelector) {
         themeSelector.addEventListener('change', (e) => {
@@ -451,9 +434,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error("O link personalizado não pode estar vazio.");
                 }
 
-                if (newSlug !== (weddingPageData?.slug || '')) {
-                    const { data: existingPage, error: slugError } = await supabaseClient
-                        .from('wedding_pages')
+                if (newSlug !== (eventData?.slug || '')) {
+                    const { data: existingPage } = await supabaseClient
+                        .from('events')
                         .select('slug')
                         .eq('slug', newSlug)
                         .single();
@@ -463,11 +446,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                let heroImageUrl = weddingPageData?.hero_image_url || null;
+                let heroImageUrl = eventData?.hero_image_url || null;
                 if (heroImageUploadInput && heroImageUploadInput.files[0]) {
                     const file = heroImageUploadInput.files[0];
-                    const sanitizedFileName = sanitizeFilename(file.name);
-                    const filePath = `${user.id}/hero-${Date.now()}-${sanitizedFileName}`;
+                    const filePath = `${user.id}/hero-${Date.now()}-${sanitizeFilename(file.name)}`;
                     heroImageUrl = await uploadFile(file, filePath);
                 }
 
@@ -479,7 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (storyImage1Container && storyImage1Container.classList.contains('hidden')) {
                     storyImg1Url = null;
                 } else {
-                    storyImg1Url = weddingPageData?.story_image_1_url || null;
+                    storyImg1Url = eventData?.story_image_1_url || null;
                 }
 
                 let storyImg2Url;
@@ -490,10 +472,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (storyImage2Container && storyImage2Container.classList.contains('hidden')) {
                     storyImg2Url = null;
                 } else {
-                    storyImg2Url = weddingPageData?.story_image_2_url || null;
+                    storyImg2Url = eventData?.story_image_2_url || null;
                 }
 
-              
                 const galleryUrlsToSave = [];
                 for (const fileOrUrl of currentGalleryFiles) {
                     if (typeof fileOrUrl === 'string') {
@@ -504,31 +485,34 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (url) galleryUrlsToSave.push(url);
                     }
                 }
-
+                
                 const selectedTheme = themeSelector ? themeSelector.querySelector('input[name="layout-theme"]:checked')?.value : 'padrao';
                 const pageDataToSave = {
                     user_id: user.id,
                     slug: newSlug,
                     main_title: mainTitleInput ? mainTitleInput.value : null,
-                    wedding_date: weddingDateInput ? weddingDateInput.value : null,
+                    event_date: eventDateInput ? eventDateInput.value : null,
                     intro_text: introTextInput ? introTextInput.value : null,
-                    couple_signature: coupleSignatureInput ? coupleSignatureInput.value : null,
+                    signature: signatureInput ? signatureInput.value : null,
                     primary_color: primaryColorInput ? primaryColorInput.value : '#D9A8A4',
                     title_color: titleColorInput ? titleColorInput.value : '#333333',
-                    hero_title_color: heroTitleColorInput ? heroTitleColorInput.value : '#FFFFFF',
+                    main_title_color: mainTitleColorInput ? mainTitleColorInput.value : '#FFFFFF',
                     hero_image_url: heroImageUrl,
                     rsvp_enabled: rsvpToggle ? rsvpToggle.getAttribute('aria-checked') === 'true' : false,
                     layout_theme: selectedTheme,
                     story_section_enabled: storyToggle ? storyToggle.getAttribute('aria-checked') === 'true' : false,
                     gallery_section_enabled: galleryToggle ? galleryToggle.getAttribute('aria-checked') === 'true' : false,
-                    story_how_we_met: storyHowWeMetInput ? storyHowWeMetInput.value : null,
-                    story_proposal: storyProposalInput ? storyProposalInput.value : null,
+                    story_title_1: storyTitle1Input ? storyTitle1Input.value : null,
+                    story_how_we_met: storyContent1Input ? storyContent1Input.value : null,
+                    story_title_2: storyTitle2Input ? storyTitle2Input.value : null,
+                    story_proposal: storyContent2Input ? storyContent2Input.value : null,
                     story_image_1_url: storyImg1Url,
                     story_image_2_url: storyImg2Url,
                     gallery_photos: galleryUrlsToSave.length > 0 ? galleryUrlsToSave : null
                 };
-                const { data: pageResult, error: pageError } = await supabaseClient.from('wedding_pages').upsert(pageDataToSave, { onConflict: 'user_id' }).select().single();
+                const { data: pageResult, error: pageError } = await supabaseClient.from('events').upsert(pageDataToSave, { onConflict: 'user_id' }).select().single();
                 if (pageError) throw pageError;
+
                 const pageId = pageResult.id;
                 const giftEditors = giftsEditorList.querySelectorAll('[data-gift-id]');
                 const giftsToSave = [];
@@ -537,20 +521,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     let imageUrl = editor.querySelector('.image-preview').src;
                     if (imageInput && imageInput.files[0]) {
                         const file = imageInput.files[0];
-                        const sanitizedFileName = sanitizeFilename(file.name);
-                        const filePath = `${user.id}/gift-${Date.now()}-${sanitizedFileName}`;
+                        const filePath = `${user.id}/gift-${Date.now()}-${sanitizeFilename(file.name)}`;
                         const uploadedUrl = await uploadFile(file, filePath);
                         if (uploadedUrl) imageUrl = uploadedUrl;
                     }
-                    giftsToSave.push({ page_id: pageId, title: editor.querySelector('.title-input')?.value || '', description: editor.querySelector('.description-input')?.value || '', value: parseFloat(editor.querySelector('.value-input')?.value) || 0, image_url: imageUrl.startsWith('https://placehold.co') ? null : imageUrl });
+                    giftsToSave.push({ event_id: pageId, title: editor.querySelector('.title-input')?.value || '', description: editor.querySelector('.description-input')?.value || '', value: parseFloat(editor.querySelector('.value-input')?.value) || 0, image_url: imageUrl.startsWith('https://placehold.co') ? null : imageUrl });
                 }
-                await supabaseClient.from('gifts').delete().eq('page_id', pageId);
+                
+                await supabaseClient.from('gifts').delete().eq('event_id', pageId);
                 if (giftsToSave.length > 0) {
                     const { error: giftsError } = await supabaseClient.from('gifts').insert(giftsToSave);
                     if (giftsError) throw giftsError;
                 }
+
                 showToast("Site atualizado com sucesso!");
-                await loadWeddingPageData(user.id);
+                await loadEventData(user.id);
             } catch (error) {
                 console.error("ERRO DETALHADO AO SALVAR:", error);
                 showToast("Ocorreu um erro ao salvar: " + error.message, 'error');
@@ -560,6 +545,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
 
     // Lógica do painel "Minha Conta"
     if (btnUpdateEmail) {
