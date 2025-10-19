@@ -258,7 +258,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loadEventData = async (userId) => {
         const { data, error } = await supabaseClient.from('events').select('*, gifts(*)').eq('user_id', userId).single();
-        if (error && error.code !== 'PGRST116') return showToast("Erro ao carregar dados.", 'error');
+        if (error && error.code !== 'PGRST116') {
+            console.error('Erro ao carregar dados do evento:', error);
+            showToast("Erro ao carregar dados.", 'error');
+            return;
+        }
         if (data) {
             eventData = data;
             const pageUrl = data.slug ? `/${data.slug}` : `/evento/${data.id}`;
@@ -584,7 +588,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const { data: { user } } = await supabaseClient.auth.getUser();
         if (user) {
             if (accountEmailInput) accountEmailInput.value = user.email;
-            await loadWeddingPageData(user.id);
+            await loadEventData(user.id);
             switchTab('layouts');
         } else {
             window.location.href = '/login';
