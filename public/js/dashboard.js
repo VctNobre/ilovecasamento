@@ -355,8 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="lg:col-span-2">
                     <label class="block text-sm font-medium text-gray-600 mb-1">Imagem do Presente</label>
-                    <input type="file" class="image-input w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[color:var(--primary-color)] file:text-white hover:file:opacity-90" accept="image/*">
-                    <img src="${gift.image_url || 'https://placehold.co/400x200?text=Sem+Imagem'}" class="image-preview mt-2 rounded-md max-h-24">
+                    <input type="file" class="image-input w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[color:var(--primary-color)] file:text-white hover:file:opacity-90" accept="image/*"><img src="${gift.image_url || 'https://placehold.co/400x200?text=Sem+Imagem'}" class="image-preview mt-2 rounded-md max-h-24">
                 </div>
             </div>
             <button class="btn-remove-gift mt-4 text-red-500 text-sm hover:underline">Remover Presente</button>`;
@@ -582,7 +581,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Lógica do painel "Minha Conta"
     if (btnUpdateEmail) {
         btnUpdateEmail.addEventListener('click', async () => {
             if (!accountEmailInput) return;
@@ -596,7 +594,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
     if(btnUpdatePassword) {
         btnUpdatePassword.addEventListener('click', async () => {
             if(!newPasswordInput || !confirmPasswordInput) return;
