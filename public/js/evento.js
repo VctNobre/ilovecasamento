@@ -56,6 +56,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (error || !data) throw new Error("Dados do evento não encontrados.");
 
+        // --- LÓGICA DE PREÇO MÚLTIPLO ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const priceListType = urlParams.get('lista') === 'premium' ? 'premium' : 'default';
+        const priceKey = priceListType === 'premium' ? 'value_premium' : 'value_default';
+
+        // Processa os dados para unificar o preço
+        const processedData = {
+            ...data,
+            gifts: data.gifts.map(gift => ({
+                ...gift,
+                // Define o 'value' principal com base na lista, com fallback para o padrão
+                value: (priceListType === 'premium' && gift.value_premium > 0) ? gift.value_premium : (gift.value_default || 0)
+            }))
+        };
+        // --- FIM DA LÓGICA DE PREÇO ---
+
         const themeName = data.layout_theme || 'padrao';
         const layout = layouts[themeName];
         if (!layout) throw new Error(`Layout "${themeName}" não definido.`);
@@ -63,14 +79,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(themeStyleLink) themeStyleLink.setAttribute('href', layout.css);
         
         const renderFunction = await layout.render();
-
-        const htmlContent = renderFunction(data);
+        
+        const htmlContent = renderFunction(processedData); // Usa os dados processados
 
         if (pageWrapper) pageWrapper.innerHTML = htmlContent;
 
-        populateDynamicContent(data);
+        populateDynamicContent(processedData);
 
-        attachEventListeners(data);
+        attachEventListeners(processedData); // Usa os dados processados
 
         if (pageLoader) {
             pageLoader.style.opacity = '0';
@@ -108,6 +124,7 @@ function attachEventListeners(data) {
     const btnCheckout = document.getElementById('btn-checkout');
     const btnSubmitRsvp = document.getElementById('btn-submit-rsvp');
 
+    // 'data.gifts' aqui já contém os presentes com o 'value' correto e unificado
     let originalGifts = data.gifts || [];
     let cart = [];
     
@@ -121,7 +138,10 @@ function attachEventListeners(data) {
             cartModalOverlay.classList.add('hidden');
             cartModal.classList.add('hidden');
         }, 300); };
-    const updateCartUI = () => {     if (!cartItemsContainer || !cartCount || !cartTotal) return;
+    
+    // O updateCartUI funcionará automaticamente porque 'item.value' já é o preço correto
+    const updateCartUI = () => {     
+        if (!cartItemsContainer || !cartCount || !cartTotal) return;
         cartItemsContainer.innerHTML = '';
         let total = 0;
         if (cart.length === 0) {
@@ -137,13 +157,15 @@ function attachEventListeners(data) {
         }
         cartCount.textContent = cart.length;
         cartTotal.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-        if (btnCheckout) btnCheckout.disabled = cart.length === 0;};
+        if (btnCheckout) btnCheckout.disabled = cart.length === 0;
+    };
     
     if (giftListContainer) {
         giftListContainer.addEventListener('click', (e) => {
             const button = e.target.closest('.add-to-cart-btn, .btn-contribute');
             if (button) {
                 const giftId = Number(button.dataset.id);
+                // Encontra o presente nos 'originalGifts' (que já têm o preço correto)
                 const giftToAdd = originalGifts.find(g => g.id === giftId);
                 if (giftToAdd) {
                     cart.push({ ...giftToAdd, cartItemId: Date.now() + Math.random() });
@@ -167,6 +189,7 @@ function attachEventListeners(data) {
     if (cartIcon) cartIcon.addEventListener('click', openCart);
     if (cartModalOverlay) cartModalOverlay.addEventListener('click', closeCart);
     if (btnAddMore) btnAddMore.addEventListener('click', closeCart);
+    
     if (btnCheckout) {
          btnCheckout.addEventListener('click', async () => {
             if (cart.length === 0) return;
@@ -174,19 +197,27 @@ function attachEventListeners(data) {
             btnCheckout.textContent = 'Processando...';
             btnCheckout.disabled = true;
 
+            // Prepara os itens do carrinho para o checkout
+            // O servidor espera um campo 'value', que já está correto
+            const cartItemsForCheckout = cart.map(item => ({
+                id: item.id,
+                title: item.title,
+                value: item.value || 0
+            }));
+
             try {
                 const response = await fetch('/create-payment-preference', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        cartItems: cart,
+                        cartItems: cartItemsForCheckout,
                         eventId: data.id,
                     }),
                 });
 
                 if (!response.ok) {
                     const errorDetails = await response.json();
-                    throw new Error(`Falha ao criar a preferência de pagamento: ${errorDetails.error}`);
+                    throw new Error(`Falha ao criar a preferência de pagamento: ${errorDetails.error || 'Erro desconhecido'}`);
                 }
 
                 const preference = await response.json();
@@ -245,3 +276,4 @@ function attachEventListeners(data) {
         });
     }
 }
+

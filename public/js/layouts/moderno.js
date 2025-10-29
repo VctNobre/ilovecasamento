@@ -164,7 +164,7 @@ export function render(data) {
         </main>
         
         <footer class="py-8 text-center text-gray-600 bg-beige-extralight">
-            <p>Com amor, ${data.couple_signature || 'Felipe & Caroline'} ♥</p>
+            <p>Com amor, ${data.signature || 'Anfitriões'} ♥</p>
         </footer>
     `;
 }

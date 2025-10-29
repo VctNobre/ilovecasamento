@@ -335,7 +335,32 @@ document.addEventListener('DOMContentLoaded', () => {
         const editorDiv = document.createElement('div');
         editorDiv.className = 'p-6 border rounded-lg bg-gray-50';
         editorDiv.setAttribute('data-gift-id', giftId);
-        editorDiv.innerHTML = `<div class="grid grid-cols-1 lg:grid-cols-5 gap-4"><div class="lg:col-span-2"><label class="block text-sm font-medium text-gray-600 mb-1">Título</label><input type="text" value="${gift.title || ''}" placeholder="Título do Presente" class="title-input w-full p-2 border rounded-md"><label class="block text-sm font-medium text-gray-600 mt-2 mb-1">Descrição</label><textarea rows="3" placeholder="Descrição do presente" class="description-input w-full p-2 border rounded-md">${gift.description || ''}</textarea></div><div class="lg:col-span-1"><label class="block text-sm font-medium text-gray-600 mb-1">Valor (R$)</label><input type="number" value="${gift.value || ''}" placeholder="250.50" class="value-input w-full p-2 border rounded-md"></div><div class="lg:col-span-2"><label class="block text-sm font-medium text-gray-600 mb-1">Imagem do Presente</label><input type="file" class="image-input w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[color:var(--primary-color)] file:text-white hover:file:opacity-90" accept="image/*"><img src="${gift.image_url || 'https://placehold.co/400x200?text=Sem+Imagem'}" class="image-preview mt-2 rounded-md max-h-24"></div></div><button class="btn-remove-gift mt-4 text-red-500 text-sm hover:underline">Remover Presente</button>`;
+        editorDiv.innerHTML = `
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+                <div class="lg:col-span-2">
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Título</label>
+                    <input type="text" value="${gift.title || ''}" placeholder="Título do Presente" class="title-input w-full p-2 border rounded-md">
+                    <label class="block text-sm font-medium text-gray-600 mt-2 mb-1">Descrição</label>
+                    <textarea rows="3" placeholder="Descrição do presente" class="description-input w-full p-2 border rounded-md">${gift.description || ''}</textarea>
+                </div>
+                <div class="lg:col-span-1 space-y-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Preço Padrão (R$)</label>
+                        <input type="number" value="${gift.value_default || ''}" placeholder="100.00" class="value-default-input w-full p-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">Preço Premium (R$)</label>
+                        <input type="number" value="${gift.value_premium || ''}" placeholder="150.00" class="value-premium-input w-full p-2 border rounded-md">
+                    </div>
+                </div>
+                <div class="lg:col-span-2">
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Imagem do Presente</label>
+                    <input type="file" class="image-input w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[color:var(--primary-color)] file:text-white hover:file:opacity-90" accept="image/*">
+                    <img src="${gift.image_url || 'https://placehold.co/400x200?text=Sem+Imagem'}" class="image-preview mt-2 rounded-md max-h-24">
+                </div>
+            </div>
+            <button class="btn-remove-gift mt-4 text-red-500 text-sm hover:underline">Remover Presente</button>`;
+        
         if (giftsEditorList) giftsEditorList.appendChild(editorDiv);
         editorDiv.querySelector('.btn-remove-gift').addEventListener('click', () => editorDiv.remove());
         editorDiv.querySelector('.image-input').addEventListener('change', (event) => {
@@ -529,7 +554,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         const uploadedUrl = await uploadFile(file, filePath);
                         if (uploadedUrl) imageUrl = uploadedUrl;
                     }
-                    giftsToSave.push({ event_id: pageId, title: editor.querySelector('.title-input')?.value || '', description: editor.querySelector('.description-input')?.value || '', value: parseFloat(editor.querySelector('.value-input')?.value) || 0, image_url: imageUrl.startsWith('https://placehold.co') ? null : imageUrl });
+                    giftsToSave.push({ 
+                        event_id: pageId, 
+                        title: editor.querySelector('.title-input')?.value || '', 
+                        description: editor.querySelector('.description-input')?.value || '', 
+                        value_default: parseFloat(editor.querySelector('.value-default-input')?.value) || 0, 
+                        value_premium: parseFloat(editor.querySelector('.value-premium-input')?.value) || 0, 
+                        image_url: imageUrl.startsWith('https://placehold.co') ? null : imageUrl 
+                    });
                 }
                 
                 await supabaseClient.from('gifts').delete().eq('event_id', pageId);
@@ -549,7 +581,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
 
     // Lógica do painel "Minha Conta"
     if (btnUpdateEmail) {
