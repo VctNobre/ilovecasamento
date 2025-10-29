@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         // Nova rota: /slug-do-evento
         if (identifier) {
-             return { type: 'slug', value: identifier };
+             return { type: 'slug', value: identifier }; // Será testado em 'slug' e 'slug_premium'
         }
         return { type: null, value: null };
     };
@@ -46,20 +46,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        const query = supabaseClient
+        // Tenta encontrar pelo tipo de identificador (id ou slug padrão)
+        let { data, error } = await supabaseClient
             .from('events')
             .select('*, gifts(*)')
             .eq(identifier.type, identifier.value)
             .single();
 
-        const { data, error } = await query;
+        let isPremiumSlug = false;
 
-        if (error || !data) throw new Error("Dados do evento não encontrados.");
+        // Se não encontrou (erro) E o tipo era 'slug', tenta buscar por 'slug_premium'
+        if ((error || !data) && identifier.type === 'slug') {
+            const { data: premiumData, error: premiumError } = await supabaseClient
+                .from('events')
+                .select('*, gifts(*)')
+                .eq('slug_premium', identifier.value) // Busca na coluna slug_premium
+                .single();
+            
+            if (premiumError || !premiumData) {
+                 throw new Error("Dados do evento não encontrados.");
+            }
+            data = premiumData; // Usa os dados encontrados
+            isPremiumSlug = true; // Marca que esta é a URL premium
+        } else if (error || !data) {
+            // Se falhou por ID, ou se falhou por slug e não encontrou no premium
+            throw new Error("Dados do evento não encontrados.");
+        }
+
 
         // --- LÓGICA DE PREÇO MÚLTIPLO ---
         const urlParams = new URLSearchParams(window.location.search);
-        const priceListType = urlParams.get('lista') === 'premium' ? 'premium' : 'default';
-        const priceKey = priceListType === 'premium' ? 'value_premium' : 'value_default';
+        // Ativa preço premium se:
+        // 1. Foi acedido pela URL premium (isPremiumSlug === true)
+        // 2. Ou se tem o parâmetro ?lista=premium
+        const priceListType = (isPremiumSlug || urlParams.get('lista') === 'premium') ? 'premium' : 'default';
+        const priceKey = priceListType === 'premium' ? 'value_premium' : 'default';
 
         // Processa os dados para unificar o preço
         const processedData = {
@@ -276,4 +297,3 @@ function attachEventListeners(data) {
         });
     }
 }
-

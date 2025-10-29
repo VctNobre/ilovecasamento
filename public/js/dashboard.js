@@ -69,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const viewSiteLink = document.getElementById('view-site-link');
     const pageSlugInput = document.getElementById('page-slug-input');
+    const pageSlugPremiumInput = document.getElementById('page-slug-premium-input'); // Adicionado seletor
     const rsvpToggle = document.getElementById('rsvp-toggle');
     const storyToggle = document.getElementById('story-toggle');
     const galleryToggle = document.getElementById('gallery-toggle');
@@ -269,6 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (viewSiteLink) { viewSiteLink.href = pageUrl; viewSiteLink.classList.remove('hidden'); }
             
             if(pageSlugInput) pageSlugInput.value = data.slug || '';
+            if(pageSlugPremiumInput) pageSlugPremiumInput.value = data.slug_premium || ''; // Adicionado
 
             if (mainTitleInput) mainTitleInput.value = data.main_title || '';
             if (eventDateInput) eventDateInput.value = data.event_date || '';
@@ -458,8 +460,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             try {
                 const newSlug = sanitizeSlug(pageSlugInput.value);
+                const newSlugPremium = sanitizeSlug(pageSlugPremiumInput.value); // Adicionado
+
                 if (!newSlug) {
-                    throw new Error("O link personalizado não pode estar vazio.");
+                    throw new Error("O link personalizado (padrão) não pode estar vazio.");
                 }
 
                 if (newSlug !== (eventData?.slug || '')) {
@@ -470,7 +474,23 @@ document.addEventListener('DOMContentLoaded', () => {
                         .single();
 
                     if (existingPage) {
-                        throw new Error("Este link já está em uso. Por favor, escolha outro.");
+                        throw new Error("Este link (padrão) já está em uso. Por favor, escolha outro.");
+                    }
+                }
+                
+                // Adicionada validação para o slug premium
+                if (newSlugPremium && newSlugPremium !== (eventData?.slug_premium || '')) {
+                    if (newSlugPremium === newSlug) {
+                        throw new Error("O link premium não pode ser igual ao link padrão.");
+                    }
+                    const { data: existingPage } = await supabaseClient
+                        .from('events')
+                        .select('slug_premium')
+                        .eq('slug_premium', newSlugPremium)
+                        .single();
+
+                    if (existingPage) {
+                        throw new Error("Este link premium já está em uso. Por favor, escolha outro.");
                     }
                 }
 
@@ -518,6 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const pageDataToSave = {
                     user_id: user.id,
                     slug: newSlug,
+                    slug_premium: newSlugPremium || null, // Adicionado
                     main_title: mainTitleInput ? mainTitleInput.value : null,
                     event_date: eventDateInput ? eventDateInput.value : null,
                     intro_text: introTextInput ? introTextInput.value : null,
@@ -623,4 +644,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     })();
 });
-
