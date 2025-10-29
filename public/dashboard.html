@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welovepresente - Painel</title>
+    <title>Ilovecasamento - Painel</title>
 
     <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
@@ -33,7 +33,7 @@
         <!-- Menu Lateral (Sidebar) -->
         <aside id="sidebar" class="bg-white w-64 text-gray-800 fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out z-30 flex flex-col shadow-lg flex-shrink-0">
             <div class="p-6 border-b flex items-center justify-center">
-                <img src="/images/logo.png" alt="Welovepresente Logo" class="h-12 w-auto">
+                <img src="/images/logo.png" alt="Ilovecasamento Logo" class="h-12 w-auto">
             </div>
             <nav class="flex-grow p-4 overflow-y-auto">
                 <ul class="space-y-2">
@@ -107,14 +107,22 @@
                 <div id="edit-site-panel" class="tab-panel">
                     <div class="space-y-8">
                         <div class="bg-white p-6 rounded-xl card-shadow">
-                            <div class="flex flex-wrap justify-between items-end gap-4">
-                                <div id="share-section" class="flex-grow">
-                                    <label for="page-slug-input" class="block text-sm font-medium text-gray-600 mb-1">URL Personalizada do seu Site</label>
+                            <div id="share-section" class="flex flex-col md:flex-row gap-6">
+                                <div class="flex-1">
+                                    <label for="page-slug-input" class="block text-sm font-medium text-gray-600 mb-1">URL Personalizada (Padrão)</label>
                                     <div class="flex items-center">
-                                        <span class="text-gray-500 text-sm p-2 bg-gray-100 rounded-l-md border border-r-0 h-11 flex items-center">welovepresente.com.br/</span>
+                                        <span class="text-gray-500 text-sm p-2 bg-gray-100 rounded-l-md border border-r-0 h-11 flex items-center whitespace-nowrap">ilovecasamento.com.br/</span>
                                         <input id="page-slug-input" type="text" class="input-styled w-full rounded-l-none" placeholder="ex: cha-da-ana">
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-1">Use apenas letras minúsculas, números e hífens (-). Este será o link público do seu site.</p>
+                                    <p class="text-xs text-gray-500 mt-1">Use apenas letras minúsculas, números e hífens (-).</p>
+                                </div>
+                                <div class="flex-1">
+                                    <label for="page-slug-premium-display" class="block text-sm font-medium text-gray-600 mb-1">URL Premium (Valores Maiores)</label>
+                                    <div class="flex items-center">
+                                        <span class="text-gray-500 text-sm p-2 bg-gray-100 rounded-l-md border border-r-0 h-11 flex items-center whitespace-nowrap">ilovecasamento.com.br/</span>
+                                        <input id="page-slug-premium-display" type="text" class="input-styled w-full rounded-l-none bg-gray-100" readonly>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Envie este link para convidados específicos.</p>
                                 </div>
                             </div>
                         </div>
