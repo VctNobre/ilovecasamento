@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ...gift,
                 // Define o 'value' principal com base na lista, com fallback para o padrão
                 value: (priceListType === 'premium' && gift.value_premium > 0) ? gift.value_premium : (gift.value_default || 0)
-            }))
+            })).sort((a, b) => a.id - b.id) // Garante a ordem dos presentes
         };
         // --- FIM DA LÓGICA DE PREÇO ---
 
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         populateDynamicContent(processedData);
 
-        // ATUALIZAÇÃO: Passa os dados brutos (processedData) para os listeners
+        // Passa os dados processados para os listeners
         attachEventListeners(processedData); 
 
         if (pageLoader) {
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error("Erro ao carregar a página:", err);
         if(pageLoader) pageLoader.remove();
         if(pageWrapper) {
-             pageWrapper.innerHTML = `<h1 class="text-center p-12 text-2xl font-title">Página do Evento não encontrada.</h1>`;
+             pageWrapper.innerHTML = `<h1 class="text-center p-12 text-2xl font-title">Página do Evento não encontrada.</h1><p class="text-center text-gray-600">${err.message}</p>`;
              pageWrapper.style.opacity = '1';
         }
     }
@@ -295,7 +295,7 @@ function attachEventListeners(data) {
         });
     }
 
-    // --- NOVO: LÓGICA DO LIGHTBOX DA GALERIA ---
+    // --- LÓGICA DO LIGHTBOX DA GALERIA ---
     const lightbox = document.getElementById('gallery-lightbox');
     const lightboxImage = document.getElementById('lightbox-image');
     const btnClose = document.getElementById('lightbox-close');
@@ -307,7 +307,7 @@ function attachEventListeners(data) {
     const galleryPhotos = data.gallery_photos || [];
     let currentPhotoIndex = 0;
 
-    if (lightbox && galleryContainer) {
+    if (lightbox && galleryContainer && galleryPhotos.length > 0) {
         
         const showPhoto = (index) => {
             if (index < 0 || index >= galleryPhotos.length) return;
@@ -320,12 +320,16 @@ function attachEventListeners(data) {
         const openLightbox = (index) => {
             showPhoto(index);
             lightbox.classList.remove('hidden');
-            setTimeout(() => lightbox.classList.add('visible'), 10); // Ativa a transição de opacidade
+            lightbox.classList.remove('opacity-0', 'pointer-events-none'); // Torna visível
+            lightbox.classList.add('opacity-100');
+            if (lightboxImage) lightboxImage.classList.add('scale-100');
         };
 
         const closeLightbox = () => {
-            lightbox.classList.remove('visible');
-            setTimeout(() => lightbox.classList.add('hidden'), 300); // Espera a transição terminar
+            lightbox.classList.remove('opacity-100');
+            lightbox.classList.add('opacity-0', 'pointer-events-none'); // Oculta
+            if (lightboxImage) lightboxImage.classList.remove('scale-100');
+            setTimeout(() => lightbox.classList.add('hidden'), 300); // Adiciona hidden após a transição
         };
 
         // Listener delegado no container da galeria
@@ -350,11 +354,60 @@ function attachEventListeners(data) {
 
         // Controles de teclado
         document.addEventListener('keydown', (e) => {
-            if (lightbox.classList.contains('visible')) {
+            // Verifica se o lightbox está visível (não contém 'hidden')
+            if (!lightbox.classList.contains('hidden')) {
                 if (e.key === 'Escape') closeLightbox();
                 if (e.key === 'ArrowLeft') showPhoto(currentPhotoIndex - 1);
                 if (e.key === 'ArrowRight') showPhoto(currentPhotoIndex + 1);
             }
         });
     }
+
+    // --- LÓGICA DE ORDENAÇÃO DE PRESENTES ---
+    const sortSelect = document.getElementById('sort-gifts');
+    if (sortSelect && giftListContainer) {
+        // Encontra os itens de presente reais
+        const giftItems = Array.from(giftListContainer.querySelectorAll('.gift-card'));
+
+        // Se não houver presentes (só o texto "não foi adicionada"), não faz nada
+        if (giftItems.length === 0 || giftItems[0].tagName === 'P') {
+             sortSelect.style.display = 'none'; // Esconde o seletor se não há presentes
+             return;
+        }
+
+        const renderSortedGifts = (sortFunction) => {
+            giftItems.sort(sortFunction);
+            giftItems.forEach(item => giftListContainer.appendChild(item)); // Reanexa na nova ordem
+        };
+
+        sortSelect.addEventListener('change', (e) => {
+            const sortType = e.target.value;
+            const getGiftValue = (el) => parseFloat(el.querySelector('p.text-gray-500').textContent.replace('R$ ', '').replace(',', '.'));
+            const getGiftName = (el) => el.querySelector('h3').textContent;
+
+            switch (sortType) {
+                case 'price-asc':
+                    renderSortedGifts((a, b) => getGiftValue(a) - getGiftValue(b));
+                    break;
+                case 'price-desc':
+                    renderSortedGifts((a, b) => getGiftValue(b) - getGiftValue(a));
+                    break;
+                case 'az':
+                    renderSortedGifts((a, b) => getGiftName(a).localeCompare(getGiftName(b)));
+                    break;
+                case 'za':
+                    renderSortedGifts((a, b) => getGiftName(b).localeCompare(getGiftName(a)));
+                    break;
+                default:
+                    // Retorna à ordem original (por ID, que foi como 'data.gifts' foi ordenado)
+                     renderSortedGifts((a, b) => {
+                        const idA = Number(a.querySelector('button').dataset.id);
+                        const idB = Number(b.querySelector('button').dataset.id);
+                        return idA - idB;
+                    });
+            }
+        });
+    }
+
 }
+

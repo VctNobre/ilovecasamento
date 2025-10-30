@@ -37,7 +37,7 @@ function createGallerySection(data) {
     if (!data.gallery_section_enabled || !data.gallery_photos || data.gallery_photos.length === 0) return '';
     
     const galleryItems = data.gallery_photos.map((photoUrl, index) => 
-        // ATUALIZAÇÃO: Adiciona classe 'gallery-item' e data-attributes para o lightbox (caso queira usar o mesmo JS)
+        // Adiciona classe 'gallery-item' e data-attributes para o lightbox
         `<button class="gallery-item overflow-hidden rounded-lg shadow-lg group" data-gallery-src="${photoUrl}" data-gallery-index="${index}">
             <img src="${photoUrl}" alt="Foto da galeria ${index + 1}" class="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105">
         </button>`
@@ -46,7 +46,7 @@ function createGallerySection(data) {
     return `
         <section id="gallery-section" class="py-20 md:py-28 bg-white">
             <div class="container mx-auto px-6 md:px-8 max-w-5xl">
-                <!-- CORREÇÃO 2a: Usa o título da galeria do banco de dados -->
+                <!-- CORREÇÃO: Usa o título da galeria do banco de dados -->
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.gallery_title || 'Galeria de Fotos'}</h2>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                     ${galleryItems}
@@ -58,7 +58,7 @@ function createGallerySection(data) {
 
 function createGiftsSection(data) {
     
-    // CORREÇÃO 2b: Define o texto de introdução
+    // CORREÇÃO: Define o texto de introdução
     const introText = data.gifts_intro_text 
         ? `<p class="text-gray-600 max-w-3xl mx-auto mb-12 text-center leading-relaxed">${data.gifts_intro_text.replace(/\n/g, '<br>')}</p>` 
         : '';
@@ -154,14 +154,14 @@ export function render(data) {
             </div>
             <div id="intro-block" class="bg-beige-extralight text-center py-12 md:py-16">
                 <div class="container mx-auto px-6">
-                    <h1 class="text-5xl md:text-6xl font-serif" style="color: ${data.hero_title_color || '#333333'};">${data.main_title || 'Felipe & Caroline'}</h1>
+                    <h1 class="text-5xl md:text-6xl font-serif" style="color: ${data.main_title_color || '#333333'};">${data.main_title || 'Felipe & Caroline'}</h1>
                     <p class="text-lg text-gray-500 mt-4">${formattedDate}</p>
                     ${data.intro_text ? `
                         <div class="text-gray-600 max-w-2xl mx-auto mt-6 leading-relaxed">
                             ${data.intro_text.replace(/\n/g, '<br>')}
                         </div>
                     ` : ''}
-                    <p class="font-signature text-3xl md:text-4xl mt-8" style="color: ${data.hero_title_color || '#333333'};">${data.signature || 'Felipe & Caroline'}</p>
+                    <p class="font-signature text-3xl md:text-4xl mt-8" style="color: ${data.main_title_color || '#333333'};">${data.signature || 'Felipe & Caroline'}</p>
                 </div>
             </div>
         </header>
@@ -187,3 +187,4 @@ export function render(data) {
         </div>
     `;
 }
+

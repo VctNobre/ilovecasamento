@@ -7,6 +7,7 @@ function createStorySection(data) {
         <section id="story-section" class="py-16 md:py-20 border-t">
             <div class="container mx-auto px-6 md:px-8 max-w-4xl text-center">
                 <h2 class="text-3xl md:text-4xl font-serif mb-12" style="color: ${data.title_color || '#333333'};">${data.story_title_1 || 'Nossa História'}</h2>
+                <!-- CORREÇÃO: Erro de digitação 'class_' corrigido para 'class' -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-12">
                     <img src="${data.story_image_1_url || 'https://placehold.co/600x400/EADFD6/967E76?text=Foto'}" alt="Como nos conhecemos" class="rounded-lg shadow-lg w-full">
                     <div class="text-gray-600 text-left">
@@ -30,7 +31,7 @@ function createStorySection(data) {
 function createGallerySection(data) {
     if (!data.gallery_section_enabled || !data.gallery_photos || data.gallery_photos.length === 0) return '';
     
-    // ATUALIZAÇÃO: Adiciona 'gallery-item' e data-attributes para o lightbox
+    // Adiciona 'gallery-item' e data-attributes para o lightbox
     const galleryItems = data.gallery_photos.map((photoUrl, index) => 
         `<button class="gallery-item w-full h-full overflow-hidden rounded-lg shadow-md group" data-gallery-src="${photoUrl}" data-gallery-index="${index}">
             <img src="${photoUrl}" alt="Foto da galeria ${index + 1}" class="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105">
@@ -40,11 +41,52 @@ function createGallerySection(data) {
     return `
         <section id="gallery-section" class="py-16 md:py-20 border-t bg-gray-50">
             <div class="container mx-auto px-6 md:px-8 max-w-5xl">
-                <!-- ATUALIZAÇÃO: Usa o título customizável ou o padrão -->
+                <!-- Usa o título customizável ou o padrão -->
                 <h2 class="text-3xl md:text-4xl font-serif text-center mb-12" style="color: ${data.title_color || '#333333'};">${data.gallery_title || 'Nossos Momentos'}</h2>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     ${galleryItems}
                 </div>
+            </div>
+        </section>
+    `;
+}
+
+// NOVA FUNÇÃO: Para renderizar os presentes
+function createGiftsSection(data) {
+    const introText = data.gifts_intro_text 
+        ? `<p class="text-gray-600 max-w-2xl mx-auto mb-10 text-center leading-relaxed">${data.gifts_intro_text.replace(/\n/g, '<br>')}</p>` 
+        : '';
+
+    let giftItems = `<p class="text-gray-500 col-span-1 md:col-span-3">A lista de presentes ainda não foi adicionada.</p>`;
+
+    if (data.gifts && data.gifts.length > 0) {
+        giftItems = data.gifts.map(gift => `
+            <div class="gift-card text-left border rounded-lg shadow-md overflow-hidden">
+                <img src="${gift.image_url || 'https://placehold.co/400x300/F9F5F2/967E76?text=Presente'}" alt="${gift.title}" class="w-full h-48 object-cover">
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-gray-700">${gift.title}</h3>
+                    <p class="text-gray-500 mb-4">R$ ${Number(gift.value).toFixed(2).replace('.', ',')}</p>
+                    <button data-id="${gift.id}" class="add-to-cart-btn btn-primary w-full">Contribuir</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    return `
+        <section id="gifts-section" class="gifts-section pt-16 border-t">
+            <h2 class="text-3xl md:text-4xl mb-6 font-serif" style="color: ${data.title_color || '#333333'};">Nossa Lista de Presentes</h2>
+            ${introText}
+            <div class="flex justify-end mb-6">
+                <select id="sort-gifts" class="input-styled">
+                    <option value="default">Ordenar por</option>
+                    <option value="price-asc">Menor Preço</option>
+                    <option value="price-desc">Maior Preço</option>
+                    <option value="az">Nome (A-Z)</option>
+                    <option value="za">Nome (Z-A)</option>
+                </select>
+            </div>
+            <div id="gift-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
+                ${giftItems}
             </div>
         </section>
     `;
@@ -99,10 +141,10 @@ export function render(data) {
     return `
         <!-- Secção de Capa (Hero) -->
         <header id="hero-section" class="hero-section relative w-full h-[60vh] md:h-[70vh] bg-gray-200">
-            <img id="hero-image" src="${data.hero_image_url || 'https://placehold.co/1920x1080/EFEAE6/967E76?text=Foto+do+Casal'}" alt="Foto do Casal" class="w-full h-full object-cover opacity-0 transition-opacity duration-500">
+            <img id="hero-image" src="${data.hero_image_url || 'https://placehold.co/1920x1080/EFEAE6/967E76?text=Foto+do+Casal'}" alt="Foto do Casal" class="w-full h-full object-cover opacity-100 transition-opacity duration-500">
             <div class="absolute inset-0 bg-black/40 flex items-center justify-center text-white">
                 <div class="text-center z-10 p-4">
-                    <h1 id="hero-title" class="text-5xl md:text-7xl font-serif leading-tight" style="color: ${data.hero_title_color || '#FFFFFF'};">${data.main_title || ''}</h1>
+                    <h1 id="hero-title" class="text-5xl md:text-7xl font-serif leading-tight" style="color: ${data.main_title_color || '#FFFFFF'};">${data.main_title || ''}</h1>
                     <p id="hero-date" class="mt-4 text-lg md:text-xl">${formattedDate}</p>
                 </div>
             </div>
@@ -120,25 +162,7 @@ export function render(data) {
 
                 ${createStorySection(data)}
                 ${createGallerySection(data)}
-
-                <section id="gifts-section" class="gifts-section pt-16 border-t">
-                    <h2 class="text-3xl md:text-4xl mb-6 font-serif" style="color: ${data.title_color || '#333333'};">Nossa Lista de Presentes</h2>
-                    
-                    <!-- ATUALIZAÇÃO: Adiciona o texto introdutório dos presentes -->
-                    ${data.gifts_intro_text ? `<p class="text-gray-600 max-w-2xl mx-auto mb-10 text-center leading-relaxed">${data.gifts_intro_text.replace(/\n/g, '<br>')}</p>` : ''}
-                    
-                    <div class="flex justify-end mb-6">
-                        <select id="sort-gifts" class="input-styled">
-                            <option value="default">Ordenar por</option>
-                            <option value="price-asc">Menor Preço</option>
-                            <option value="price-desc">Maior Preço</option>
-                            <option value="az">Nome (A-Z)</option>
-                            <option value="za">Nome (Z-A)</option>
-                        </select>
-                    </div>
-                    <div id="gift-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left"></div>
-                </section>
-
+                ${createGiftsSection(data)} <!-- CORREÇÃO: Chama a nova função de presentes -->
                 ${createRsvpSection(data)}
             </main>
         </div>
@@ -146,7 +170,7 @@ export function render(data) {
             <p>Com amor, ${data.signature || ''} ♥</p>
         </footer>
 
-        <!-- NOVO: Lightbox Modal da Galeria -->
+        <!-- Lightbox Modal da Galeria -->
         <div id="gallery-lightbox" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-4 transition-opacity duration-300 opacity-0 pointer-events-none">
             <button id="lightbox-close" class="absolute top-4 right-4 text-white text-5xl opacity-80 hover:opacity-100">&times;</button>
             <button id="lightbox-prev" class="absolute left-4 md:left-10 text-white text-4xl opacity-80 hover:opacity-100">&#10094;</button>
