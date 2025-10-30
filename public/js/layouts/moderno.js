@@ -6,12 +6,11 @@ function createStorySection(data) {
     return `
         <section id="story-section" class="py-20 md:py-28">
             <div class="container mx-auto px-6 md:px-8 max-w-4xl">
-                <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">Nossa História</h2>
+                <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.story_title_1 || 'Nossa História'}</h2>
                 
                 <!-- Como nos Conhecemos -->
                 <div class="flex flex-col md:flex-row items-center gap-12 md:gap-16 mb-20">
                     <div class="md:w-1/2 text-gray-600 text-center md:text-left">
-                        <h3 class="text-3xl font-serif mb-4" style="color: ${data.title_color || '#333333'};">Como nos Conhecemos</h3>
                         <p class="leading-relaxed">${data.story_how_we_met ? data.story_how_we_met.replace(/\n/g, '<br>') : 'Texto sobre como nos conhecemos...'}</p>
                     </div>
                     <div class="md:w-1/2">
@@ -20,9 +19,9 @@ function createStorySection(data) {
                 </div>
 
                 <!-- O Pedido -->
+                <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.story_title_2 || 'O Pedido'}</h2>
                 <div class="flex flex-col md:flex-row-reverse items-center gap-12 md:gap-16">
                     <div class="md:w-1/2 text-gray-600 text-center md:text-left">
-                        <h3 class="text-3xl font-serif mb-4" style="color: ${data.title_color || '#333333'};">O Pedido</h3>
                         <p class="leading-relaxed">${data.story_proposal ? data.story_proposal.replace(/\n/g, '<br>') : 'Texto sobre o pedido de casamento...'}</p>
                     </div>
                     <div class="md:w-1/2">
@@ -38,13 +37,17 @@ function createGallerySection(data) {
     if (!data.gallery_section_enabled || !data.gallery_photos || data.gallery_photos.length === 0) return '';
     
     const galleryItems = data.gallery_photos.map((photoUrl, index) => 
-        `<div class="overflow-hidden"><img src="${photoUrl}" alt="Foto da galeria ${index + 1}" class="w-full h-full object-cover rounded-lg shadow-lg transform transition-transform duration-300 hover:scale-105"></div>`
+        // ATUALIZAÇÃO: Adiciona classe 'gallery-item' e data-attributes para o lightbox (caso queira usar o mesmo JS)
+        `<button class="gallery-item overflow-hidden rounded-lg shadow-lg group" data-gallery-src="${photoUrl}" data-gallery-index="${index}">
+            <img src="${photoUrl}" alt="Foto da galeria ${index + 1}" class="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105">
+        </button>`
     ).join('');
 
     return `
         <section id="gallery-section" class="py-20 md:py-28 bg-white">
             <div class="container mx-auto px-6 md:px-8 max-w-5xl">
-                <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">Galeria de Fotos</h2>
+                <!-- CORREÇÃO 2a: Usa o título da galeria do banco de dados -->
+                <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.gallery_title || 'Galeria de Fotos'}</h2>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                     ${galleryItems}
                 </div>
@@ -54,11 +57,18 @@ function createGallerySection(data) {
 }
 
 function createGiftsSection(data) {
+    
+    // CORREÇÃO 2b: Define o texto de introdução
+    const introText = data.gifts_intro_text 
+        ? `<p class="text-gray-600 max-w-3xl mx-auto mb-12 text-center leading-relaxed">${data.gifts_intro_text.replace(/\n/g, '<br>')}</p>` 
+        : '';
+
     if (!data.gifts || data.gifts.length === 0) {
         return `
         <section id="gifts-section" class="py-20 md:py-28">
              <div class="container mx-auto px-6 md:px-8 max-w-5xl">
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">Lista de Presentes</h2>
+                ${introText} <!-- Adicionado aqui -->
                 <p class="text-center text-gray-500">A lista de presentes ainda não foi adicionada.</p>
             </div>
         </section>
@@ -80,6 +90,7 @@ function createGiftsSection(data) {
         <section id="gifts-section" class="py-20 md:py-28">
              <div class="container mx-auto px-6 md:px-8 max-w-5xl">
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">Lista de Presentes</h2>
+                ${introText} <!-- Adicionado aqui -->
                 <div id="gift-list-container" class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
                     ${giftItems}
                 </div>
@@ -127,7 +138,7 @@ function createRsvpSection(data) {
 
 export function render(data) {
     // Formata a data para um estilo mais elegante, ex: "25 de Novembro de 2025"
-    const formattedDate = data.event_date
+    const formattedDate = data.event_date 
         ? new Date(data.event_date + 'T12:00:00').toLocaleDateString('pt-BR', {
             day: '2-digit', 
             month: 'long', 
@@ -150,7 +161,7 @@ export function render(data) {
                             ${data.intro_text.replace(/\n/g, '<br>')}
                         </div>
                     ` : ''}
-                    <p class="font-signature text-3xl md:text-4xl mt-8" style="color: ${data.hero_title_color || '#333333'};">${data.couple_signature || 'Felipe & Caroline'}</p>
+                    <p class="font-signature text-3xl md:text-4xl mt-8" style="color: ${data.hero_title_color || '#333333'};">${data.signature || 'Felipe & Caroline'}</p>
                 </div>
             </div>
         </header>
@@ -166,6 +177,13 @@ export function render(data) {
         <footer class="py-8 text-center text-gray-600 bg-beige-extralight">
             <p>Com amor, ${data.signature || 'Anfitriões'} ♥</p>
         </footer>
+
+        <!-- Adicionando o HTML do Lightbox para consistência (ele é controlado pelo evento.js) -->
+        <div id="gallery-lightbox" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-4 transition-opacity duration-300 opacity-0 pointer-events-none">
+            <button id="lightbox-close" class="absolute top-4 right-4 text-white text-5xl opacity-80 hover:opacity-100">&times;</button>
+            <button id="lightbox-prev" class="absolute left-4 md:left-10 text-white text-4xl opacity-80 hover:opacity-100">&#10094;</button>
+            <button id="lightbox-next" class="absolute right-4 md:right-10 text-white text-4xl opacity-80 hover:opacity-100">&#10095;</button>
+            <img id="lightbox-image" src="" alt="Foto da Galeria" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl transition-transform duration-300 transform scale-95">
+        </div>
     `;
 }
-

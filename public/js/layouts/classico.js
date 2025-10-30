@@ -87,7 +87,7 @@ function createRsvpSection(data) {
 }
 
 export function render(data) {
-    // Formata a data (corrigido na última interação)
+    // Formata a data
     const formattedDate = data.event_date 
         ? new Date(data.event_date + 'T12:00:00').toLocaleDateString('pt-BR', {
             day: 'numeric', 
@@ -155,3 +155,4 @@ export function render(data) {
         </div>
     `;
 }
+
