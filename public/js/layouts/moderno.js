@@ -127,8 +127,8 @@ function createRsvpSection(data) {
 
 export function render(data) {
     // Formata a data para um estilo mais elegante, ex: "25 de Novembro de 2025"
-    const formattedDate = data.wedding_date 
-        ? new Date(data.wedding_date + 'T12:00:00').toLocaleDateString('pt-BR', {
+    const formattedDate = data.event_date
+        ? new Date(data.event_date + 'T12:00:00').toLocaleDateString('pt-BR', {
             day: '2-digit', 
             month: 'long', 
             year: 'numeric' 

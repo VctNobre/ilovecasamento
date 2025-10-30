@@ -126,7 +126,7 @@ export function render(data) {
             </main>
         </div>
          <footer class="py-8 text-center text-gray-600">
-            <p>Com amor, ${data.couple_signature || ''} ♥</p>
+            <p>Com amor, ${data.signature || ''} ♥</p>
         </footer>
     `;
 }
