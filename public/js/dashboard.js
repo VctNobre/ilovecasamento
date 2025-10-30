@@ -66,6 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const toastContainer = document.getElementById('toast-container');
     let eventData = null;
     let currentGalleryFiles = [];
+    let currentStory1Files = []; // Novo
+    let currentStory2Files = []; // Novo
     
     const viewSiteLink = document.getElementById('view-site-link');
     const pageSlugInput = document.getElementById('page-slug-input');
@@ -97,14 +99,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const storyContent1Input = document.getElementById('story-how-we-met');
     const storyTitle2Input = document.getElementById('story-title-2');
     const storyContent2Input = document.getElementById('story-proposal');
-    const storyImage1Upload = document.getElementById('story-image-1-upload');
-    const storyImage1Preview = document.getElementById('story-image-1-preview');
-    const storyImage1Container = document.getElementById('story-image-1-container');
-    const btnDeleteStory1 = document.getElementById('btn-delete-story-1');
-    const storyImage2Upload = document.getElementById('story-image-2-upload');
-    const storyImage2Preview = document.getElementById('story-image-2-preview');
-    const storyImage2Container = document.getElementById('story-image-2-container');
-    const btnDeleteStory2 = document.getElementById('btn-delete-story-2');
+    
+    // Novos seletores para os uploads da história
+    const story1PhotosUpload = document.getElementById('story-1-photos-upload');
+    const story1PreviewGrid = document.getElementById('story-1-preview-grid');
+    const story2PhotosUpload = document.getElementById('story-2-photos-upload');
+    const story2PreviewGrid = document.getElementById('story-2-preview-grid');
+
     const galleryPhotosUpload = document.getElementById('gallery-photos-upload');
     const galleryPreviewGrid = document.getElementById('gallery-preview-grid');
 
@@ -291,35 +292,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (heroImagePreview && data.hero_image_url) { heroImagePreview.src = data.hero_image_url; heroImagePreview.classList.remove('hidden'); }
             if (giftsEditorList) { giftsEditorList.innerHTML = ''; if (data.gifts) data.gifts.sort((a, b) => a.id - b.id).forEach(renderGiftEditor); }
             
-            // Carrega novos campos
-            if (galleryTitleInput) galleryTitleInput.value = data.gallery_title || '';
-            if (giftsIntroTextInput) giftsIntroTextInput.value = data.gifts_intro_text || '';
-
-            if (data.story_image_1_url) {
-                storyImage1Preview.src = data.story_image_1_url;
-                storyImage1Container.classList.remove('hidden');
-                storyImage1Upload.classList.add('hidden');
-            } else {
-                storyImage1Container.classList.add('hidden');
-                storyImage1Upload.classList.remove('hidden');
-                storyImage1Upload.value = '';
-                storyImage1Preview.src = '';
-            }
-
-            if (data.story_image_2_url) {
-                 storyImage2Preview.src = data.story_image_2_url;
-                storyImage2Container.classList.remove('hidden');
-                storyImage2Upload.classList.add('hidden');
-            } else {
-                storyImage2Container.classList.add('hidden');
-                storyImage2Upload.classList.remove('hidden');
-                storyImage2Upload.value = '';
-                storyImage2Preview.src = '';
-            }
-            
+            // Carrega fotos da galeria principal
             currentGalleryFiles = (data.gallery_photos && Array.isArray(data.gallery_photos)) ? [...data.gallery_photos] : [];
             renderGalleryPreviews();
-            galleryPhotosUpload.value = '';
+            if(galleryPhotosUpload) galleryPhotosUpload.value = '';
+
+            // Carrega fotos da História 1
+            currentStory1Files = (data.story_images_1 && Array.isArray(data.story_images_1)) ? [...data.story_images_1] : [];
+            renderStory1Previews();
+            if(story1PhotosUpload) story1PhotosUpload.value = '';
+
+            // Carrega fotos da História 2
+            currentStory2Files = (data.story_images_2 && Array.isArray(data.story_images_2)) ? [...data.story_images_2] : [];
+            renderStory2Previews();
+            if(story2PhotosUpload) story2PhotosUpload.value = '';
 
             if (setRsvpState) setRsvpState(data.rsvp_enabled);
             if (setStoryState) setStoryState(data.story_section_enabled);
@@ -379,7 +365,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
     
+    // Funções de preview para Galeria Principal
     const renderGalleryPreviews = () => {
+        if (!galleryPreviewGrid) return; // Adiciona verificação
         galleryPreviewGrid.innerHTML = '';
         currentGalleryFiles.forEach((fileOrUrl, index) => {
             const previewWrapper = document.createElement('div');
@@ -395,6 +383,43 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // Novas funções de preview para História 1
+    const renderStory1Previews = () => {
+        if (!story1PreviewGrid) return;
+        story1PreviewGrid.innerHTML = '';
+        currentStory1Files.forEach((fileOrUrl, index) => {
+            const previewWrapper = document.createElement('div');
+            previewWrapper.className = 'relative';
+            const src = (typeof fileOrUrl === 'string') ? fileOrUrl : URL.createObjectURL(fileOrUrl);
+            previewWrapper.innerHTML = `
+                <img src="${src}" class="w-full h-24 object-cover rounded-md">
+                <button type="button" data-index="${index}" class="btn-delete-story-1-item absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 leading-none hover:bg-red-700">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            `;
+            story1PreviewGrid.appendChild(previewWrapper);
+        });
+    };
+
+    // Novas funções de preview para História 2
+    const renderStory2Previews = () => {
+        if (!story2PreviewGrid) return;
+        story2PreviewGrid.innerHTML = '';
+        currentStory2Files.forEach((fileOrUrl, index) => {
+            const previewWrapper = document.createElement('div');
+            previewWrapper.className = 'relative';
+            const src = (typeof fileOrUrl === 'string') ? fileOrUrl : URL.createObjectURL(fileOrUrl);
+            previewWrapper.innerHTML = `
+                <img src="${src}" class="w-full h-24 object-cover rounded-md">
+                <button type="button" data-index="${index}" class="btn-delete-story-2-item absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 leading-none hover:bg-red-700">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            `;
+            story2PreviewGrid.appendChild(previewWrapper);
+        });
+    };
+
+
     // --- EVENT LISTENERS ---
     if (btnLogout) btnLogout.addEventListener('click', async () => { clearTimeout(inactivityTimer); await supabaseClient.auth.signOut(); });
     if (btnAddGift) btnAddGift.addEventListener('click', () => renderGiftEditor({}));
@@ -405,27 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const setupImagePreviewAndDelete = (uploadInput, previewContainer, previewImg, deleteBtn) => {
-        if (!uploadInput || !previewContainer || !previewImg || !deleteBtn) return;
-        uploadInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                previewImg.src = URL.createObjectURL(file);
-                previewContainer.classList.remove('hidden');
-                uploadInput.classList.add('hidden');
-            }
-        });
-        deleteBtn.addEventListener('click', () => {
-            uploadInput.value = ''; // Limpa o input
-            previewImg.src = '';
-            previewContainer.classList.add('hidden');
-            uploadInput.classList.remove('hidden');
-        });
-    };
-
-    setupImagePreviewAndDelete(storyImage1Upload, storyImage1Container, storyImage1Preview, btnDeleteStory1);
-    setupImagePreviewAndDelete(storyImage2Upload, storyImage2Container, storyImage2Preview, btnDeleteStory2);
-
+    // Listener para Galeria Principal
     if (galleryPhotosUpload) {
         galleryPhotosUpload.addEventListener('change', (event) => {
             const newFiles = Array.from(event.target.files);
@@ -442,6 +447,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 const indexToRemove = parseInt(deleteBtn.dataset.index, 10);
                 currentGalleryFiles.splice(indexToRemove, 1);
                 renderGalleryPreviews();
+            }
+        });
+    }
+
+    // Novos Listeners para História 1
+    if (story1PhotosUpload) {
+        story1PhotosUpload.addEventListener('change', (event) => {
+            const newFiles = Array.from(event.target.files);
+            currentStory1Files.push(...newFiles);
+            renderStory1Previews();
+            event.target.value = '';
+        });
+    }
+
+    if (story1PreviewGrid) {
+        story1PreviewGrid.addEventListener('click', (e) => {
+            const deleteBtn = e.target.closest('.btn-delete-story-1-item');
+            if (deleteBtn) {
+                const indexToRemove = parseInt(deleteBtn.dataset.index, 10);
+                currentStory1Files.splice(indexToRemove, 1);
+                renderStory1Previews();
+            }
+        });
+    }
+
+    // Novos Listeners para História 2
+    if (story2PhotosUpload) {
+        story2PhotosUpload.addEventListener('change', (event) => {
+            const newFiles = Array.from(event.target.files);
+            currentStory2Files.push(...newFiles);
+            renderStory2Previews();
+            event.target.value = '';
+        });
+    }
+
+    if (story2PreviewGrid) {
+        story2PreviewGrid.addEventListener('click', (e) => {
+            const deleteBtn = e.target.closest('.btn-delete-story-2-item');
+            if (deleteBtn) {
+                const indexToRemove = parseInt(deleteBtn.dataset.index, 10);
+                currentStory2Files.splice(indexToRemove, 1);
+                renderStory2Previews();
             }
         });
     }
@@ -510,28 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     heroImageUrl = await uploadFile(file, filePath);
                 }
 
-                let storyImg1Url;
-                if (storyImage1Upload && storyImage1Upload.files[0]) {
-                    const file = storyImage1Upload.files[0];
-                    const filePath = `${user.id}/story-1-${Date.now()}-${sanitizeFilename(file.name)}`;
-                    storyImg1Url = await uploadFile(file, filePath);
-                } else if (storyImage1Container && storyImage1Container.classList.contains('hidden')) {
-                    storyImg1Url = null;
-                } else {
-                    storyImg1Url = eventData?.story_image_1_url || null;
-                }
-
-                let storyImg2Url;
-                if (storyImage2Upload && storyImage2Upload.files[0]) {
-                    const file = storyImage2Upload.files[0];
-                    const filePath = `${user.id}/story-2-${Date.now()}-${sanitizeFilename(file.name)}`;
-                    storyImg2Url = await uploadFile(file, filePath);
-                } else if (storyImage2Container && storyImage2Container.classList.contains('hidden')) {
-                    storyImg2Url = null;
-                } else {
-                    storyImg2Url = eventData?.story_image_2_url || null;
-                }
-
+                // Lógica de upload da Galeria Principal
                 const galleryUrlsToSave = [];
                 for (const fileOrUrl of currentGalleryFiles) {
                     if (typeof fileOrUrl === 'string') {
@@ -540,6 +566,30 @@ document.addEventListener('DOMContentLoaded', () => {
                         const filePath = `${user.id}/gallery-${Date.now()}-${sanitizeFilename(fileOrUrl.name)}`;
                         const url = await uploadFile(fileOrUrl, filePath);
                         if (url) galleryUrlsToSave.push(url);
+                    }
+                }
+
+                // Nova Lógica de upload da História 1
+                const story1UrlsToSave = [];
+                for (const fileOrUrl of currentStory1Files) {
+                    if (typeof fileOrUrl === 'string') {
+                        story1UrlsToSave.push(fileOrUrl);
+                    } else {
+                        const filePath = `${user.id}/story1-${Date.now()}-${sanitizeFilename(fileOrUrl.name)}`;
+                        const url = await uploadFile(fileOrUrl, filePath);
+                        if (url) story1UrlsToSave.push(url);
+                    }
+                }
+                
+                // Nova Lógica de upload da História 2
+                const story2UrlsToSave = [];
+                for (const fileOrUrl of currentStory2Files) {
+                    if (typeof fileOrUrl === 'string') {
+                        story2UrlsToSave.push(fileOrUrl);
+                    } else {
+                        const filePath = `${user.id}/story2-${Date.now()}-${sanitizeFilename(fileOrUrl.name)}`;
+                        const url = await uploadFile(fileOrUrl, filePath);
+                        if (url) story2UrlsToSave.push(url);
                     }
                 }
                 
@@ -564,12 +614,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     story_how_we_met: storyContent1Input ? storyContent1Input.value : null,
                     story_title_2: storyTitle2Input ? storyTitle2Input.value : null,
                     story_proposal: storyContent2Input ? storyContent2Input.value : null,
-                    story_image_1_url: storyImg1Url,
-                    story_image_2_url: storyImg2Url,
-                    gallery_photos: galleryUrlsToSave.length > 0 ? galleryUrlsToSave : null,
-                    // NOVOS CAMPOS
-                    gallery_title: galleryTitleInput ? galleryTitleInput.value : null,
-                    gifts_intro_text: giftsIntroTextInput ? giftsIntroTextInput.value : null
+                    // Novas colunas (jsonb)
+                    story_images_1: story1UrlsToSave.length > 0 ? story1UrlsToSave : null,
+                    story_images_2: story2UrlsToSave.length > 0 ? story2UrlsToSave : null,
+                    gallery_photos: galleryUrlsToSave.length > 0 ? galleryUrlsToSave : null
                 };
                 const { data: pageResult, error: pageError } = await supabaseClient.from('events').upsert(pageDataToSave, { onConflict: 'user_id' }).select().single();
                 if (pageError) throw pageError;
@@ -656,3 +704,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     })();
 });
+
+
