@@ -108,6 +108,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const galleryPhotosUpload = document.getElementById('gallery-photos-upload');
     const galleryPreviewGrid = document.getElementById('gallery-preview-grid');
 
+    // NOVOS SELETORES
+    const galleryTitleInput = document.getElementById('gallery-title');
+    const giftsIntroTextInput = document.getElementById('gifts-intro-text');
+
+
     // --- FUNÇÕES GLOBAIS ---
     const showToast = (message, type = 'success') => {
         if (!toastContainer) return;
@@ -286,6 +291,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (heroImagePreview && data.hero_image_url) { heroImagePreview.src = data.hero_image_url; heroImagePreview.classList.remove('hidden'); }
             if (giftsEditorList) { giftsEditorList.innerHTML = ''; if (data.gifts) data.gifts.sort((a, b) => a.id - b.id).forEach(renderGiftEditor); }
             
+            // Carrega novos campos
+            if (galleryTitleInput) galleryTitleInput.value = data.gallery_title || '';
+            if (giftsIntroTextInput) giftsIntroTextInput.value = data.gifts_intro_text || '';
+
             if (data.story_image_1_url) {
                 storyImage1Preview.src = data.story_image_1_url;
                 storyImage1Container.classList.remove('hidden');
@@ -557,7 +566,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     story_proposal: storyContent2Input ? storyContent2Input.value : null,
                     story_image_1_url: storyImg1Url,
                     story_image_2_url: storyImg2Url,
-                    gallery_photos: galleryUrlsToSave.length > 0 ? galleryUrlsToSave : null
+                    gallery_photos: galleryUrlsToSave.length > 0 ? galleryUrlsToSave : null,
+                    // NOVOS CAMPOS
+                    gallery_title: galleryTitleInput ? galleryTitleInput.value : null,
+                    gifts_intro_text: giftsIntroTextInput ? giftsIntroTextInput.value : null
                 };
                 const { data: pageResult, error: pageError } = await supabaseClient.from('events').upsert(pageDataToSave, { onConflict: 'user_id' }).select().single();
                 if (pageError) throw pageError;

@@ -8,3 +8,27 @@
         margin-top: -8rem;
     }
 }
+
+/* * NOVO: Estilos do Lightbox da Galeria 
+ */
+#gallery-lightbox {
+    /* Estado inicial (oculto) */
+    opacity: 0;
+    pointer-events: none;
+}
+
+#gallery-lightbox.visible {
+    /* Estado visível */
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#gallery-lightbox.visible #lightbox-image {
+    /* Animação da imagem ao aparecer */
+    transform: scale(1);
+}
+
+.gallery-item {
+    /* Muda o cursor para indicar que é clicável */
+    cursor: zoom-in;
+}

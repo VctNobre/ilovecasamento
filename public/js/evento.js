@@ -107,7 +107,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         populateDynamicContent(processedData);
 
-        attachEventListeners(processedData); // Usa os dados processados
+        // ATUALIZAÇÃO: Passa os dados brutos (processedData) para os listeners
+        attachEventListeners(processedData); 
 
         if (pageLoader) {
             pageLoader.style.opacity = '0';
@@ -144,8 +145,8 @@ function attachEventListeners(data) {
     const btnAddMore = document.getElementById('btn-add-more');
     const btnCheckout = document.getElementById('btn-checkout');
     const btnSubmitRsvp = document.getElementById('btn-submit-rsvp');
-
-    // 'data.gifts' aqui já contém os presentes com o 'value' correto e unificado
+    
+    // --- LÓGICA DO CARRINHO ---
     let originalGifts = data.gifts || [];
     let cart = [];
     
@@ -160,7 +161,6 @@ function attachEventListeners(data) {
             cartModal.classList.add('hidden');
         }, 300); };
     
-    // O updateCartUI funcionará automaticamente porque 'item.value' já é o preço correto
     const updateCartUI = () => {     
         if (!cartItemsContainer || !cartCount || !cartTotal) return;
         cartItemsContainer.innerHTML = '';
@@ -186,7 +186,6 @@ function attachEventListeners(data) {
             const button = e.target.closest('.add-to-cart-btn, .btn-contribute');
             if (button) {
                 const giftId = Number(button.dataset.id);
-                // Encontra o presente nos 'originalGifts' (que já têm o preço correto)
                 const giftToAdd = originalGifts.find(g => g.id === giftId);
                 if (giftToAdd) {
                     cart.push({ ...giftToAdd, cartItemId: Date.now() + Math.random() });
@@ -218,8 +217,6 @@ function attachEventListeners(data) {
             btnCheckout.textContent = 'Processando...';
             btnCheckout.disabled = true;
 
-            // Prepara os itens do carrinho para o checkout
-            // O servidor espera um campo 'value', que já está correto
             const cartItemsForCheckout = cart.map(item => ({
                 id: item.id,
                 title: item.title,
@@ -258,6 +255,7 @@ function attachEventListeners(data) {
         });
     }
 
+    // --- LÓGICA DO RSVP ---
     if (btnSubmitRsvp) {
         btnSubmitRsvp.addEventListener('click', async () => {
             const rsvpName = document.getElementById('rsvp-name');
@@ -293,6 +291,69 @@ function attachEventListeners(data) {
                 if (rsvpSection) {
                     rsvpSection.innerHTML = '<div class="text-center"><p class="text-lg text-green-600 font-semibold">Obrigado! A sua presença foi registada com sucesso.</p></div>';
                 }
+            }
+        });
+    }
+
+    // --- NOVO: LÓGICA DO LIGHTBOX DA GALERIA ---
+    const lightbox = document.getElementById('gallery-lightbox');
+    const lightboxImage = document.getElementById('lightbox-image');
+    const btnClose = document.getElementById('lightbox-close');
+    const btnPrev = document.getElementById('lightbox-prev');
+    const btnNext = document.getElementById('lightbox-next');
+    const galleryContainer = document.getElementById('gallery-section');
+    
+    // Pega as fotos dos dados do evento
+    const galleryPhotos = data.gallery_photos || [];
+    let currentPhotoIndex = 0;
+
+    if (lightbox && galleryContainer) {
+        
+        const showPhoto = (index) => {
+            if (index < 0 || index >= galleryPhotos.length) return;
+            currentPhotoIndex = index;
+            if (lightboxImage) lightboxImage.src = galleryPhotos[index];
+            if (btnPrev) btnPrev.style.display = (index === 0) ? 'none' : 'block';
+            if (btnNext) btnNext.style.display = (index === galleryPhotos.length - 1) ? 'none' : 'block';
+        };
+
+        const openLightbox = (index) => {
+            showPhoto(index);
+            lightbox.classList.remove('hidden');
+            setTimeout(() => lightbox.classList.add('visible'), 10); // Ativa a transição de opacidade
+        };
+
+        const closeLightbox = () => {
+            lightbox.classList.remove('visible');
+            setTimeout(() => lightbox.classList.add('hidden'), 300); // Espera a transição terminar
+        };
+
+        // Listener delegado no container da galeria
+        galleryContainer.addEventListener('click', (e) => {
+            const item = e.target.closest('.gallery-item');
+            if (item) {
+                const index = parseInt(item.dataset.galleryIndex, 10);
+                openLightbox(index);
+            }
+        });
+
+        if (btnClose) btnClose.addEventListener('click', closeLightbox);
+        if (btnPrev) btnPrev.addEventListener('click', () => showPhoto(currentPhotoIndex - 1));
+        if (btnNext) btnNext.addEventListener('click', () => showPhoto(currentPhotoIndex + 1));
+        
+        // Fechar ao clicar fora da imagem
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                closeLightbox();
+            }
+        });
+
+        // Controles de teclado
+        document.addEventListener('keydown', (e) => {
+            if (lightbox.classList.contains('visible')) {
+                if (e.key === 'Escape') closeLightbox();
+                if (e.key === 'ArrowLeft') showPhoto(currentPhotoIndex - 1);
+                if (e.key === 'ArrowRight') showPhoto(currentPhotoIndex + 1);
             }
         });
     }
