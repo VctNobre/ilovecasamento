@@ -74,3 +74,29 @@ body.theme-moderno {
     box-shadow: 0 0 0 2px rgba(191, 168, 158, 0.4);
 }
 
+/* Estilos para o novo Carousel da Galeria */
+.gallery-nav-btn {
+    background-color: rgba(0, 0, 0, 0.4);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 44px; /* w-11 */
+    height: 44px; /* h-11 */
+    font-size: 24px; /* text-2xl */
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none; /* Impede a seleção do texto do botão */
+}
+
+.gallery-nav-btn:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+#modern-gallery-image {
+    /* Adiciona transição para o fade */
+    transition: opacity 0.3s ease-in-out;
+}

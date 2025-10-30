@@ -34,19 +34,26 @@ function createStorySection(data) {
 function createGallerySection(data) {
     if (!data.gallery_section_enabled || !data.gallery_photos || data.gallery_photos.length === 0) return '';
     
-    const galleryItems = data.gallery_photos.map((photoUrl, index) => 
-        // Adiciona classe 'gallery-item' e data-attributes para o lightbox
-        `<button class="gallery-item overflow-hidden rounded-lg shadow-lg group" data-gallery-src="${photoUrl}" data-gallery-index="${index}">
-            <img src="${photoUrl}" alt="Foto da galeria ${index + 1}" class="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105">
-        </button>`
-    ).join('');
-
+    // MODIFICADO: Esta seção agora renderiza um carrossel em vez de uma grade.
+    // A lógica de clique (lightbox) foi removida, pois o carrossel a substitui.
     return `
         <section id="gallery-section" class="py-20 md:py-28 bg-white">
             <div class="container mx-auto px-6 md:px-8 max-w-5xl">
-                <!-- CORREÇÃO: Usa o título da galeria do banco de dados --><h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.gallery_title || 'Galeria de Fotos'}</h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                    ${galleryItems}
+                <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.gallery_title || 'Galeria de Fotos'}</h2>
+                
+                <!-- Modern Gallery Carousel -->
+                <div class="relative w-full max-w-3xl mx-auto rounded-lg shadow-xl overflow-hidden" style="aspect-ratio: 16 / 10; user-select: none;">
+                    <!-- Imagem principal -->
+                    <img id="modern-gallery-image" src="${data.gallery_photos[0]}" alt="Foto da Galeria" class="w-full h-full object-cover transition-opacity duration-300">
+                    
+                    <!-- Botões de Navegação -->
+                    <button id="modern-gallery-prev" class="gallery-nav-btn absolute left-4 top-1/2 -translate-y-1/2">&#10094;</button>
+                    <button id="modern-gallery-next" class="gallery-nav-btn absolute right-4 top-1/2 -translate-y-1/2">&#10095;</button>
+                    
+                    <!-- Contador -->
+                    <div id="modern-gallery-counter" class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-sm py-1 px-3 rounded-full">
+                        1 / ${data.gallery_photos.length}
+                    </div>
                 </div>
             </div>
         </section>

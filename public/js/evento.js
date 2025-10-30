@@ -80,7 +80,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 1. Foi acedido pela URL premium (isPremiumSlug === true)
         // 2. Ou se tem o parâmetro ?lista=premium
         const priceListType = (isPremiumSlug || urlParams.get('lista') === 'premium') ? 'premium' : 'default';
-        const priceKey = priceListType === 'premium' ? 'value_premium' : 'default';
 
         // Processa os dados para unificar o preço
         const processedData = {
@@ -89,7 +88,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ...gift,
                 // Define o 'value' principal com base na lista, com fallback para o padrão
                 value: (priceListType === 'premium' && gift.value_premium > 0) ? gift.value_premium : (gift.value_default || 0)
-            })).sort((a, b) => a.id - b.id) // Garante a ordem dos presentes
+            })).filter(gift => gift.value > 0) // Filtra presentes com valor 0
         };
         // --- FIM DA LÓGICA DE PREÇO ---
 
@@ -107,8 +106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         populateDynamicContent(processedData);
 
-        // Passa os dados processados para os listeners
-        attachEventListeners(processedData); 
+        attachEventListeners(processedData); // Usa os dados processados
 
         if (pageLoader) {
             pageLoader.style.opacity = '0';
@@ -147,6 +145,7 @@ function attachEventListeners(data) {
     const btnSubmitRsvp = document.getElementById('btn-submit-rsvp');
     
     // --- LÓGICA DO CARRINHO ---
+    // 'data.gifts' aqui já contém os presentes com o 'value' correto e unificado
     let originalGifts = data.gifts || [];
     let cart = [];
     
@@ -161,6 +160,7 @@ function attachEventListeners(data) {
             cartModal.classList.add('hidden');
         }, 300); };
     
+    // O updateCartUI funcionará automaticamente porque 'item.value' já é o preço correto
     const updateCartUI = () => {     
         if (!cartItemsContainer || !cartCount || !cartTotal) return;
         cartItemsContainer.innerHTML = '';
@@ -186,10 +186,12 @@ function attachEventListeners(data) {
             const button = e.target.closest('.add-to-cart-btn, .btn-contribute');
             if (button) {
                 const giftId = Number(button.dataset.id);
+                // Encontra o presente nos 'originalGifts' (que já têm o preço correto)
                 const giftToAdd = originalGifts.find(g => g.id === giftId);
                 if (giftToAdd) {
                     cart.push({ ...giftToAdd, cartItemId: Date.now() + Math.random() });
                     updateCartUI();
+                    openCart(); // Abre o carrinho ao adicionar
                 }
             }
         });
@@ -199,7 +201,7 @@ function attachEventListeners(data) {
         cartItemsContainer.addEventListener('click', (e) => {
              const button = e.target.closest('.remove-item-btn');
              if(button) {
-                 const cartItemIdToRemove = Number(button.dataset.cartItemId);
+                 const cartItemIdToRemove = parseFloat(button.dataset.cartItemId); // Corrigido para parseFloat
                  cart = cart.filter(item => item.cartItemId !== cartItemIdToRemove);
                  updateCartUI();
              }
@@ -217,6 +219,8 @@ function attachEventListeners(data) {
             btnCheckout.textContent = 'Processando...';
             btnCheckout.disabled = true;
 
+            // Prepara os itens do carrinho para o checkout
+            // O servidor espera um campo 'value', que já está correto
             const cartItemsForCheckout = cart.map(item => ({
                 id: item.id,
                 title: item.title,
@@ -255,47 +259,65 @@ function attachEventListeners(data) {
         });
     }
 
-    // --- LÓGICA DO RSVP ---
-    if (btnSubmitRsvp) {
-        btnSubmitRsvp.addEventListener('click', async () => {
-            const rsvpName = document.getElementById('rsvp-name');
-            const rsvpGuests = document.getElementById('rsvp-guests');
-            const rsvpMessage = document.getElementById('rsvp-message');
-            const attendingRadio = document.querySelector('input[name="attending"]:checked');
-            const rsvpSection = document.getElementById('rsvp-section');
+    // --- LÓGICA DO CAROUSEL (MODERNO) ---
+    const modernGalleryImage = document.getElementById('modern-gallery-image');
+    const btnModernPrev = document.getElementById('modern-gallery-prev');
+    const btnModernNext = document.getElementById('modern-gallery-next');
+    const modernGalleryCounter = document.getElementById('modern-gallery-counter');
+    const galleryPhotosCarousel = data.gallery_photos || [];
+    let currentCarouselIndex = 0;
 
-            if (!rsvpName || !rsvpGuests || !rsvpMessage) return;
-
-            if (!rsvpName.value || !attendingRadio) {
-                return alert("Por favor, preencha o seu nome e confirme a sua presença.");
-            }
-
-            btnSubmitRsvp.disabled = true;
-            btnSubmitRsvp.textContent = "Enviando...";
-
-            const rsvpData = {
-                event_id: data.id,
-                guest_name: rsvpName.value,
-                is_attending: attendingRadio.value === 'yes',
-                plus_ones: parseInt(rsvpGuests.value) || 0,
-                message: rsvpMessage.value,
-            };
+    if (modernGalleryImage && galleryPhotosCarousel.length > 0) {
+        
+        const showModernPhoto = (index) => {
+            if (index < 0) index = galleryPhotosCarousel.length - 1; // Loop
+            if (index >= galleryPhotosCarousel.length) index = 0; // Loop
             
-            const { error } = await supabaseClient.from('rsvps').insert([rsvpData]);
-
-            if (error) {
-                alert("Ocorreu um erro ao enviar a sua confirmação. Por favor, tente novamente.");
-                btnSubmitRsvp.disabled = false;
-                btnSubmitRsvp.textContent = "Enviar Confirmação";
-            } else {
-                if (rsvpSection) {
-                    rsvpSection.innerHTML = '<div class="text-center"><p class="text-lg text-green-600 font-semibold">Obrigado! A sua presença foi registada com sucesso.</p></div>';
-                }
+            currentCarouselIndex = index;
+            
+            // Efeito de fade
+            modernGalleryImage.style.opacity = '0';
+            setTimeout(() => {
+                modernGalleryImage.src = galleryPhotosCarousel[index];
+                modernGalleryImage.style.opacity = '1';
+            }, 300); // Deve corresponder à duração da transição
+            
+            if (modernGalleryCounter) {
+                modernGalleryCounter.textContent = `${index + 1} / ${galleryPhotosCarousel.length}`;
             }
+        };
+
+        if (btnModernPrev) {
+            btnModernPrev.addEventListener('click', () => showModernPhoto(currentCarouselIndex - 1));
+        }
+        if (btnModernNext) {
+            btnModernNext.addEventListener('click', () => showModernPhoto(currentCarouselIndex + 1));
+        }
+        
+        // Suporte a swipe
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        modernGalleryImage.parentElement.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        modernGalleryImage.parentElement.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
         });
+        
+        const handleSwipe = () => {
+            if (touchEndX < touchStartX - 50) { // Swiped left
+                showModernPhoto(currentCarouselIndex + 1);
+            }
+            if (touchEndX > touchStartX + 50) { // Swiped right
+                showModernPhoto(currentCarouselIndex - 1);
+            }
+        };
     }
 
-    // --- LÓGICA DO LIGHTBOX DA GALERIA ---
+    // --- LÓGICA DO LIGHTBOX DA GALERIA (Layout Clássico) ---
     const lightbox = document.getElementById('gallery-lightbox');
     const lightboxImage = document.getElementById('lightbox-image');
     const btnClose = document.getElementById('lightbox-close');
@@ -310,51 +332,57 @@ function attachEventListeners(data) {
     if (lightbox && galleryContainer && galleryPhotos.length > 0) {
         
         const showPhoto = (index) => {
-            if (index < 0 || index >= galleryPhotos.length) return;
+            if (index < 0) index = galleryPhotos.length - 1; // Loop
+            if (index >= galleryPhotos.length) index = 0; // Loop
+            
             currentPhotoIndex = index;
-            if (lightboxImage) lightboxImage.src = galleryPhotos[index];
-            if (btnPrev) btnPrev.style.display = (index === 0) ? 'none' : 'block';
-            if (btnNext) btnNext.style.display = (index === galleryPhotos.length - 1) ? 'none' : 'block';
+            
+            // Efeito de fade-out e scale-down
+            if(lightboxImage) {
+                 lightboxImage.style.opacity = '0';
+                 lightboxImage.style.transform = 'scale(0.95)';
+            }
+           
+            setTimeout(() => {
+                if(lightboxImage) {
+                    lightboxImage.src = galleryPhotos[index];
+                    // Efeito de fade-in e scale-up
+                    lightboxImage.style.opacity = '1';
+                    lightboxImage.style.transform = 'scale(1)';
+                }
+            }, 150); // Tempo para a transição
         };
 
-        const openLightbox = (index) => {
-            showPhoto(index);
-            lightbox.classList.remove('hidden');
-            lightbox.classList.remove('opacity-0', 'pointer-events-none'); // Torna visível
-            lightbox.classList.add('opacity-100');
-            if (lightboxImage) lightboxImage.classList.add('scale-100');
-        };
+        galleryContainer.addEventListener('click', (e) => {
+            const galleryItem = e.target.closest('.gallery-item');
+            if (galleryItem) {
+                const index = parseInt(galleryItem.dataset.galleryIndex, 10);
+                showPhoto(index);
+                lightbox.classList.remove('hidden');
+                setTimeout(() => {
+                    lightbox.style.opacity = '1';
+                    lightbox.style.pointerEvents = 'auto';
+                }, 10);
+            }
+        });
 
         const closeLightbox = () => {
-            lightbox.classList.remove('opacity-100');
-            lightbox.classList.add('opacity-0', 'pointer-events-none'); // Oculta
-            if (lightboxImage) lightboxImage.classList.remove('scale-100');
-            setTimeout(() => lightbox.classList.add('hidden'), 300); // Adiciona hidden após a transição
+            lightbox.style.opacity = '0';
+            lightbox.style.pointerEvents = 'none';
+            if(lightboxImage) lightboxImage.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                lightbox.classList.add('hidden');
+            }, 300); // Duração da transição
         };
 
-        // Listener delegado no container da galeria
-        galleryContainer.addEventListener('click', (e) => {
-            const item = e.target.closest('.gallery-item');
-            if (item) {
-                const index = parseInt(item.dataset.galleryIndex, 10);
-                openLightbox(index);
-            }
+        if(btnClose) btnClose.addEventListener('click', closeLightbox);
+        if(btnPrev) btnPrev.addEventListener('click', () => showPhoto(currentPhotoIndex - 1));
+        if(btnNext) btnNext.addEventListener('click', () => showPhoto(currentPhotoIndex + 1));
+        if(lightbox) lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) closeLightbox();
         });
 
-        if (btnClose) btnClose.addEventListener('click', closeLightbox);
-        if (btnPrev) btnPrev.addEventListener('click', () => showPhoto(currentPhotoIndex - 1));
-        if (btnNext) btnNext.addEventListener('click', () => showPhoto(currentPhotoIndex + 1));
-        
-        // Fechar ao clicar fora da imagem
-        lightbox.addEventListener('click', (e) => {
-            if (e.target === lightbox) {
-                closeLightbox();
-            }
-        });
-
-        // Controles de teclado
         document.addEventListener('keydown', (e) => {
-            // Verifica se o lightbox está visível (não contém 'hidden')
             if (!lightbox.classList.contains('hidden')) {
                 if (e.key === 'Escape') closeLightbox();
                 if (e.key === 'ArrowLeft') showPhoto(currentPhotoIndex - 1);
@@ -365,49 +393,91 @@ function attachEventListeners(data) {
 
     // --- LÓGICA DE ORDENAÇÃO DE PRESENTES ---
     const sortSelect = document.getElementById('sort-gifts');
-    if (sortSelect && giftListContainer) {
-        // Encontra os itens de presente reais
-        const giftItems = Array.from(giftListContainer.querySelectorAll('.gift-card'));
-
-        // Se não houver presentes (só o texto "não foi adicionada"), não faz nada
-        if (giftItems.length === 0 || giftItems[0].tagName === 'P') {
-             sortSelect.style.display = 'none'; // Esconde o seletor se não há presentes
-             return;
+    if (sortSelect) {
+        // Esconde a ordenação se não houver presentes
+        if (originalGifts.length === 0) {
+            sortSelect.classList.add('hidden');
         }
 
-        const renderSortedGifts = (sortFunction) => {
-            giftItems.sort(sortFunction);
-            giftItems.forEach(item => giftListContainer.appendChild(item)); // Reanexa na nova ordem
+        const renderSortedGifts = (gifts) => {
+            if (!giftListContainer) return;
+            giftListContainer.innerHTML = gifts.map(gift => {
+                 // Reutiliza a renderização do layout clássico, se disponível
+                 // Esta é uma simplificação; idealmente, a função de renderização de item seria separada.
+                 // Para este caso, vamos recriar o HTML básico do 'classico.js'.
+                 return `
+                    <div class="border rounded-lg overflow-hidden card-shadow bg-white">
+                        <img src="${gift.image_url || 'https://placehold.co/600x400/EFEAE6/967E76?text=Presente'}" alt="${gift.title}" class="w-full h-48 object-cover">
+                        <div class="p-6 text-center">
+                            <h3 class="text-xl font-serif" style="color: ${data.title_color || '#333333'};">${gift.title}</h3>
+                            <p class="text-gray-600 my-2">${gift.description || ''}</p>
+                            <p class="text-2xl font-semibold my-4" style="color: ${data.primary_color || '#D9A8A4'};">R$ ${Number(gift.value).toFixed(2).replace('.', ',')}</p>
+                            <button data-id="${gift.id}" class="add-to-cart-btn btn-primary w-full">Adicionar ao Carrinho</button>
+                        </div>
+                    </div>
+                 `;
+            }).join('');
         };
-
-        sortSelect.addEventListener('change', (e) => {
-            const sortType = e.target.value;
-            const getGiftValue = (el) => parseFloat(el.querySelector('p.text-gray-500').textContent.replace('R$ ', '').replace(',', '.'));
-            const getGiftName = (el) => el.querySelector('h3').textContent;
-
-            switch (sortType) {
+        
+        sortSelect.addEventListener('change', () => {
+            let sortedGifts = [...originalGifts];
+            switch (sortSelect.value) {
                 case 'price-asc':
-                    renderSortedGifts((a, b) => getGiftValue(a) - getGiftValue(b));
+                    sortedGifts.sort((a, b) => a.value - b.value);
                     break;
                 case 'price-desc':
-                    renderSortedGifts((a, b) => getGiftValue(b) - getGiftValue(a));
+                    sortedGifts.sort((a, b) => b.value - b.value);
                     break;
                 case 'az':
-                    renderSortedGifts((a, b) => getGiftName(a).localeCompare(getGiftName(b)));
+                    sortedGifts.sort((a, b) => a.title.localeCompare(b.title));
                     break;
                 case 'za':
-                    renderSortedGifts((a, b) => getGiftName(b).localeCompare(getGiftName(a)));
+                    sortedGifts.sort((a, b) => b.title.localeCompare(a.title));
                     break;
-                default:
-                    // Retorna à ordem original (por ID, que foi como 'data.gifts' foi ordenado)
-                     renderSortedGifts((a, b) => {
-                        const idA = Number(a.querySelector('button').dataset.id);
-                        const idB = Number(b.querySelector('button').dataset.id);
-                        return idA - idB;
-                    });
+            }
+            renderSortedGifts(sortedGifts);
+        });
+    }
+    
+    // --- LÓGICA DO RSVP ---
+    if (btnSubmitRsvp) {
+        btnSubmitRsvp.addEventListener('click', async () => {
+            const rsvpName = document.getElementById('rsvp-name');
+            const rsvpGuests = document.getElementById('rsvp-guests');
+            const rsvpMessage = document.getElementById('rsvp-message');
+            const attendingRadio = document.querySelector('input[name="attending"]:checked');
+            const rsvpSection = document.getElementById('rsvp-section');
+
+            if (!rsvpName || !attendingRadio) {
+                return alert("Por favor, preencha o seu nome e confirme a sua presença.");
+            }
+            
+            // Garante que rsvpGuests exista ou define um valor padrão
+            const guestsValue = rsvpGuests ? (parseInt(rsvpGuests.value) || 0) : 0;
+
+            btnSubmitRsvp.disabled = true;
+            btnSubmitRsvp.textContent = "Enviando...";
+
+            const rsvpData = {
+                event_id: data.id,
+                guest_name: rsvpName.value,
+                is_attending: attendingRadio.value === 'yes',
+                plus_ones: guestsValue, // Usa o valor seguro
+                message: rsvpMessage ? rsvpMessage.value : '', // Garante que rsvpMessage exista
+            };
+            
+            const { error } = await supabaseClient.from('rsvps').insert([rsvpData]);
+
+            if (error) {
+                alert("Ocorreu um erro ao enviar a sua confirmação. Por favor, tente novamente.");
+                btnSubmitRsvp.disabled = false;
+                btnSubmitRsvp.textContent = "Enviar Confirmação";
+            } else {
+                if (rsvpSection) {
+                    rsvpSection.innerHTML = `<div class="text-center p-8"><p class="text-lg text-green-600 font-semibold">Obrigado! A sua presença foi registada com sucesso.</p></div>`;
+                }
             }
         });
     }
-
 }
 
