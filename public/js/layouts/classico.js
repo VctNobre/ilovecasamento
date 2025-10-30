@@ -26,8 +26,9 @@ function createStorySection(data) {
         <section id="story-section" class="py-16 md:py-20 border-t">
             <div class="container mx-auto px-6 md:px-8 max-w-4xl text-center">
                 <h2 class="text-3xl md:text-4xl font-serif mb-12" style="color: ${data.title_color || '#333333'};">${data.story_title_1 || 'Nossa História'}</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-12">
-                    <div class="md:w-full">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-8 items-center mb-12">
+                     <div class="md:col-span-3">
+                    
                          ${renderStoryCarousel(
                             data.story_images_1,
                             'story-1-carousel-container',
@@ -38,17 +39,17 @@ function createStorySection(data) {
                             'https://placehold.co/600x400/EADFD6/967E76?text=Foto+1'
                         )}
                     </div>
-                    <div class="text-gray-600 text-left">
+                    <div class="md:col-span-2 text-gray-600 text-left">
                         <p class="leading-relaxed">${data.story_how_we_met ? data.story_how_we_met.replace(/\n/g, '<br>') : ''}</p>
                     </div>
                 </div>
                 
                 <h2 class="text-3xl md:text-4xl font-serif mt-16 mb-12" style="color: ${data.title_color || '#333333'};">${data.story_title_2 || 'O Pedido'}</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                     <div class="text-gray-600 text-left md:order-2">
+                <<div class="grid grid-cols-1 md:grid-cols-5 gap-8 items-center">
+                   <div class="md:col-span-2 text-gray-600 text-left md:order-2">
                         <p class="leading-relaxed">${data.story_proposal ? data.story_proposal.replace(/\n/g, '<br>') : ''}</p>
                     </div>
-                    <div class="md:order-1 md:w-full">
+                 <div class="md:col-span-3 md:order-1">
                         ${renderStoryCarousel(
                             data.story_images_2,
                             'story-2-carousel-container',

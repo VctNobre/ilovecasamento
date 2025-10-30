@@ -27,10 +27,10 @@ function createStorySection(data) {
                 
                 <!-- Como nos Conhecemos -->
                 <div class="flex flex-col md:flex-row items-center gap-12 md:gap-16 mb-20">
-                    <div class="md:w-1/2 text-gray-600 text-center md:text-left">
+                    <div class="md:w-2/5 text-gray-600 text-center md:text-left">
                         <p class="leading-relaxed">${data.story_how_we_met ? data.story_how_we_met.replace(/\n/g, '<br>') : 'Texto sobre como nos conhecemos...'}</p>
                     </div>
-                    <div class="md:w-1/2">
+                    <div class="md:w-3/5">
                         ${renderStoryCarousel(
                             data.story_images_1,
                             'story-1-carousel-container',
@@ -46,10 +46,10 @@ function createStorySection(data) {
                 <!-- O Pedido -->
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.story_title_2 || 'O Pedido'}</h2>
                 <div class="flex flex-col md:flex-row-reverse items-center gap-12 md:gap-16">
-                    <div class="md:w-1/2 text-gray-600 text-center md:text-left">
+                    <div class="md:w-2/5 text-gray-600 text-center md:text-left">
                         <p class="leading-relaxed">${data.story_proposal ? data.story_proposal.replace(/\n/g, '<br>') : 'Texto sobre o pedido de casamento...'}</p>
                     </div>
-                    <div class="md:w-1/2">
+                    <div class="md:w-3/5">
                         ${renderStoryCarousel(
                             data.story_images_2,
                             'story-2-carousel-container',
