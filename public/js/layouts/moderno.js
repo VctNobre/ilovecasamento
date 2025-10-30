@@ -163,10 +163,6 @@ function createRsvpSection(data) {
                         </div>
                     </fieldset>
                     <div>
-                        <label for="rsvp-guests" class="block text-sm font-medium text-gray-700 mb-1">Acompanhantes</label>
-                        <input type="number" id="rsvp-guests" min="0" value="0" class="rsvp-input">
-                    </div>
-                    <div>
                         <label for="rsvp-message" class="block text-sm font-medium text-gray-700 mb-1">Mensagem</label>
                         <textarea id="rsvp-message" rows="4" class="rsvp-input"></textarea>
                     </div>
