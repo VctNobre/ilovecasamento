@@ -100,3 +100,11 @@ body.theme-moderno {
     /* Adiciona transição para o fade */
     transition: opacity 0.3s ease-in-out;
 }
+
+/* Efeito de Papel Rasgado (Aplicado somente ao layout moderno) */
+#hero-section {
+    /* O SVG <clipPath> com id="torn-paper-edge" deve
+       estar presente no 'evento.html' para que isto funcione.
+    */
+    clip-path: url(#torn-paper-edge);
+}
