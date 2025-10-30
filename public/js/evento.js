@@ -451,7 +451,7 @@ function attachEventListeners(data) {
                         <div class="border rounded-lg overflow-hidden card-shadow bg-white">
                             <img src="${gift.image_url || 'https://placehold.co/600x400/EFEAE6/967E76?text=Presente'}" alt="${gift.title}" class="w-full h-48 object-cover">
                             <div class="p-6 text-center">
-                                <h3 class-="text-xl font-serif" style="color: ${data.title_color || '#333333'};">${gift.title}</h3>
+                                <h3 class="text-xl font-serif" style="color: ${data.title_color || '#333333'};">${gift.title}</h3>
                                 ${gift.description ? `<p class="text-gray-600 my-2 text-sm">${gift.description}</p>` : ''}
                                 <p class="text-2xl font-semibold my-4" style="color: ${data.primary_color || '#D9A8A4'};">R$ ${Number(gift.value).toFixed(2).replace('.', ',')}</p>
                                 <button data-id="${gift.id}" class="add-to-cart-btn btn-primary w-full">Adicionar ao Carrinho</button>
@@ -501,7 +501,7 @@ function attachEventListeners(data) {
     if (btnSubmitRsvp) {
         btnSubmitRsvp.addEventListener('click', async () => {
             const rsvpName = document.getElementById('rsvp-name');
-            const rsvpGuests = document.getElementById('rsvp-guests');
+            // const rsvpGuests = document.getElementById('rsvp-guests'); // CAMPO REMOVIDO
             const rsvpMessage = document.getElementById('rsvp-message');
             const attendingRadio = document.querySelector('input[name="attending"]:checked');
             const rsvpSection = document.getElementById('rsvp-section');
@@ -510,8 +510,8 @@ function attachEventListeners(data) {
                 return alert("Por favor, preencha o seu nome e confirme a sua presença.");
             }
             
-            // Garante que rsvpGuests exista ou define um valor padrão
-            const guestsValue = rsvpGuests ? (parseInt(rsvpGuests.value) || 0) : 0;
+            // Lógica de "acompanhantes" removida
+            // const guestsValue = rsvpGuests ? (parseInt(rsvpGuests.value) || 0) : 0; // REMOVIDO
 
             btnSubmitRsvp.disabled = true;
             btnSubmitRsvp.textContent = "Enviando...";
@@ -520,7 +520,8 @@ function attachEventListeners(data) {
                 event_id: data.id,
                 guest_name: rsvpName.value,
                 is_attending: attendingRadio.value === 'yes',
-                plus_ones: guestsValue, // Usa o valor seguro
+                // Define plus_ones como 1 se for, 0 se não for.
+                plus_ones: attendingRadio.value === 'yes' ? 1 : 0, 
                 message: rsvpMessage ? rsvpMessage.value : '', // Garante que rsvpMessage exista
             };
             

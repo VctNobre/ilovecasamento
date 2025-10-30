@@ -1,26 +1,63 @@
 // public/js/layouts/classico.js
 
+// --- Seção da História ---
 function createStorySection(data) {
     if (!data.story_section_enabled) return '';
+
+    // Helper para renderizar carrossel ou placeholder da História
+    const renderStoryCarousel = (images, containerId, imageId, prevId, nextId, counterId, placeholder) => {
+        if (!images || images.length === 0) {
+            return `<img src="${placeholder}" alt="Foto da história" class="rounded-lg shadow-xl w-full">`;
+        }
+        // Note: IDs precisam ser únicos, então usamos os IDs passados como parâmetros
+        return `
+            <div id="${containerId}" class="relative w-full rounded-lg shadow-xl overflow-hidden" style="aspect-ratio: 16 / 10; user-select: none;">
+                <img id="${imageId}" src="${images[0]}" alt="Foto da Galeria" class="w-full h-full object-cover transition-opacity duration-300">
+                <button id="${prevId}" class="gallery-nav-btn absolute left-4 top-1/2 -translate-y-1/2">&#10094;</button>
+                <button id="${nextId}" class="gallery-nav-btn absolute right-4 top-1/2 -translate-y-1/2">&#10095;</button>
+                <div id="${counterId}" class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-sm py-1 px-3 rounded-full">
+                    1 / ${images.length}
+                </div>
+            </div>
+        `;
+    };
 
     return `
         <section id="story-section" class="py-16 md:py-20 border-t">
             <div class="container mx-auto px-6 md:px-8 max-w-4xl text-center">
                 <h2 class="text-3xl md:text-4xl font-serif mb-12" style="color: ${data.title_color || '#333333'};">${data.story_title_1 || 'Nossa História'}</h2>
-                <!-- CORREÇÃO: Erro de digitação 'class_' corrigido para 'class' -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-12">
-                    <img src="${data.story_image_1_url || 'https://placehold.co/600x400/EADFD6/967E76?text=Foto'}" alt="Como nos conhecemos" class="rounded-lg shadow-lg w-full">
+                    <div class="md:w-full">
+                         ${renderStoryCarousel(
+                            data.story_images_1,
+                            'story-1-carousel-container',
+                            'story-1-gallery-image',
+                            'story-1-gallery-prev',
+                            'story-1-gallery-next',
+                            'story-1-gallery-counter',
+                            'https://placehold.co/600x400/EADFD6/967E76?text=Foto+1'
+                        )}
+                    </div>
                     <div class="text-gray-600 text-left">
                         <p class="leading-relaxed">${data.story_how_we_met ? data.story_how_we_met.replace(/\n/g, '<br>') : ''}</p>
                     </div>
                 </div>
-                <h2 class="text-3xl md:text-4xl font-serif mb-12" style="color: ${data.title_color || '#333333'};">${data.story_title_2 || 'O Pedido'}</h2>
+                
+                <h2 class="text-3xl md:text-4xl font-serif mt-16 mb-12" style="color: ${data.title_color || '#333333'};">${data.story_title_2 || 'O Pedido'}</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                      <div class="text-gray-600 text-left md:order-2">
                         <p class="leading-relaxed">${data.story_proposal ? data.story_proposal.replace(/\n/g, '<br>') : ''}</p>
                     </div>
-                    <div class="md:order-1">
-                        <img src="${data.story_image_2_url || 'https://placehold.co/600x400/EADFD6/967E76?text=Foto'}" alt="O pedido" class="rounded-lg shadow-lg w-full">
+                    <div class="md:order-1 md:w-full">
+                        ${renderStoryCarousel(
+                            data.story_images_2,
+                            'story-2-carousel-container',
+                            'story-2-gallery-image',
+                            'story-2-gallery-prev',
+                            'story-2-gallery-next',
+                            'story-2-gallery-counter',
+                            'https://placehold.co/600x400/EADFD6/967E76?text=Foto+2'
+                        )}
                     </div>
                 </div>
             </div>
@@ -28,11 +65,12 @@ function createStorySection(data) {
     `;
 }
 
+// --- Seção da Galeria (com Lightbox) ---
 function createGallerySection(data) {
     if (!data.gallery_section_enabled || !data.gallery_photos || data.gallery_photos.length === 0) return '';
     
-    // Adiciona 'gallery-item' e data-attributes para o lightbox
     const galleryItems = data.gallery_photos.map((photoUrl, index) => 
+        // Adiciona classe 'gallery-item' e data-attributes para o lightbox
         `<button class="gallery-item w-full h-full overflow-hidden rounded-lg shadow-md group" data-gallery-src="${photoUrl}" data-gallery-index="${index}">
             <img src="${photoUrl}" alt="Foto da galeria ${index + 1}" class="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105">
         </button>`
@@ -41,7 +79,6 @@ function createGallerySection(data) {
     return `
         <section id="gallery-section" class="py-16 md:py-20 border-t bg-gray-50">
             <div class="container mx-auto px-6 md:px-8 max-w-5xl">
-                <!-- Usa o título customizável ou o padrão -->
                 <h2 class="text-3xl md:text-4xl font-serif text-center mb-12" style="color: ${data.title_color || '#333333'};">${data.gallery_title || 'Nossos Momentos'}</h2>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     ${galleryItems}
@@ -51,22 +88,28 @@ function createGallerySection(data) {
     `;
 }
 
-// NOVA FUNÇÃO: Para renderizar os presentes
+// --- Seção de Presentes ---
 function createGiftsSection(data) {
     const introText = data.gifts_intro_text 
-        ? `<p class="text-gray-600 max-w-2xl mx-auto mb-10 text-center leading-relaxed">${data.gifts_intro_text.replace(/\n/g, '<br>')}</p>` 
+        ? `<p class="text-gray-600 max-w-3xl mx-auto mb-12 text-center leading-relaxed">${data.gifts_intro_text.replace(/\n/g, '<br>')}</p>` 
         : '';
+    
+    let giftItems = '';
 
-    let giftItems = `<p class="text-gray-500 col-span-1 md:col-span-3">A lista de presentes ainda não foi adicionada.</p>`;
-
-    if (data.gifts && data.gifts.length > 0) {
-        giftItems = data.gifts.map(gift => `
-            <div class="gift-card text-left border rounded-lg shadow-md overflow-hidden">
-                <img src="${gift.image_url || 'https://placehold.co/400x300/F9F5F2/967E76?text=Presente'}" alt="${gift.title}" class="w-full h-48 object-cover">
-                <div class="p-4">
-                    <h3 class="text-lg font-semibold text-gray-700">${gift.title}</h3>
-                    <p class="text-gray-500 mb-4">R$ ${Number(gift.value).toFixed(2).replace('.', ',')}</p>
-                    <button data-id="${gift.id}" class="add-to-cart-btn btn-primary w-full">Contribuir</button>
+    if (!data.gifts || data.gifts.length === 0) {
+        giftItems = '<p class="text-center text-gray-500 col-span-1 md:col-span-3">A lista de presentes ainda não foi adicionada.</p>';
+    } else {
+        // Ordenação padrão inicial (pode ser alterada pelo select)
+        giftItems = data.gifts
+            // .sort((a, b) => a.value - b.value) // A ordenação agora é feita pelo evento.js
+            .map(gift => `
+            <div class="border rounded-lg overflow-hidden card-shadow bg-white">
+                <img src="${gift.image_url || 'https://placehold.co/600x400/EFEAE6/967E76?text=Presente'}" alt="${gift.title}" class="w-full h-48 object-cover">
+                <div class="p-6 text-center">
+                    <h3 class="text-xl font-serif" style="color: ${data.title_color || '#333333'};">${gift.title}</h3>
+                    ${gift.description ? `<p class="text-gray-600 my-2 text-sm">${gift.description}</p>` : ''}
+                    <p class="text-2xl font-semibold my-4" style="color: ${data.primary_color || '#D9A8A4'};">R$ ${Number(gift.value).toFixed(2).replace('.', ',')}</p>
+                    <button data-id="${gift.id}" class="add-to-cart-btn btn-primary w-full">Adicionar ao Carrinho</button>
                 </div>
             </div>
         `).join('');
@@ -74,13 +117,12 @@ function createGiftsSection(data) {
 
     return `
         <section id="gifts-section" class="gifts-section pt-16 border-t">
-            <h2 class="text-3xl md:text-4xl mb-6 font-serif" style="color: ${data.title_color || '#333333'};">Nossa Lista de Presentes</h2>
+            <h2 class="text-3xl md:text-4xl mb-6 font-serif text-center" style="color: ${data.title_color || '#333333'};">Nossa Lista de Presentes</h2>
             ${introText}
             <div class="flex justify-end mb-6">
                 <select id="sort-gifts" class="input-styled">
-                    <option value="default">Ordenar por</option>
-                    <option value="price-asc">Menor Preço</option>
-                    <option value="price-desc">Maior Preço</option>
+                    <option value="price-asc">Ordenar por Menor Preço</option>
+                    <option value="price-desc">Ordenar por Maior Preço</option>
                     <option value="az">Nome (A-Z)</option>
                     <option value="za">Nome (Z-A)</option>
                 </select>
@@ -92,6 +134,7 @@ function createGiftsSection(data) {
     `;
 }
 
+// --- Seção de RSVP (Confirmação de Presença) ---
 function createRsvpSection(data) {
     if (!data.rsvp_enabled) return '';
 
@@ -111,10 +154,7 @@ function createRsvpSection(data) {
                             <label class="flex items-center text-gray-600 cursor-pointer"><input type="radio" name="attending" value="no" class="h-4 w-4 mr-2"><span class="ml-2">Não poderei comparecer</span></label>
                         </div>
                     </fieldset>
-                    <div>
-                        <label for="rsvp-guests" class="block text-sm font-medium text-gray-700 mb-1">Número de convidados (incluindo você)</label>
-                        <input type="number" id="rsvp-guests" min="1" value="1" class="input-styled w-full">
-                    </div>
+                    <!-- CAMPO DE NÚMERO DE CONVIDADOS REMOVIDO -->
                     <div>
                         <label for="rsvp-message" class="block text-sm font-medium text-gray-700 mb-1">Deixe uma mensagem para os noivos (opcional)</label>
                         <textarea id="rsvp-message" rows="4" class="input-styled w-full"></textarea>
@@ -128,15 +168,20 @@ function createRsvpSection(data) {
     `;
 }
 
+// --- Renderização Principal ---
 export function render(data) {
-    // Formata a data
+     // Formata a data
     const formattedDate = data.event_date 
         ? new Date(data.event_date + 'T12:00:00').toLocaleDateString('pt-BR', {
-            day: 'numeric', 
+            day: '2-digit', 
             month: 'long', 
             year: 'numeric' 
           })
-        : '';
+        : 'Data do Evento';
+
+    // Adiciona a classe de tema ao body
+    document.body.classList.add('theme-padrao');
+    document.body.classList.remove('theme-moderno'); // Garante que não está no modo moderno
 
     return `
         <!-- Secção de Capa (Hero) -->
@@ -155,22 +200,22 @@ export function render(data) {
             <main id="main-content" class="bg-white rounded-xl p-8 md:p-12 text-center card-shadow">
                 <section id="intro-section" class="mb-16">
                     <div id="intro-text-container" class="text-gray-600 text-lg max-w-3xl mx-auto leading-relaxed text-center space-y-6">
-                        <p>${data.intro_text ? data.intro_text.replace(/\n/g, '<br>') : ''}</p>
-                        <p class="font-signature text-4xl" style="color: ${data.primary_color || '#D9A8A4'};">${data.signature || ''}</p>
+                        ${data.intro_text ? data.intro_text.replace(/\n/g, '<p class="mt-4"></p>') : ''}
+                        <p class="font-signature text-4xl mt-8" style="color: ${data.primary_color || '#D9A8A4'};">${data.signature || ''}</p>
                     </div>
                 </section>
 
                 ${createStorySection(data)}
                 ${createGallerySection(data)}
-                ${createGiftsSection(data)} <!-- CORREÇÃO: Chama a nova função de presentes -->
+                ${createGiftsSection(data)}
                 ${createRsvpSection(data)}
             </main>
         </div>
          <footer class="py-8 text-center text-gray-600">
             <p>Com amor, ${data.signature || ''} ♥</p>
         </footer>
-
-        <!-- Lightbox Modal da Galeria -->
+        
+        <!-- Lightbox da Galeria (HTML Oculto) -->
         <div id="gallery-lightbox" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-4 transition-opacity duration-300 opacity-0 pointer-events-none">
             <button id="lightbox-close" class="absolute top-4 right-4 text-white text-5xl opacity-80 hover:opacity-100">&times;</button>
             <button id="lightbox-prev" class="absolute left-4 md:left-10 text-white text-4xl opacity-80 hover:opacity-100">&#10094;</button>

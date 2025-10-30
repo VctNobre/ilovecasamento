@@ -134,7 +134,16 @@ function createGiftsSection(data) {
         <section id="gifts-section" class="py-20 md:py-28">
              <div class="container mx-auto px-6 md:px-8 max-w-5xl">
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">Lista de Presentes</h2>
-                ${introText} <!-- Adicionado aqui --><div id="gift-list-container" class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
+                ${introText} <!-- Adicionado aqui -->
+                <div class="flex justify-end mb-6">
+                     <select id="sort-gifts" class="input-styled">
+                        <option value="price-asc">Ordenar por Menor Preço</option>
+                        <option value="price-desc">Ordenar por Maior Preço</option>
+                        <option value="az">Nome (A-Z)</option>
+                        <option value="za">Nome (Z-A)</option>
+                    </select>
+                </div>
+                <div id="gift-list-container" class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
                     ${giftItems}
                 </div>
             </div>
@@ -162,10 +171,7 @@ function createRsvpSection(data) {
                             <label class="flex items-center text-gray-600"><input type="radio" name="attending" value="no" class="h-4 w-4 mr-2"><span class="ml-2">Não</span></label>
                         </div>
                     </fieldset>
-                    <div>
-                        <label for="rsvp-guests" class="block text-sm font-medium text-gray-700 mb-1">Acompanhantes</label>
-                        <input type="number" id="rsvp-guests" min="0" value="0" class="rsvp-input">
-                    </div>
+                    <!-- CAMPO DE ACOMPANHANTES REMOVIDO -->
                     <div>
                         <label for="rsvp-message" class="block text-sm font-medium text-gray-700 mb-1">Mensagem</label>
                         <textarea id="rsvp-message" rows="4" class="rsvp-input"></textarea>
@@ -188,6 +194,10 @@ export function render(data) {
             year: 'numeric' 
           })
         : 'Data do Casamento';
+
+    // Adiciona a classe de tema ao body
+    document.body.classList.add('theme-moderno');
+    document.body.classList.remove('theme-padrao'); // Garante que não está no modo clássico
 
     return `
         <!-- Cabeçalho com Imagem de Capa e Overlay --><header class="relative w-full h-[70vh] md:h-[80vh] overflow-hidden">
@@ -223,7 +233,8 @@ export function render(data) {
             <p>Com amor, ${data.signature || 'Anfitriões'} ♥</p>
         </footer>
 
-        <!-- Adicionando o HTML do Lightbox para consistência (ele é controlado pelo evento.js) --><div id="gallery-lightbox" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-4 transition-opacity duration-300 opacity-0 pointer-events-none">
+        <!-- O lightbox não é usado pelo layout moderno (que tem o carrossel), mas o HTML está aqui para consistência do evento.js -->
+        <div id="gallery-lightbox" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-4 transition-opacity duration-300 opacity-0 pointer-events-none">
             <button id="lightbox-close" class="absolute top-4 right-4 text-white text-5xl opacity-80 hover:opacity-100">&times;</button>
             <button id="lightbox-prev" class="absolute left-4 md:left-10 text-white text-4xl opacity-80 hover:opacity-100">&#10094;</button>
             <button id="lightbox-next" class="absolute right-4 md:right-10 text-white text-4xl opacity-80 hover:opacity-100">&#10095;</button>

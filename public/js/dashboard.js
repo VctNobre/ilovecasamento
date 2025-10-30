@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- LÓGICA DO PAINEL "CONVIDADOS" (RSVP) ---
-    const guestsPanel = {
+       const guestsPanel = {
         rsvpListContainer: document.getElementById('rsvp-list-container'),
         async loadRsvpData() {
             if (!this.rsvpListContainer || !eventData) {
@@ -151,7 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="border p-4 rounded-lg ${rsvp.is_attending ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
                     <p class="font-bold text-gray-800">${rsvp.guest_name}</p>
                     <p class="text-sm">Status: ${rsvp.is_attending ? '<span class="font-semibold text-green-700">✅ Confirmado</span>' : '<span class="font-semibold text-red-700">❌ Não poderá ir</span>'}</p>
-                    <p class="text-sm">Total de convidados: ${rsvp.plus_ones}</p>
                     ${rsvp.message ? `<p class="mt-2 text-sm italic text-gray-600">"${rsvp.message}"</p>` : ''}
                 </div>
             `).join('');
