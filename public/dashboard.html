@@ -189,24 +189,18 @@
                                     </div>
                                     <div class="space-y-4">
                                         <div>
-                                            <label for="story-image-1-upload" class="block text-sm font-medium text-gray-600 mb-1">Foto da Seção 1</label>
-                                            <div id="story-image-1-container" class="relative w-full sm:w-auto sm:max-w-xs hidden">
-                                                <img id="story-image-1-preview" class="rounded-md max-h-24 w-full object-cover">
-                                                <button type="button" id="btn-delete-story-1" class="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 leading-none hover:bg-red-700 transition-colors">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                                </button>
+                                            <label for="story-1-photos-upload" class="block text-sm font-medium text-gray-600 mb-1">Fotos da Seção 1 (pode selecionar várias)</label>
+                                            <input type="file" id="story-1-photos-upload" class="input-styled w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[color:var(--primary-color)] file:text-white hover:file:opacity-90" accept="image/*" multiple>
+                                            <div id="story-1-preview-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 mt-4">
+                                                <!-- Previews das fotos da Seção 1 -->
                                             </div>
-                                            <input type="file" id="story-image-1-upload" class="input-styled w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[color:var(--primary-color)] file:text-white hover:file:opacity-90" accept="image/*">
                                         </div>
                                         <div>
-                                            <label for="story-image-2-upload" class="block text-sm font-medium text-gray-600 mb-1">Foto da Seção 2</label>
-                                             <div id="story-image-2-container" class="relative w-full sm:w-auto sm:max-w-xs hidden">
-                                                <img id="story-image-2-preview" class="rounded-md max-h-24 w-full object-cover">
-                                                <button type="button" id="btn-delete-story-2" class="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 leading-none hover:bg-red-700 transition-colors">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                                </button>
+                                            <label for="story-2-photos-upload" class="block text-sm font-medium text-gray-600 mb-1">Fotos da Seção 2 (pode selecionar várias)</label>
+                                            <input type="file" id="story-2-photos-upload" class="input-styled w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[color:var(--primary-color)] file:text-white hover:file:opacity-90" accept="image/*" multiple>
+                                            <div id="story-2-preview-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 mt-4">
+                                                <!-- Previews das fotos da Seção 2 -->
                                             </div>
-                                            <input type="file" id="story-image-2-upload" class="input-styled w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[color:var(--primary-color)] file:text-white hover:file:opacity-90" accept="image/*">
                                         </div>
                                     </div>
                                 </div>
@@ -320,3 +314,4 @@
     <script type="module" src="/js/dashboard.js"></script>
 </body>
 </html>
+

@@ -259,63 +259,99 @@ function attachEventListeners(data) {
         });
     }
 
-    // --- LÓGICA DO CAROUSEL (MODERNO) ---
-    const modernGalleryImage = document.getElementById('modern-gallery-image');
-    const btnModernPrev = document.getElementById('modern-gallery-prev');
-    const btnModernNext = document.getElementById('modern-gallery-next');
-    const modernGalleryCounter = document.getElementById('modern-gallery-counter');
-    const galleryPhotosCarousel = data.gallery_photos || [];
-    let currentCarouselIndex = 0;
+    // --- LÓGICA DE CARROSSEL GENÉRICA (MODERNO) ---
+    const setupCarousel = (containerSelector, imageId, prevId, nextId, counterId, photos) => {
+        const galleryContainer = document.querySelector(containerSelector);
+        const imageEl = document.getElementById(imageId);
+        const btnPrev = document.getElementById(prevId);
+        const btnNext = document.getElementById(nextId);
+        const counterEl = document.getElementById(counterId);
+        const photoList = photos || [];
+        let currentIndex = 0;
 
-    if (modernGalleryImage && galleryPhotosCarousel.length > 0) {
-        
-        const showModernPhoto = (index) => {
-            if (index < 0) index = galleryPhotosCarousel.length - 1; // Loop
-            if (index >= galleryPhotosCarousel.length) index = 0; // Loop
+        if (!galleryContainer || !imageEl || !btnPrev || !btnNext || photoList.length === 0) {
+            if(galleryContainer) galleryContainer.style.display = 'none'; // Esconde se não houver fotos
+            return;
+        }
+
+        const showPhoto = (index) => {
+            if (index < 0) index = photoList.length - 1; // Loop
+            if (index >= photoList.length) index = 0; // Loop
             
-            currentCarouselIndex = index;
+            currentIndex = index;
             
-            // Efeito de fade
-            modernGalleryImage.style.opacity = '0';
+            imageEl.style.opacity = '0';
             setTimeout(() => {
-                modernGalleryImage.src = galleryPhotosCarousel[index];
-                modernGalleryImage.style.opacity = '1';
-            }, 300); // Deve corresponder à duração da transição
+                imageEl.src = photoList[index];
+                imageEl.style.opacity = '1';
+            }, 300);
             
-            if (modernGalleryCounter) {
-                modernGalleryCounter.textContent = `${index + 1} / ${galleryPhotosCarousel.length}`;
+            if (counterEl) {
+                counterEl.textContent = `${index + 1} / ${photoList.length}`;
             }
         };
 
-        if (btnModernPrev) {
-            btnModernPrev.addEventListener('click', () => showModernPhoto(currentCarouselIndex - 1));
-        }
-        if (btnModernNext) {
-            btnModernNext.addEventListener('click', () => showModernPhoto(currentCarouselIndex + 1));
-        }
+        btnPrev.addEventListener('click', () => showPhoto(currentIndex - 1));
+        btnNext.addEventListener('click', () => showPhoto(currentIndex + 1));
         
         // Suporte a swipe
         let touchStartX = 0;
         let touchEndX = 0;
         
-        modernGalleryImage.parentElement.addEventListener('touchstart', (e) => {
+        galleryContainer.addEventListener('touchstart', (e) => {
             touchStartX = e.changedTouches[0].screenX;
         }, { passive: true });
 
-        modernGalleryImage.parentElement.addEventListener('touchend', (e) => {
+        galleryContainer.addEventListener('touchend', (e) => {
             touchEndX = e.changedTouches[0].screenX;
             handleSwipe();
         });
         
         const handleSwipe = () => {
             if (touchEndX < touchStartX - 50) { // Swiped left
-                showModernPhoto(currentCarouselIndex + 1);
+                showPhoto(currentIndex + 1);
             }
             if (touchEndX > touchStartX + 50) { // Swiped right
-                showModernPhoto(currentCarouselIndex - 1);
+                showPhoto(currentIndex - 1);
             }
         };
-    }
+
+        // Mostra a primeira foto
+        showPhoto(0);
+    };
+
+    // INICIALIZA OS CARROSSÉIS (Layout Moderno)
+    
+    // Galeria Principal
+    setupCarousel(
+        '#main-gallery-container', // Usando o ID do container principal da galeria
+        'modern-gallery-image', 
+        'modern-gallery-prev', 
+        'modern-gallery-next', 
+        'modern-gallery-counter', 
+        data.gallery_photos
+    );
+    
+    // Carrossel da História 1
+    setupCarousel(
+        '#story-1-carousel-container',
+        'story-1-gallery-image', 
+        'story-1-gallery-prev', 
+        'story-1-gallery-next', 
+        'story-1-gallery-counter', 
+        data.story_images_1 // Usando a nova coluna do Supabase
+    );
+    
+    // Carrossel da História 2
+    setupCarousel(
+        '#story-2-carousel-container',
+        'story-2-gallery-image', 
+        'story-2-gallery-prev', 
+        'story-2-gallery-next', 
+        'story-2-gallery-counter', 
+        data.story_images_2 // Usando a nova coluna do Supabase
+    );
+
 
     // --- LÓGICA DO LIGHTBOX DA GALERIA (Layout Clássico) ---
     const lightbox = document.getElementById('gallery-lightbox');
@@ -383,7 +419,7 @@ function attachEventListeners(data) {
         });
 
         document.addEventListener('keydown', (e) => {
-            if (!lightbox.classList.contains('hidden')) {
+            if (lightbox && !lightbox.classList.contains('hidden')) {
                 if (e.key === 'Escape') closeLightbox();
                 if (e.key === 'ArrowLeft') showPhoto(currentPhotoIndex - 1);
                 if (e.key === 'ArrowRight') showPhoto(currentPhotoIndex + 1);
@@ -401,22 +437,44 @@ function attachEventListeners(data) {
 
         const renderSortedGifts = (gifts) => {
             if (!giftListContainer) return;
-            giftListContainer.innerHTML = gifts.map(gift => {
-                 // Reutiliza a renderização do layout clássico, se disponível
-                 // Esta é uma simplificação; idealmente, a função de renderização de item seria separada.
-                 // Para este caso, vamos recriar o HTML básico do 'classico.js'.
-                 return `
-                    <div class="border rounded-lg overflow-hidden card-shadow bg-white">
-                        <img src="${gift.image_url || 'https://placehold.co/600x400/EFEAE6/967E76?text=Presente'}" alt="${gift.title}" class="w-full h-48 object-cover">
-                        <div class="p-6 text-center">
-                            <h3 class="text-xl font-serif" style="color: ${data.title_color || '#333333'};">${gift.title}</h3>
-                            <p class="text-gray-600 my-2">${gift.description || ''}</p>
-                            <p class="text-2xl font-semibold my-4" style="color: ${data.primary_color || '#D9A8A4'};">R$ ${Number(gift.value).toFixed(2).replace('.', ',')}</p>
-                            <button data-id="${gift.id}" class="add-to-cart-btn btn-primary w-full">Adicionar ao Carrinho</button>
+            // A renderização dos presentes é diferente entre os layouts,
+            // então não podemos ter uma função de renderização genérica aqui
+            // sem refatorar os layouts.
+            // Por enquanto, vamos apenas ordenar os dados e deixar o layout
+            // tratar a renderização (o layout clássico faz isso).
+            // A ordenação inicial já é feita no 'classico.js'.
+            
+            // Para o layout clássico:
+            if(document.body.classList.contains('theme-padrao')) {
+                giftListContainer.innerHTML = gifts.map(gift => {
+                    return `
+                        <div class="border rounded-lg overflow-hidden card-shadow bg-white">
+                            <img src="${gift.image_url || 'https://placehold.co/600x400/EFEAE6/967E76?text=Presente'}" alt="${gift.title}" class="w-full h-48 object-cover">
+                            <div class="p-6 text-center">
+                                <h3 class-="text-xl font-serif" style="color: ${data.title_color || '#333333'};">${gift.title}</h3>
+                                ${gift.description ? `<p class="text-gray-600 my-2 text-sm">${gift.description}</p>` : ''}
+                                <p class="text-2xl font-semibold my-4" style="color: ${data.primary_color || '#D9A8A4'};">R$ ${Number(gift.value).toFixed(2).replace('.', ',')}</p>
+                                <button data-id="${gift.id}" class="add-to-cart-btn btn-primary w-full">Adicionar ao Carrinho</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            // Para o layout moderno (se precisar de ordenação):
+            else if(document.body.classList.contains('theme-moderno')) {
+                giftListContainer.innerHTML = gifts.map(gift => `
+                    <div class="gift-card text-center bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+                        <div class="w-full h-48">
+                            <img src="${gift.image_url || 'https://placehold.co/400x300/F9F5F2/967E76?text=Presente'}" alt="${gift.title}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="p-4 flex-grow flex flex-col">
+                            <h3 class="text-lg font-semibold text-gray-700">${gift.title}</h3>
+                            <p class="text-gray-500 mb-4 mt-1 flex-grow">R$ ${Number(gift.value).toFixed(2).replace('.', ',')}</p>
+                            <button data-id="${gift.id}" class="add-to-cart-btn btn-contribute mt-auto">Contribuir</button>
                         </div>
                     </div>
-                 `;
-            }).join('');
+                `).join('');
+            }
         };
         
         sortSelect.addEventListener('change', () => {

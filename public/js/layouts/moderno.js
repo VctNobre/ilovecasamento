@@ -3,27 +3,62 @@
 function createStorySection(data) {
     if (!data.story_section_enabled) return '';
 
+    // Helper para renderizar carrossel ou placeholder da História
+    const renderStoryCarousel = (images, containerId, imageId, prevId, nextId, counterId, placeholder) => {
+        if (!images || images.length === 0) {
+            return `<img src="${placeholder}" alt="Foto da história" class="rounded-lg shadow-xl w-full">`;
+        }
+        return `
+            <div id="${containerId}" class="relative w-full rounded-lg shadow-xl overflow-hidden" style="aspect-ratio: 16 / 10; user-select: none;">
+                <img id="${imageId}" src="${images[0]}" alt="Foto da Galeria" class="w-full h-full object-cover transition-opacity duration-300">
+                <button id="${prevId}" class="gallery-nav-btn absolute left-4 top-1/2 -translate-y-1/2">&#10094;</button>
+                <button id="${nextId}" class="gallery-nav-btn absolute right-4 top-1/2 -translate-y-1/2">&#10095;</button>
+                <div id="${counterId}" class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-sm py-1 px-3 rounded-full">
+                    1 / ${images.length}
+                </div>
+            </div>
+        `;
+    };
+
     return `
         <section id="story-section" class="py-20 md:py-28">
             <div class="container mx-auto px-6 md:px-8 max-w-4xl">
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.story_title_1 || 'Nossa História'}</h2>
                 
-                <!-- Como nos Conhecemos --><div class="flex flex-col md:flex-row items-center gap-12 md:gap-16 mb-20">
+                <!-- Como nos Conhecemos -->
+                <div class="flex flex-col md:flex-row items-center gap-12 md:gap-16 mb-20">
                     <div class="md:w-1/2 text-gray-600 text-center md:text-left">
                         <p class="leading-relaxed">${data.story_how_we_met ? data.story_how_we_met.replace(/\n/g, '<br>') : 'Texto sobre como nos conhecemos...'}</p>
                     </div>
                     <div class="md:w-1/2">
-                        <img src="${data.story_image_1_url || 'https://placehold.co/600x400/EADFD6/967E76?text=Foto+1'}" alt="Como nos conhecemos" class="rounded-lg shadow-xl w-full">
+                        ${renderStoryCarousel(
+                            data.story_images_1,
+                            'story-1-carousel-container',
+                            'story-1-gallery-image',
+                            'story-1-gallery-prev',
+                            'story-1-gallery-next',
+                            'story-1-gallery-counter',
+                            'https://placehold.co/600x400/EADFD6/967E76?text=Foto+1'
+                        )}
                     </div>
                 </div>
 
-                <!-- O Pedido --><h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.story_title_2 || 'O Pedido'}</h2>
+                <!-- O Pedido -->
+                <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.story_title_2 || 'O Pedido'}</h2>
                 <div class="flex flex-col md:flex-row-reverse items-center gap-12 md:gap-16">
                     <div class="md:w-1/2 text-gray-600 text-center md:text-left">
                         <p class="leading-relaxed">${data.story_proposal ? data.story_proposal.replace(/\n/g, '<br>') : 'Texto sobre o pedido de casamento...'}</p>
                     </div>
                     <div class="md:w-1/2">
-                        <img src="${data.story_image_2_url || 'https://placehold.co/600x400/EADFD6/967E76?text=Foto+2'}" alt="O pedido" class="rounded-lg shadow-xl w-full">
+                        ${renderStoryCarousel(
+                            data.story_images_2,
+                            'story-2-carousel-container',
+                            'story-2-gallery-image',
+                            'story-2-gallery-prev',
+                            'story-2-gallery-next',
+                            'story-2-gallery-counter',
+                            'https://placehold.co/600x400/EADFD6/967E76?text=Foto+2'
+                        )}
                     </div>
                 </div>
             </div>
@@ -34,7 +69,6 @@ function createStorySection(data) {
 function createGallerySection(data) {
     if (!data.gallery_section_enabled || !data.gallery_photos || data.gallery_photos.length === 0) return '';
     
-    // MODIFICADO: Esta seção agora renderiza um carrossel em vez de uma grade.
     // A lógica de clique (lightbox) foi removida, pois o carrossel a substitui.
     return `
         <section id="gallery-section" class="py-20 md:py-28 bg-white">
@@ -43,7 +77,8 @@ function createGallerySection(data) {
                 
                 <!-- Modern Gallery Carousel -->
                 <!-- ALTERAÇÃO: Removido max-w-3xl e mx-auto para que o carrossel ocupe max-w-5xl (largura do container pai) -->
-                <div class="relative w-full rounded-lg shadow-xl overflow-hidden" style="aspect-ratio: 16 / 10; user-select: none;">
+                <!-- Adicionado ID "main-gallery-container" para o setupCarousel -->
+                <div id="main-gallery-container" class="relative w-full rounded-lg shadow-xl overflow-hidden" style="aspect-ratio: 16 / 10; user-select: none;">
                     <!-- Imagem principal -->
                     <img id="modern-gallery-image" src="${data.gallery_photos[0]}" alt="Foto da Galeria" class="w-full h-full object-cover transition-opacity duration-300">
                     
