@@ -8,8 +8,7 @@ function createStorySection(data) {
             <div class="container mx-auto px-6 md:px-8 max-w-4xl">
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.story_title_1 || 'Nossa História'}</h2>
                 
-                <!-- Como nos Conhecemos -->
-                <div class="flex flex-col md:flex-row items-center gap-12 md:gap-16 mb-20">
+                <!-- Como nos Conhecemos --><div class="flex flex-col md:flex-row items-center gap-12 md:gap-16 mb-20">
                     <div class="md:w-1/2 text-gray-600 text-center md:text-left">
                         <p class="leading-relaxed">${data.story_how_we_met ? data.story_how_we_met.replace(/\n/g, '<br>') : 'Texto sobre como nos conhecemos...'}</p>
                     </div>
@@ -18,8 +17,7 @@ function createStorySection(data) {
                     </div>
                 </div>
 
-                <!-- O Pedido -->
-                <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.story_title_2 || 'O Pedido'}</h2>
+                <!-- O Pedido --><h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.story_title_2 || 'O Pedido'}</h2>
                 <div class="flex flex-col md:flex-row-reverse items-center gap-12 md:gap-16">
                     <div class="md:w-1/2 text-gray-600 text-center md:text-left">
                         <p class="leading-relaxed">${data.story_proposal ? data.story_proposal.replace(/\n/g, '<br>') : 'Texto sobre o pedido de casamento...'}</p>
@@ -46,8 +44,7 @@ function createGallerySection(data) {
     return `
         <section id="gallery-section" class="py-20 md:py-28 bg-white">
             <div class="container mx-auto px-6 md:px-8 max-w-5xl">
-                <!-- CORREÇÃO: Usa o título da galeria do banco de dados -->
-                <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.gallery_title || 'Galeria de Fotos'}</h2>
+                <!-- CORREÇÃO: Usa o título da galeria do banco de dados --><h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.gallery_title || 'Galeria de Fotos'}</h2>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                     ${galleryItems}
                 </div>
@@ -67,9 +64,8 @@ function createGiftsSection(data) {
         return `
         <section id="gifts-section" class="py-20 md:py-28">
              <div class="container mx-auto px-6 md:px-8 max-w-5xl">
-                <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">Lista de Presentes</h2>
-                ${introText} <!-- Adicionado aqui -->
-                <p class="text-center text-gray-500">A lista de presentes ainda não foi adicionada.</p>
+                <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#33333V'};">Lista de Presentes</h2>
+                ${introText} <!-- Adicionado aqui --><p class="text-center text-gray-500">A lista de presentes ainda não foi adicionada.</p>
             </div>
         </section>
         `;
@@ -90,8 +86,7 @@ function createGiftsSection(data) {
         <section id="gifts-section" class="py-20 md:py-28">
              <div class="container mx-auto px-6 md:px-8 max-w-5xl">
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">Lista de Presentes</h2>
-                ${introText} <!-- Adicionado aqui -->
-                <div id="gift-list-container" class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
+                ${introText} <!-- Adicionado aqui --><div id="gift-list-container" class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
                     ${giftItems}
                 </div>
             </div>
@@ -147,27 +142,29 @@ export function render(data) {
         : 'Data do Casamento';
 
     return `
-        <!-- Cabeçalho com Imagem e Bloco de Introdução -->
-        <header>
-            <div id="hero-image-container" class="w-full h-auto">
-                <img id="hero-image" src="${data.hero_image_url || 'https://images.pexels.com/photos/1024989/pexels-photo-1024989.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'}" alt="Foto do Casal" class="w-full h-full object-cover">
-            </div>
-            <div id="intro-block" class="bg-beige-extralight text-center py-12 md:py-16">
-                <div class="container mx-auto px-6">
-                    <h1 class="text-5xl md:text-6xl font-serif" style="color: ${data.main_title_color || '#333333'};">${data.main_title || 'Felipe & Caroline'}</h1>
-                    <p class="text-lg text-gray-500 mt-4">${formattedDate}</p>
-                    ${data.intro_text ? `
-                        <div class="text-gray-600 max-w-2xl mx-auto mt-6 leading-relaxed">
-                            ${data.intro_text.replace(/\n/g, '<br>')}
-                        </div>
-                    ` : ''}
-                    <p class="font-signature text-3xl md:text-4xl mt-8" style="color: ${data.main_title_color || '#333333'};">${data.signature || 'Felipe & Caroline'}</p>
+        <!-- Cabeçalho com Imagem de Capa e Overlay --><header class="relative w-full h-[70vh] md:h-[80vh] overflow-hidden">
+            <img id="hero-image" src="${data.hero_image_url || 'https://images.pexels.com/photos/1024989/pexels-photo-1024989.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'}" alt="Foto do Casal" class="w-full h-full object-cover">
+            
+            <!-- Overlay para legibilidade --><div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white p-4">
+                <div class="text-center">
+                    <h1 class="text-5xl md:text-7xl font-serif leading-tight" style="color: ${data.main_title_color || '#FFFFFF'};">${data.main_title || 'Felipe & Caroline'}</h1>
+                    <p class="text-xl md:text-2xl mt-4">${formattedDate}</p>
                 </div>
             </div>
         </header>
 
-        <!-- Conteúdo Principal -->
-        <main id="main-content" class="bg-beige-extralight">
+        <!-- Bloco de Introdução (agora sem o título e a data) --><div id="intro-block" class="bg-beige-extralight text-center py-12 md:py-16">
+            <div class="container mx-auto px-6">
+                ${data.intro_text ? `
+                    <div class="text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                        ${data.intro_text.replace(/\n/g, '<br>')}
+                    </div>
+                ` : ''}
+                <p class="font-signature text-3xl md:text-4xl mt-8" style="color: ${data.title_color || '#333333'};">${data.signature || 'Felipe & Caroline'}</p>
+            </div>
+        </div>
+
+        <!-- Conteúdo Principal --><main id="main-content" class="bg-beige-extralight">
             ${createStorySection(data)}
             ${createGallerySection(data)}
             ${createGiftsSection(data)}
@@ -178,8 +175,7 @@ export function render(data) {
             <p>Com amor, ${data.signature || 'Anfitriões'} ♥</p>
         </footer>
 
-        <!-- Adicionando o HTML do Lightbox para consistência (ele é controlado pelo evento.js) -->
-        <div id="gallery-lightbox" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-4 transition-opacity duration-300 opacity-0 pointer-events-none">
+        <!-- Adicionando o HTML do Lightbox para consistência (ele é controlado pelo evento.js) --><div id="gallery-lightbox" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-4 transition-opacity duration-300 opacity-0 pointer-events-none">
             <button id="lightbox-close" class="absolute top-4 right-4 text-white text-5xl opacity-80 hover:opacity-100">&times;</button>
             <button id="lightbox-prev" class="absolute left-4 md:left-10 text-white text-4xl opacity-80 hover:opacity-100">&#10094;</button>
             <button id="lightbox-next" class="absolute right-4 md:right-10 text-white text-4xl opacity-80 hover:opacity-100">&#10095;</button>
