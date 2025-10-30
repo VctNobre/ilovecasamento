@@ -42,7 +42,8 @@ function createGallerySection(data) {
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.gallery_title || 'Galeria de Fotos'}</h2>
                 
                 <!-- Modern Gallery Carousel -->
-                <div class="relative w-full max-w-3xl mx-auto rounded-lg shadow-xl overflow-hidden" style="aspect-ratio: 16 / 10; user-select: none;">
+                <!-- ALTERAÇÃO: Removido max-w-3xl e mx-auto para que o carrossel ocupe max-w-5xl (largura do container pai) -->
+                <div class="relative w-full rounded-lg shadow-xl overflow-hidden" style="aspect-ratio: 16 / 10; user-select: none;">
                     <!-- Imagem principal -->
                     <img id="modern-gallery-image" src="${data.gallery_photos[0]}" alt="Foto da Galeria" class="w-full h-full object-cover transition-opacity duration-300">
                     
@@ -79,13 +80,18 @@ function createGiftsSection(data) {
     }
 
     const giftItems = data.gifts.map(gift => `
-        <div class="gift-card text-center">
-            <div class="bg-white p-4 rounded-lg shadow-md mb-4">
-                <img src="${gift.image_url || 'https://placehold.co/400x300/F9F5F2/967E76?text=Presente'}" alt="${gift.title}" class="w-full h-48 object-contain rounded-md">
+        <!-- ALTERAÇÃO: Card reestruturado para a imagem preencher o topo -->
+        <div class="gift-card text-center bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+            <!-- Imagem preenche a div, sem padding -->
+            <div class="w-full h-48">
+                <img src="${gift.image_url || 'https://placehold.co/400x300/F9F5F2/967E76?text=Presente'}" alt="${gift.title}" class="w-full h-full object-cover">
             </div>
-            <h3 class="text-lg font-semibold text-gray-700">${gift.title}</h3>
-            <p class="text-gray-500 mb-4">R$ ${Number(gift.value).toFixed(2).replace('.', ',')}</p>
-            <button data-id="${gift.id}" class="add-to-cart-btn btn-contribute">Contribuir</button>
+            <!-- Conteúdo com padding, botão alinhado abaixo -->
+            <div class="p-4 flex-grow flex flex-col">
+                <h3 class="text-lg font-semibold text-gray-700">${gift.title}</h3>
+                <p class="text-gray-500 mb-4 mt-1 flex-grow">R$ ${Number(gift.value).toFixed(2).replace('.', ',')}</p>
+                <button data-id="${gift.id}" class="add-to-cart-btn btn-contribute mt-auto">Contribuir</button>
+            </div>
         </div>
     `).join('');
 
