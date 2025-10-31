@@ -107,4 +107,11 @@ body.theme-moderno {
        estar presente no 'evento.html' para que isto funcione.
     */
     clip-path: url(#torn-paper-edge);
+
+    /* Garante que a secção da imagem fique "por cima" 
+       do conteúdo que rola no layout de grid do desktop.
+    */
+    position: relative;
+    z-index: 10;
 }
+

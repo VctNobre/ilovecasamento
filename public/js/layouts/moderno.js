@@ -186,10 +186,13 @@ export function render(data) {
         : 'Data do Casamento';
 
     return `
-        <!-- Cabeçalho com Imagem de Capa e Overlay --><header class="relative w-full h-[70vh] md:h-[80vh] overflow-hidden">
+        <!-- Cabeçalho com Imagem de Capa e Overlay -->        
+        
+        <header id="hero-section" class="hero-section relative w-full h-[70vh] md:h-[80vh] overflow-hidden">
             <img id="hero-image" src="${data.hero_image_url || 'https://images.pexels.com/photos/1024989/pexels-photo-1024989.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'}" alt="Foto do Casal" class="w-full h-full object-cover">
             
-            <!-- Overlay para legibilidade --><div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white p-4">
+            <!-- Overlay para legibilidade -->
+            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white p-4">
                 <div class="text-center">
                     <h1 class="text-5xl md:text-7xl font-serif leading-tight" style="color: ${data.main_title_color || '#FFFFFF'};">${data.main_title || 'Felipe & Caroline'}</h1>
                     <p class="text-xl md:text-2xl mt-4">${formattedDate}</p>
@@ -197,27 +200,31 @@ export function render(data) {
             </div>
         </header>
 
-        <!-- Bloco de Introdução (agora sem o título e a data) --><div id="intro-block" class="bg-beige-extralight text-center py-12 md:py-16">
-            <div class="container mx-auto px-6">
-                ${data.intro_text ? `
-                    <div class="text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                        ${data.intro_text.replace(/\n/g, '<br>')}
-                    </div>
-                ` : ''}
-                <p class="font-signature text-3xl md:text-4xl mt-8" style="color: ${data.title_color || '#333333'};">${data.signature || 'Felipe & Caroline'}</p>
+        <div id="page-content">
+            <!-- Bloco de Introdução (agora sem o título e a data) -->
+            <div id="intro-block" class="bg-beige-extralight text-center py-12 md:py-16">
+                <div class="container mx-auto px-6">
+                    ${data.intro_text ? `
+                        <div class="text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                            ${data.intro_text.replace(/\n/g, '<br>')}
+                        </div>
+                    ` : ''}
+                    <p class="font-signature text-3xl md:text-4xl mt-8" style="color: ${data.title_color || '#333333'};">${data.signature || 'Felipe & Caroline'}</p>
+                </div>
             </div>
-        </div>
 
-        <!-- Conteúdo Principal --><main id="main-content" class="bg-beige-extralight">
-            ${createStorySection(data)}
-            ${createGallerySection(data)}
-            ${createGiftsSection(data)}
-            ${createRsvpSection(data)}
-        </main>
-        
-        <footer class="py-8 text-center text-gray-600 bg-beige-extralight">
-            <p>Com amor, ${data.signature || 'Anfitriões'} ♥</p>
-        </footer>
+            <!-- Conteúdo Principal -->
+            <main id="main-content" class="bg-beige-extralight">
+                ${createStorySection(data)}
+                ${createGallerySection(data)}
+                ${createGiftsSection(data)}
+                ${createRsvpSection(data)}
+            </main>
+            
+            <footer class="py-8 text-center text-gray-600 bg-beige-extralight">
+                <p>Com amor, ${data.signature || 'Anfitriões'} ♥</p>
+            </footer>
+        </div>
 
         <!-- Adicionando o HTML do Lightbox para consistência (ele é controlado pelo evento.js) --><div id="gallery-lightbox" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-4 transition-opacity duration-300 opacity-0 pointer-events-none">
             <button id="lightbox-close" class="absolute top-4 right-4 text-white text-5xl opacity-80 hover:opacity-100">&times;</button>
