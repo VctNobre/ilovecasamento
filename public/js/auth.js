@@ -10,6 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('register-form');
     const toggleFormLink = document.getElementById('toggle-form');
     const forgotPasswordContainer = document.getElementById('forgot-password-container');
+    const ouDivider = document.getElementById('ou-divider'); // ID do divisor "OU"
+    
+    // Formulário de Redefinição de Senha (Novo)
+    const passwordResetForm = document.getElementById('password-reset-form');
+    const btnUpdatePasswordSubmit = document.getElementById('btn-update-password-submit');
     
     const urlParams = new URLSearchParams(window.location.search);
     const action = urlParams.get('action');
@@ -30,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         special: document.getElementById('req-special'),
     };
 
-    // Elementos de "Esqueceu a Senha"
+    // Elementos de "Esqueceu a Senha" (Modal)
     const forgotPasswordLink = document.getElementById('forgot-password-link');
     const resetPasswordModal = document.getElementById('reset-password-modal');
     const btnCancelReset = document.getElementById('btn-cancel-reset');
@@ -55,8 +60,77 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeResetModal = () => resetPasswordModal && resetPasswordModal.classList.replace('flex', 'hidden');
 
     // --- Event Listeners ---
+    
+    // --- NOVO: Lógica de Redefinição de Senha (Ouve o evento do Supabase) ---
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        if (event === "PASSWORD_RECOVERY") {
+            // O utilizador clicou no link do email e está na sessão de recuperação
+            
+            // 1. Esconder tudo o que não é relevante
+            if (loginForm) loginForm.classList.add('hidden');
+            if (registerForm) registerForm.classList.add('hidden');
+            if (toggleFormLink) toggleFormLink.classList.add('hidden');
+            if (ouDivider) ouDivider.classList.add('hidden');
+            if (btnGoogleLogin) btnGoogleLogin.classList.add('hidden');
+            if (forgotPasswordContainer) forgotPasswordContainer.classList.add('hidden');
 
-    // --- Lógica de Registo ---
+            // 2. Mostrar o formulário de redefinição
+            if (passwordResetForm) passwordResetForm.classList.remove('hidden');
+        }
+    });
+
+    // --- NOVO: Listener para o botão do formulário de redefinição de senha ---
+    if (btnUpdatePasswordSubmit) {
+        btnUpdatePasswordSubmit.addEventListener('click', async () => {
+            const newPassword = document.getElementById('reset-new-password').value;
+            const confirmPassword = document.getElementById('reset-confirm-password').value;
+            const errorEl = document.getElementById('password-reset-error');
+            
+            if (errorEl) errorEl.textContent = '';
+
+            // Validações
+            if (!newPassword || !confirmPassword) {
+                if (errorEl) errorEl.textContent = 'Por favor, preencha ambos os campos.';
+                return;
+            }
+            if (newPassword.length < 8) {
+                // Sincroniza com os requisitos de registro
+                if (errorEl) errorEl.textContent = 'A senha deve ter no mínimo 8 caracteres.';
+                return;
+            }
+            if (newPassword !== confirmPassword) {
+                if (errorEl) errorEl.textContent = 'As senhas não coincidem.';
+                return;
+            }
+
+            // Desativa o botão
+            btnUpdatePasswordSubmit.disabled = true;
+            btnUpdatePasswordSubmit.textContent = 'Salvando...';
+
+            // Envia a atualização para o Supabase
+            // (Funciona porque o utilizador está na sessão de 'PASSWORD_RECOVERY')
+            const { error } = await supabaseClient.auth.updateUser({
+                password: newPassword
+            });
+
+            if (error) {
+                if (errorEl) errorEl.textContent = `Erro: ${error.message}`;
+                btnUpdatePasswordSubmit.disabled = false;
+                btnUpdatePasswordSubmit.textContent = 'Salvar Nova Senha';
+            } else {
+                // Sucesso!
+                showToast('Senha atualizada com sucesso! Pode fazer login.');
+                
+                // Recarrega a página para o estado de login normal
+                setTimeout(() => {
+                    window.location.hash = ''; // Limpa o token da URL
+                    window.location.reload();
+                }, 2000);
+            }
+        });
+    }
+
+    // --- Lógica de Registo (Existente) ---
     if (registerForm) {
         const btnRegister = document.getElementById('btn-register');
         const emailRegisterInput = document.getElementById('register-email');
@@ -199,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // "Esqueceu a senha?"
+    // "Esqueceu a senha?" (Modal)
     if (forgotPasswordLink) forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); openResetModal(); });
     if (btnCancelReset) btnCancelReset.addEventListener('click', closeResetModal);
     if (resetPasswordModal) resetPasswordModal.addEventListener('click', (e) => { if (e.target === resetPasswordModal) closeResetModal(); });
@@ -213,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btnSendResetLink.disabled = true;
             btnSendResetLink.textContent = 'Enviando...';
 
-            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname }); // Corrigido para incluir o pathname
             if (error) {
                 showToast(`Erro: ${error.message}`, 'error');
                 btnSendResetLink.disabled = false;
@@ -245,4 +319,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
-

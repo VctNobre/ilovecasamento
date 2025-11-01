@@ -18,6 +18,7 @@
                 <img src="/images/logo.svg" alt="Ilovecasamento Logo" class="h-18 sm:h-22 w-full object-contain">
         </a></div>
       
+        <!-- Formulário de Login -->
         <div id="login-form">
             <h2 class="text-2xl font-semibold mb-3 font-title text-gray-700">Entrar na sua conta</h2>
             <div class="space-y-2">
@@ -32,7 +33,7 @@
             <p id="login-error" class="text-red-500 text-sm mt-2 text-center"></p>
         </div>
 
-  
+        <!-- Formulário de Registro -->
         <div id="register-form" class="hidden">
             <h2 class="text-2xl font-semibold mb-2 font-title text-gray-700">Criar nova conta</h2>
             <div class="space-y-4">
@@ -56,22 +57,38 @@
             <p id="register-error" class="text-red-500 text-sm mt-2 text-center"></p>
         </div>
 
+        <!-- NOVO: Formulário de Redefinição de Senha -->
+        <div id="password-reset-form" class="hidden">
+            <h2 class="text-2xl font-semibold mb-3 font-title text-gray-700">Crie sua nova senha</h2>
+            <p class="text-gray-600 text-sm mb-4">Insira e confirme sua nova senha abaixo.</p>
+            <div class="space-y-4">
+                <input type="password" id="reset-new-password" placeholder="Nova Senha" class="input-styled w-full h-12">
+                <input type="password" id="reset-confirm-password" placeholder="Confirmar Nova Senha" class="input-styled w-full h-12">
+            </div>
+            <button id="btn-update-password-submit" class="w-full btn-primary mt-4">Salvar Nova Senha</button>
+            <p id="password-reset-error" class="text-red-500 text-sm mt-2 text-center"></p>
+        </div>
+        <!-- Fim do Novo Formulário -->
+
 
         <div class="text-center my-2 h-2">
             <a href="#" id="toggle-form" class="hover:underline" style="color: var(--primary-color);">Não tem uma conta? Cadastre-se</a>
         </div>
-        <div class="relative flex py-5 items-center">
+        
+        <!-- Divisor "OU" -->
+        <div id="ou-divider" class="relative flex py-5 items-center">
             <div class="flex-grow border-t border-gray-300"></div>
             <span class="flex-shrink mx-4 text-gray-400">OU</span>
             <div class="flex-grow border-t border-gray-300"></div>
         </div>
+        <!-- Botão Google -->
         <button id="btn-google-login" class="w-full bg-white border border-gray-300 text-gray-700 p-3 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors card-shadow">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo" class="w-6 h-6 mr-3">
             Entrar com Google
         </button>
     </div>
 
-
+    <!-- Modal "Esqueceu a Senha" (para solicitar o link) -->
     <div id="reset-password-modal" class="fixed inset-0 bg-black/60 z-40 hidden items-center justify-center p-4">
         <div class="bg-white p-8 rounded-xl card-shadow w-full max-w-md">
             <h2 class="text-2xl font-title mb-4">Redefinir Senha</h2>
@@ -91,4 +108,3 @@
     <script type="module" src="/js/auth.js"></script>
 </body>
 </html>
-
