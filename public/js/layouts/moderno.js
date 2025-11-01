@@ -37,7 +37,7 @@ function createStorySection(data) {
     return `
         <section id="story-section" class="py-20 md:py-28">
             <div class="container mx-auto px-6 md:px-8 max-w-4xl">
-                <!-- RESTAURADO: Títulos <h2> voltam ao normal (usando .font-serif do CSS) -->
+                <!-- REVERTIDO: Título H2 com a fonte serif (Playfair) original -->
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.story_title_1 || 'Nossa História'}</h2>
                 
                 <!-- Como nos Conhecemos -->
@@ -59,7 +59,7 @@ function createStorySection(data) {
                 </div>
 
                 <!-- O Pedido -->
-                <!-- RESTAURADO: Títulos <h2> voltam ao normal -->
+                <!-- REVERTIDO: Título H2 com a fonte serif (Playfair) original -->
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.story_title_2 || 'O Pedido'}</h2>
                 <div class="flex flex-col md:flex-row-reverse items-center gap-12 md:gap-16">
                     <div class="md:w-2/5 text-gray-600 text-center md:text-left">
@@ -88,7 +88,7 @@ function createGallerySection(data) {
     return `
         <section id="gallery-section" class="py-20 md:py-28 bg-white">
             <div class="container mx-auto px-6 md:px-8 max-w-5xl">
-                <!-- RESTAURADO: Títulos <h2> voltam ao normal -->
+                <!-- REVERTIDO: Título H2 com a fonte serif (Playfair) original -->
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.gallery_title || 'Galeria de Fotos'}</h2>
                 
                 <div id="main-gallery-container" class="relative w-full rounded-lg shadow-xl overflow-hidden" style="aspect-ratio: 16 / 10; user-select: none;">
@@ -114,7 +114,7 @@ function createGiftsSection(data) {
         return `
         <section id="gifts-section" class="py-20 md:py-28">
              <div class="container mx-auto px-6 md:px-8 max-w-5xl">
-                <!-- RESTAURADO: Títulos <h2> voltam ao normal -->
+                <!-- REVERTIDO: Título H2 com a fonte serif (Playfair) original -->
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#33333V'};">Lista de Presentes</h2>
                 ${introText} <p class="text-center text-gray-500">A lista de presentes ainda não foi adicionada.</p>
             </div>
@@ -138,7 +138,7 @@ function createGiftsSection(data) {
     return `
         <section id="gifts-section" class="py-20 md:py-28">
              <div class="container mx-auto px-6 md:px-8 max-w-5xl">
-                <!-- RESTAURADO: Títulos <h2> voltam ao normal -->
+                <!-- REVERTIDO: Título H2 com a fonte serif (Playfair) original -->
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">Lista de Presentes</h2>
                 ${introText} <div id="gift-list-container" class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
                     ${giftItems}
@@ -155,7 +155,7 @@ function createRsvpSection(data) {
     return `
         <section id="rsvp-section" class="py-20 md:py-28 bg-beige-light">
             <div class="container mx-auto px-6 md:px-8 max-w-2xl">
-                <!-- RESTAURADO: Títulos <h2> voltam ao normal -->
+                <!-- REVERTIDO: Título H2 com a fonte serif (Playfair) original -->
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-12" style="color: ${data.title_color || '#333333'};">Confirme sua Presença</h2>
                 <form id="rsvp-form" class="space-y-6">
                     <div>
@@ -197,18 +197,18 @@ export function render(data) {
     document.body.classList.add('theme-moderno'); // Garante que está no modo moderno
 
     return `
-        <!-- CORREÇÃO DE LAYOUT: Adicionada a class="hero-section" -->
+        <!-- REVERTIDO: A classe "hero-section" é necessária para o layout de grid (lado a lado) do tema moderno -->
         <header id="hero-section" class="hero-section relative w-full h-[70vh] md:h-screen overflow-hidden">
             <img id="hero-image" src="${data.hero_image_url || 'https://images.pexels.com/photos/1024989/pexels-photo-1024989.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'}" alt="Foto do Casal" class="w-full h-full object-cover">
             
             <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white p-4">
                 <div class="text-center">
                     
-                    <!-- CORRIGIDO: Aplica o estilo Montserrat Medium, uppercase e letter-spacing -->
-                    <h1 class="text-4xl md:text-5xl font-sans font-medium leading-tight uppercase" style="letter-spacing: 6.4px; color: ${data.main_title_color || '#FFFFFF'};">${data.main_title || 'Felipe & Caroline'}</h1>
+                    <!-- REVERTIDO: Estilo original com fonte serif (Playfair Display) -->
+                    <h1 class="text-5xl md:text-7xl font-serif leading-tight" style="color: ${data.main_title_color || '#FFFFFF'};">${data.main_title || 'Felipe & Caroline'}</h1>
                     
-                    <!-- CORRIGIDO: Aplica o estilo Montserrat Medium, uppercase e letter-spacing -->
-                    <p class="text-lg md:text-xl mt-4 font-sans font-medium uppercase" style="letter-spacing: 6.4px;">${formattedDate.toUpperCase()}</p>
+                    <!-- REVERTIDO: Estilo original -->
+                    <p class="text-xl md:text-2xl mt-4">${formattedDate}</p>
                 </div>
             </div>
         </header>
@@ -219,7 +219,7 @@ export function render(data) {
                     <div class="text-gray-600 max-w-2xl mx-auto">
                         ${formatTextToParagraphs(data.intro_text)}
                     </div>
-                    <!-- RESTAURADO: Assinatura volta a usar .font-signature (Playfair Display Italic) -->
+                    <!-- REVERTIDO: Assinatura com a classe .font-signature original -->
                     <p class="font-signature text-3xl md:text-4xl mt-8" style="color: ${data.title_color || '#333333'};">${data.signature || 'Felipe & Caroline'}</p>
                 </div>
             </div>
