@@ -1,11 +1,12 @@
 /* css/moderno.css - Estilo Elegante e Minimalista */
 
-/* Importação das Fontes */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@400;500&display=swap');
+/* ATUALIZADO: Importa apenas 'Montserrat' com os pesos 400 (corpo), 500 (médio) e 700 (negrito) */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap');
 
 /* Variáveis de Cores e Tipografia */
 :root {
-    --font-serif: 'Playfair Display', serif;
+    /* ATUALIZADO: --font-serif agora usa a mesma fonte --font-sans (Montserrat) */
+    --font-serif: 'Montserrat', sans-serif; 
     --font-sans: 'Montserrat', sans-serif;
     --color-text: #5C5C5C;
     --color-heading: #333333;
@@ -21,17 +22,19 @@ body.theme-moderno {
     background-color: var(--color-background-extralight);
 }
 
-/* Estilo para Títulos */
+/* Estilo para Títulos (agora Montserrat) */
 .theme-moderno .font-serif {
     font-family: var(--font-serif);
     color: var(--color-heading);
 }
 
-/* Estilo para a Assinatura (usando a mesma fonte dos títulos) */
+/* Estilo para a Assinatura (para ser consistente) */
 .theme-moderno .font-signature {
-    font-family: var(--font-serif);
-    font-weight: 400;
-    font-style: italic;
+    font-family: var(--font-sans);
+    font-weight: 500; /* font-medium */
+    font-size: 1.5rem; /* 24px */
+    letter-spacing: 0.1em; /* tracking-widest */
+    text-transform: uppercase;
 }
 
 
