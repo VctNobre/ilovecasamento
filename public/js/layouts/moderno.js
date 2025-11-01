@@ -37,8 +37,7 @@ function createStorySection(data) {
     return `
         <section id="story-section" class="py-20 md:py-28">
             <div class="container mx-auto px-6 md:px-8 max-w-4xl">
-                <!-- ATUALIZADO: Adicionado font-light para usar Montserrat Light -->
-                <h2 class="text-4xl md:text-5xl font-serif font-light text-center mb-16 uppercase tracking-widest" style="color: ${data.title_color || '#333333'};">${data.story_title_1 || 'Nossa História'}</h2>
+                <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.story_title_1 || 'Nossa História'}</h2>
                 
                 <!-- Como nos Conhecemos -->
                 <div class="flex flex-col md:flex-row items-center gap-12 md:gap-16 mb-20">
@@ -60,8 +59,7 @@ function createStorySection(data) {
                 </div>
 
                 <!-- O Pedido -->
-                <!-- ATUALIZADO: Adicionado font-light para usar Montserrat Light -->
-                <h2 class="text-4xl md:text-5xl font-serif font-light text-center mb-16 uppercase tracking-widest" style="color: ${data.title_color || '#333333'};">${data.story_title_2 || 'O Pedido'}</h2>
+                <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.story_title_2 || 'O Pedido'}</h2>
                 <div class="flex flex-col md:flex-row-reverse items-center gap-12 md:gap-16">
                     <div class="md:w-2/5 text-gray-600 text-center md:text-left">
                         <!-- ATUALIZADO: Lógica de parágrafos -->
@@ -87,12 +85,15 @@ function createStorySection(data) {
 function createGallerySection(data) {
     if (!data.gallery_section_enabled || !data.gallery_photos || data.gallery_photos.length === 0) return '';
     
+    // A lógica de clique (lightbox) foi removida, pois o carrossel a substitui.
     return `
         <section id="gallery-section" class="py-20 md:py-28 bg-white">
             <div class="container mx-auto px-6 md:px-8 max-w-5xl">
-                <!-- ATUALIZADO: Adicionado font-light para usar Montserrat Light -->
-                <h2 class="text-4xl md:text-5xl font-serif font-light text-center mb-16 uppercase tracking-widest" style="color: ${data.title_color || '#333333'};">${data.gallery_title || 'Galeria de Fotos'}</h2>
+                <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.gallery_title || 'Galeria de Fotos'}</h2>
                 
+                <!-- Modern Gallery Carousel -->
+                <!-- ALTERAÇÃO: Removido max-w-3xl e mx-auto para que o carrossel ocupe max-w-5xl (largura do container pai) -->
+                <!-- Adicionado ID "main-gallery-container" para o setupCarousel -->
                 <div id="main-gallery-container" class="relative w-full rounded-lg shadow-xl overflow-hidden" style="aspect-ratio: 16 / 10; user-select: none;">
                     <!-- Imagem principal -->
                     <img id="modern-gallery-image" src="${data.gallery_photos[0]}" alt="Foto da Galeria" class="w-full h-full object-cover transition-opacity duration-300">
@@ -113,6 +114,7 @@ function createGallerySection(data) {
 
 function createGiftsSection(data) {
     
+    // CORREÇÃO: Define o texto de introdução
     const introText = data.gifts_intro_text 
         ? `<p class="text-gray-600 max-w-3xl mx-auto mb-12 text-center leading-relaxed">${data.gifts_intro_text.replace(/\n/g, '<br>')}</p>` 
         : '';
@@ -121,19 +123,21 @@ function createGiftsSection(data) {
         return `
         <section id="gifts-section" class="py-20 md:py-28">
              <div class="container mx-auto px-6 md:px-8 max-w-5xl">
-                <!-- ATUALIZADO: Adicionado font-light para usar Montserrat Light -->
-                <h2 class="text-4xl md:text-5xl font-serif font-light text-center mb-16 uppercase tracking-widest" style="color: ${data.title_color || '#33333V'};">Lista de Presentes</h2>
-                ${introText} <p class="text-center text-gray-500">A lista de presentes ainda não foi adicionada.</p>
+                <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#33333V'};">Lista de Presentes</h2>
+                ${introText} <!-- Adicionado aqui --><p class="text-center text-gray-500">A lista de presentes ainda não foi adicionada.</p>
             </div>
         </section>
         `;
     }
 
     const giftItems = data.gifts.map(gift => `
+        <!-- ALTERAÇÃO: Card reestruturado para a imagem preencher o topo -->
         <div class="gift-card text-center bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+            <!-- Imagem preenche a div, sem padding -->
             <div class="w-full h-48">
                 <img src="${gift.image_url || 'https://placehold.co/400x300/F9F5F2/967E76?text=Presente'}" alt="${gift.title}" class="w-full h-full object-cover">
             </div>
+            <!-- Conteúdo com padding, botão alinhado abaixo -->
             <div class="p-4 flex-grow flex flex-col">
                 <h3 class="text-lg font-semibold text-gray-700">${gift.title}</h3>
                 <p class="text-gray-500 mb-4 mt-1 flex-grow">R$ ${Number(gift.value).toFixed(2).replace('.', ',')}</p>
@@ -145,9 +149,8 @@ function createGiftsSection(data) {
     return `
         <section id="gifts-section" class="py-20 md:py-28">
              <div class="container mx-auto px-6 md:px-8 max-w-5xl">
-                <!-- ATUALIZADO: Adicionado font-light para usar Montserrat Light -->
-                <h2 class="text-4xl md:text-5xl font-serif font-light text-center mb-16 uppercase tracking-widest" style="color: ${data.title_color || '#333333'};">Lista de Presentes</h2>
-                ${introText} <div id="gift-list-container" class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
+                <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">Lista de Presentes</h2>
+                ${introText} <!-- Adicionado aqui --><div id="gift-list-container" class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
                     ${giftItems}
                 </div>
             </div>
@@ -162,8 +165,7 @@ function createRsvpSection(data) {
     return `
         <section id="rsvp-section" class="py-20 md:py-28 bg-beige-light">
             <div class="container mx-auto px-6 md:px-8 max-w-2xl">
-                <!-- ATUALIZADO: Adicionado font-light para usar Montserrat Light -->
-                <h2 class="text-4xl md:text-5xl font-serif font-light text-center mb-12 uppercase tracking-widest" style="color: ${data.title_color || '#333333'};">Confirme sua Presença</h2>
+                <h2 class="text-4xl md:text-5xl font-serif text-center mb-12" style="color: ${data.title_color || '#333333'};">Confirme sua Presença</h2>
                 <form id="rsvp-form" class="space-y-6">
                     <div>
                         <label for="rsvp-name" class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
@@ -212,10 +214,8 @@ export function render(data) {
             <!-- Overlay para legibilidade -->
             <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white p-4">
                 <div class="text-center">
-                    <!-- ATUALIZADO: Adicionado font-light (para Montserrat Light) e mantido tracking-widest -->
-                    <h1 class="text-6xl md:text-8xl font-serif font-light leading-tight uppercase tracking-widest" style="color: ${data.main_title_color || '#FFFFFF'};">${data.main_title || 'Felipe & Caroline'}</h1>
-                    <!-- ATUALIZADO: Adicionado font-medium (para Montserrat Medium), text-xl (20px), e o style="letter-spacing: 6.4px" exato -->
-                    <p class="text-xl mt-4 font-serif font-medium uppercase" style="letter-spacing: 6.4px;">${formattedDate.toUpperCase()}</p>
+                    <h1 class="text-5xl md:text-7xl font-serif leading-tight" style="color: ${data.main_title_color || '#FFFFFF'};">${data.main_title || 'Felipe & Caroline'}</h1>
+                    <p class="text-xl md:text-2xl mt-4">${formattedDate}</p>
                 </div>
             </div>
         </header>
@@ -228,8 +228,7 @@ export function render(data) {
                     <div class="text-gray-600 max-w-2xl mx-auto">
                         ${formatTextToParagraphs(data.intro_text)}
                     </div>
-                    <!-- ATUALIZADO: Assinatura agora usa font-medium (Montserrat Medium) -->
-                    <p class="font-signature text-3xl md:text-4xl mt-8 font-medium" style="color: ${data.title_color || '#333333'};">${data.signature || 'Felipe & Caroline'}</p>
+                    <p class="font-signature text-3xl md:text-4xl mt-8" style="color: ${data.title_color || '#333333'};">${data.signature || 'Felipe & Caroline'}</p>
                 </div>
             </div>
 
@@ -254,5 +253,3 @@ export function render(data) {
         </div>
     `;
 }
-
-
