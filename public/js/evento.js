@@ -144,7 +144,7 @@ function attachEventListeners(data) {
     const btnCheckout = document.getElementById('btn-checkout');
     const btnSubmitRsvp = document.getElementById('btn-submit-rsvp');
     
-     // --- LÓGICA DO CARRINHO ---
+    // --- LÓGICA DO CARRINHO ---
     // 'data.gifts' aqui já contém os presentes com o 'value' correto e unificado
     let originalGifts = data.gifts || [];
     let cart = [];
@@ -153,13 +153,17 @@ function attachEventListeners(data) {
     const MP_TRANSACTIO_FEE_PERCENTAGE = 0.0398; // 3.98%
     
     const openCart = () => {if (!cartModal || !cartModalOverlay) return;
-// ... (código inalterado) ...
-        cartModal.classList.remove('scale-95'), 10); };
+        cartModalOverlay.classList.remove('hidden');
+        cartModal.classList.remove('hidden');
+        setTimeout(() => cartModal.classList.remove('scale-95'), 10); };
     const closeCart = () => { if (!cartModal || !cartModalOverlay) return;
-// ... (código inalterado) ...
+        cartModal.classList.add('scale-95');
+        setTimeout(() => {
+            cartModalOverlay.classList.add('hidden');
+            cartModal.classList.add('hidden');
         }, 300); };
     
-    // O updateCartUI funcionará automaticamente porque 'item.value' já é o preço correto
+       // O updateCartUI funcionará automaticamente porque 'item.value' já é o preço correto
     const updateCartUI = () => {     
         if (!cartItemsContainer || !cartCount || !cartTotal) return;
         cartItemsContainer.innerHTML = '';
@@ -205,9 +209,6 @@ function attachEventListeners(data) {
                 totalRow.before(feeRow);
             }
         }
-        // --- FIM DA LÓGICA DA TAXA ---
-
-
         cartCount.textContent = cart.length;
         // 5. Atualiza o "Total" com o valor final (Presentes + Taxa)
         cartTotal.textContent = `R$ ${finalTotal.toFixed(2).replace('.', ',')}`;
