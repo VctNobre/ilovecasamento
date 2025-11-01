@@ -287,7 +287,11 @@ document.addEventListener('DOMContentLoaded', () => {
             btnSendResetLink.disabled = true;
             btnSendResetLink.textContent = 'Enviando...';
 
-            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname }); // Corrigido para incluir o pathname
+            const productionLoginUrl = 'https://www.ilovecasamento.com.br/login.html';
+            
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { 
+                redirectTo: productionLoginUrl 
+            });
             if (error) {
                 showToast(`Erro: ${error.message}`, 'error');
                 btnSendResetLink.disabled = false;
