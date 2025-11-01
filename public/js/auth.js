@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 showToast('Se existir uma conta com este email, um link foi enviado.');
                 btnSendResetLink.textContent = 'Enviado!';
-                btnSendResetLink.classList.remove('btn-primary');
+                btnSendResetLink.classList.remove('bg-[color:var(--primary-color)]');
                 btnSendResetLink.classList.add('bg-green-500');
                 setTimeout(() => {
                     closeResetModal();
@@ -264,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         btnSendResetLink.disabled = false;
                         btnSendResetLink.textContent = originalText;
                         btnSendResetLink.classList.remove('bg-green-500');
-                        btnSendResetLink.classList.add('btn-primary');
+                        btnSendResetLink.classList.add('bg-[color:var(--primary-color)]');
                     }, 300);
                 }, 2000);
             }
