@@ -1,11 +1,11 @@
 /* css/moderno.css - Estilo Elegante e Minimalista */
 
-/* RESTAURADO: Importa Playfair Display (para títulos/assinatura) e Montserrat (para corpo) */
+/* REVERTIDO: Importa Playfair Display (para títulos/assinatura) e Montserrat (para corpo) */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@400;500&display=swap');
 
 /* Variáveis de Cores e Tipografia */
 :root {
-    --font-serif: 'Playfair Display', serif; 
+    --font-serif: 'Playfair Display', serif;
     --font-sans: 'Montserrat', sans-serif;
     --color-text: #5C5C5C;
     --color-heading: #333333;
@@ -19,12 +19,16 @@ body.theme-moderno {
     font-family: var(--font-sans);
     color: var(--color-text);
     background-color: var(--color-background-extralight);
+}
 
-    /* CORREÇÃO CRÍTICA DO LAYOUT: Anula o display: grid do base.css para esta parte */
-    /* Garante que o conteúdo abaixo da hero-section NÃO fica ao lado */
-    display: block !important;
-    grid-template-columns: none !important;
-    grid-template-rows: none !important;
+/* * CORREÇÃO DE LAYOUT:
+ * Anula o 'display: grid' do ficheiro 'base.css' em ecrãs de computador.
+ * Isto força o conteúdo a ficar 'embaixo' da imagem, em vez de 'ao lado'.
+*/
+@media (min-width: 1024px) {
+    body.theme-moderno #page-wrapper {
+        display: block !important;
+    }
 }
 
 /* Estilo para Títulos (voltando para Playfair Display) */
@@ -33,14 +37,14 @@ body.theme-moderno {
     color: var(--color-heading);
 }
 
-/* RESTAURADO: Estilo da Assinatura - volta para Playfair Display sem estilos extras */
+/* REVERTIDO: Estilo da Assinatura - volta para Playfair Display Italic */
 .theme-moderno .font-signature {
     font-family: var(--font-serif); /* Playfair Display */
     font-weight: 400; /* Regular */
-    font-style: italic; /* Adicionado para o estilo de assinatura, se desejado */
-    font-size: 1.5rem; /* 24px */
-    letter-spacing: 0; /* Volta ao normal */
-    text-transform: none; /* Volta ao normal */
+    font-style: italic;
+    /* Remove as alterações de 'uppercase' e 'letter-spacing' */
+    text-transform: none;
+    letter-spacing: normal;
 }
 
 
@@ -112,9 +116,11 @@ body.theme-moderno {
 
 /* Efeito de Papel Rasgado (Aplicado somente ao layout moderno) */
 #hero-section {
-
+    /* O SVG <clipPath> com id="torn-paper-edge" deve
+       estar presente no 'evento.html' para que isto funcione.
+    */
     clip-path: url(#torn-paper-edge);
-
-
+    
+    /* REVERTIDO: Remove z-index e position (não são necessários com o layout corrigido) */
 }
 
