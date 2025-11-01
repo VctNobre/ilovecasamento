@@ -34,21 +34,26 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
     const user = session?.user;
     const currentPage = window.location.pathname;
     
-    // --- ALTERAÇÃO ---
-    // Verifica se estamos no fluxo de recuperação de senha olhando o hash da URL
-    const isPasswordRecovery = window.location.hash.includes('type=recovery');
-    // --- FIM DA ALTERAÇÃO ---
-
+    // Se temos um utilizador (sessão existe)...
     if (user) {
-        // Redireciona para o dashboard...
-        // A MENOS QUE estejamos na página de login E seja uma recuperação de senha.
-        if (currentPage.includes('/login') && !isPasswordRecovery) {
+        // E estamos na página de login...
+        if (currentPage.includes('/login')) {
+            
+            // ...NÃO nos redirecione se o evento for PASSWORD_RECOVERY.
+            // Isto permite ao auth.js mostrar o formulário de redefinição.
+            if (event === "PASSWORD_RECOVERY") {
+                return; // Para o script aqui e não faz nada.
+            }
+            
+            // Se for qualquer outro evento (SIGNED_IN, etc.), então redirecione.
             window.location.href = '/dashboard';
         }
     } else {
-        // Se não há utilizador, e estamos no dashboard, manda para o login.
+        // Se não há utilizador (sessão é nula), e estamos no dashboard...
         if (currentPage.includes('/dashboard')) {
+            // ...manda para o login.
             window.location.href = '/login';
         }
     }
 });
+
