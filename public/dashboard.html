@@ -27,9 +27,12 @@
     </style>
 </head>
 <body class="bg-gray-100">
-        <div id="couple-dashboard" class="relative h-screen flex overflow-hidden">
+    <!-- ESTRUTURA FLEX PRINCIPAL (Sidebar + Conteúdo) -->
+    <div id="couple-dashboard" class="relative h-screen flex overflow-hidden">
+        
         <!-- Overlay para o menu em modo responsivo -->
         <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden"></div>
+        
         <!-- Menu Lateral (Sidebar) -->
         <aside id="sidebar" class="bg-white w-64 text-gray-800 fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out z-30 flex flex-col shadow-lg flex-shrink-0">
             <div class="p-6 border-b flex items-center justify-center">
@@ -66,9 +69,12 @@
                 </button>
             </div>
         </aside>
+        <!-- Fim da Sidebar -->
 
-        <!-- Área de Conteúdo Principal -->
+        <!-- Wrapper do Conteúdo Principal (Header + Main) -->
         <div class="flex-1 flex flex-col overflow-hidden">
+            
+            <!-- Header Fixo -->
             <header class="bg-white shadow-sm sticky top-0 z-10 flex-shrink-0">
                 <div class="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
                     <div><button id="menu-button" class="md:hidden text-gray-700 p-2"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button></div>
@@ -78,8 +84,9 @@
                     </div>
                 </div>
             </header>
+            <!-- Fim do Header Fixo -->
             
-            <!-- A tag <main> DEVE começar aqui e envolver TODOS os painéis -->
+            <!-- Área de Conteúdo Rolável -->
             <main class="flex-1 p-4 sm:p-6 overflow-y-auto">
 
                 <!-- Painel Layouts -->
@@ -119,7 +126,6 @@
                                     <p class="text-xs text-gray-500 mt-1">Use apenas letras minúsculas, números e hífens (-).</p>
                                 </div>
                                 <div class="flex-1">
-                                    <!-- CORREÇÃO: Removido readonly e bg-gray-100, ID e 'for' atualizados -->
                                     <label for="page-slug-premium-input" class="block text-sm font-medium text-gray-600 mb-1">URL Premium (Valores Maiores)</label>
                                     <div class="flex items-center">
                                         <span class="text-gray-500 text-sm p-2 bg-gray-100 rounded-l-md border border-r-0 h-11 flex items-center whitespace-nowrap">ilovecasamento.com.br/</span>
@@ -134,7 +140,6 @@
                         <div class="bg-white p-6 rounded-xl card-shadow">
                             <h2 class="text-2xl font-title mb-4">Funcionalidades Extras</h2>
                             <div class="space-y-4">
-                        
                                 <div class="flex items-center justify-between p-4 border rounded-lg">
                                     <span class="flex-grow flex flex-col pr-4">
                                         <span class="text-sm font-medium text-gray-900">Confirmação de Presença (RSVP)</span>
@@ -170,7 +175,6 @@
                             </div>
                         </div>
 
-                        <!-- Secção "Editar Seção de Detalhes" (agora opcional) -->
                         <div id="story-editor-wrapper" class="hidden">
                              <div class="bg-white p-6 rounded-xl card-shadow">
                                 <h2 class="text-2xl font-title mb-4">Editar Seção de Detalhes</h2>
@@ -194,14 +198,12 @@
                                             <label for="story-1-photos-upload" class="block text-sm font-medium text-gray-600 mb-1">Fotos da Seção 1 (pode selecionar várias)</label>
                                             <input type="file" id="story-1-photos-upload" class="input-styled w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[color:var(--primary-color)] file:text-white hover:file:opacity-90" accept="image/*" multiple>
                                             <div id="story-1-preview-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 mt-4">
-                                                <!-- Previews das fotos da Seção 1 -->
                                             </div>
                                         </div>
                                         <div>
                                             <label for="story-2-photos-upload" class="block text-sm font-medium text-gray-600 mb-1">Fotos da Seção 2 (pode selecionar várias)</label>
                                             <input type="file" id="story-2-photos-upload" class="input-styled w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[color:var(--primary-color)] file:text-white hover:file:opacity-90" accept="image/*" multiple>
                                             <div id="story-2-preview-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 mt-4">
-                                                <!-- Previews das fotos da Seção 2 -->
                                             </div>
                                         </div>
                                     </div>
@@ -209,21 +211,17 @@
                             </div>
                         </div>
                         
-                        <!-- Secção "Galeria de Fotos" (agora opcional) -->
                         <div id="gallery-editor-wrapper" class="hidden">
                              <div class="bg-white p-6 rounded-xl card-shadow">
-                                <!-- NOVO CAMPO: Título da Galeria -->
                                 <div>
                                     <label for="gallery-title" class="block text-sm font-medium text-gray-600 mb-1">Título da Galeria</label>
                                     <input type="text" id="gallery-title" class="input-styled w-full mb-4" placeholder="ex: Nossos Momentos, Pré-wedding">
                                 </div>
-                                <!-- FIM NOVO CAMPO -->
                                 <div>
                                     <label for="gallery-photos-upload" class="block text-sm font-medium text-gray-600 mb-1">Adicionar Fotos à Galeria (pode selecionar várias)</label>
                                     <input type="file" id="gallery-photos-upload" class="input-styled w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[color:var(--primary-color)] file:text-white hover:file:opacity-90" accept="image/*" multiple>
                                 </div>
                                 <div id="gallery-preview-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 mt-4">
-                                    <!-- As pré-visualizações das fotos da galeria aparecerão aqui -->
                                 </div>
                             </div>
                         </div>
@@ -254,17 +252,16 @@
                                 <h2 class="text-2xl font-title">Lista de Presentes</h2>
                                 <button id="btn-add-gift" class="btn-primary">+ Adicionar Presente</button>
                             </div>
-                            <!-- NOVO CAMPO: Texto da Lista de Presentes -->
                             <div>
                                 <label for="gifts-intro-text" class="block text-sm font-medium text-gray-600 mb-1">Texto Introdutório da Lista de Presentes (Opcional)</label>
                                 <textarea id="gifts-intro-text" rows="3" class="input-styled w-full mb-6" placeholder="Escreva uma mensagem sobre os presentes..."></textarea>
                             </div>
-                             <!-- FIM NOVO CAMPO -->
                             <div id="gifts-editor-list" class="space-y-4"></div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Painel Convidados -->
                 <div id="guests-panel" class="tab-panel hidden">
                     <div class="bg-white p-8 rounded-xl card-shadow">
                         <h2 class="text-3xl font-title mb-6">Lista de Convidados</h2>
@@ -275,6 +272,7 @@
                     </div>
                 </div>
 
+                <!-- Painel Minha Carteira -->
                 <div id="wallet-panel" class="tab-panel hidden">
                     <div class="bg-white p-8 rounded-xl card-shadow max-w-3xl mx-auto">
                         <h2 class="text-3xl font-title mb-2">Minha Carteira</h2>
@@ -283,6 +281,7 @@
                     </div>
                 </div>
 
+                <!-- Painel Minha Conta -->
                 <div id="account-panel" class="tab-panel hidden">
                     <div class="bg-white p-8 rounded-xl card-shadow max-w-2xl mx-auto space-y-8">
                         <h2 class="text-3xl font-title">Minha Conta</h2>
@@ -307,12 +306,20 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- TODOS OS PAINÉIS DEVEM ESTAR ACIMA DESTA LINHA -->
             </main>
+            <!-- Fim da Área de Conteúdo Rolável -->
+
         </div>
+        <!-- Fim do Wrapper do Conteúdo Principal -->
+
         <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-3"></div>
     </div>
+    <!-- Fim da ESTRUTURA FLEX PRINCIPAL -->
 
     <script type="module" src="/js/app.js"></script>
     <script type="module" src="/js/dashboard.js"></script>
 </body>
 </html>
+
