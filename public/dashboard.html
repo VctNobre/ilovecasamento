@@ -73,7 +73,6 @@
         <!-- Fim da Sidebar -->
 
         <!-- Wrapper do Conteúdo Principal (Header + Main) -->
-        <!-- ESTA DIV é a chave. "flex-col" força o header e o main a empilhar verticalmente -->
         <div class="flex-1 flex flex-col overflow-hidden">
             
             <!-- Header Fixo -->
@@ -89,7 +88,6 @@
             <!-- Fim do Header Fixo -->
             
             <!-- Área de Conteúdo Rolável -->
-            <!-- Esta tag <main> contém TODOS os 5 painéis -->
             <main class="flex-1 p-4 sm:p-6 overflow-y-auto">
 
                 <!-- Painel Layouts -->
@@ -262,13 +260,25 @@
                             <div id="gifts-editor-list" class="space-y-4"></div>
                         </div>
                     </div>
-      
+                </div>
 
                 <!-- Painel Convidados -->
                 <div id="guests-panel" class="tab-panel hidden">
                     <div class="bg-white p-8 rounded-xl card-shadow">
-                        <h2 class="text-3xl font-title mb-6">Lista de Convidados</h2>
-                        <p class="text-gray-600 mb-6">Aqui pode ver todos os convidados que já confirmaram ou recusaram a sua presença.</p>
+                        
+                        <!-- NOVO: Cabeçalho flexível com o botão -->
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+                            <div>
+                                <h2 class="text-3xl font-title">Lista de Convidados</h2>
+                                <p class="text-gray-600 mt-1">Aqui pode ver todos os convidados que já confirmaram ou recusaram a sua presença.</p>
+                            </div>
+                            <button id="btn-export-excel" class="btn-primary flex items-center justify-center gap-2" disabled>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Exportar
+                            </button>
+                        </div>
+                        <!-- FIM DA MUDANÇA -->
+
                         <div id="rsvp-list-container" class="space-y-4">
                             <p>A carregar respostas...</p>
                         </div>
@@ -324,4 +334,3 @@
     <script type="module" src="/js/dashboard.js"></script>
 </body>
 </html>
-

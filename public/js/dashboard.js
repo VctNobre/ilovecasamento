@@ -112,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // NOVOS SELETORES
     const galleryTitleInput = document.getElementById('gallery-title');
     const giftsIntroTextInput = document.getElementById('gifts-intro-text');
+    const btnExportExcel = document.getElementById('btn-export-excel'); // NOVO: Botão de exportar
 
 
     // --- FUNÇÕES GLOBAIS ---
@@ -131,21 +132,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- LÓGICA DO PAINEL "CONVIDADOS" (RSVP) ---
        const guestsPanel = {
         rsvpListContainer: document.getElementById('rsvp-list-container'),
+        guestData: [], // NOVO: Armazena os dados dos convidados
+        
         async loadRsvpData() {
             if (!this.rsvpListContainer || !eventData) {
                 if (this.rsvpListContainer) this.rsvpListContainer.innerHTML = '<p>Salve o seu site primeiro para ver a lista de convidados.</p>';
+                if (btnExportExcel) btnExportExcel.disabled = true; // Desabilita o botão
                 return;
             }
             this.rsvpListContainer.innerHTML = '<p>A carregar respostas...</p>';
+            if (btnExportExcel) btnExportExcel.disabled = true; // Desabilita enquanto carrega
+            
             const { data: rsvps, error } = await supabaseClient.from('rsvps').select('*').eq('event_id', eventData.id);
             if (error) {
                 this.rsvpListContainer.innerHTML = '<p class="text-red-500">Erro ao carregar as respostas.</p>';
+                if (btnExportExcel) btnExportExcel.disabled = true;
                 return;
             }
+
+            this.guestData = rsvps; // Salva os dados para exportação
+            
             if (rsvps.length === 0) {
                 this.rsvpListContainer.innerHTML = '<p>Ainda ninguém respondeu à sua confirmação de presença.</p>';
+                if (btnExportExcel) btnExportExcel.disabled = true;
                 return;
             }
+
+            // Habilita o botão se houver dados
+            if (btnExportExcel) btnExportExcel.disabled = false;
+
             rsvps.sort((a, b) => b.is_attending - a.is_attending);
             this.rsvpListContainer.innerHTML = rsvps.map(rsvp => `
                 <div class="border p-4 rounded-lg ${rsvp.is_attending ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
@@ -154,8 +169,78 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${rsvp.message ? `<p class="mt-2 text-sm italic text-gray-600">"${rsvp.message}"</p>` : ''}
                 </div>
             `).join('');
+        },
+
+        // NOVO: Função para sanitizar campos do CSV
+        sanitizeCsvField(field) {
+            if (field === null || field === undefined) {
+                return '""'; // Retorna aspas vazias para nulo/indefinido
+            }
+            let str = String(field);
+            // Escapa aspas duplas internas duplicando-as
+            str = str.replace(/"/g, '""');
+            // Se o campo contém vírgula, aspas ou quebra de linha, envolve-o em aspas
+            if (str.search(/("|,|\n)/g) >= 0) {
+                str = `"${str}"`;
+            }
+            return str;
+        },
+
+        // NOVO: Função de exportação
+        exportToCsv() {
+            if (this.guestData.length === 0) {
+                showToast("Não há dados para exportar.", "error");
+                return;
+            }
+
+            // Filtra apenas convidados confirmados
+            const confirmedGuests = this.guestData.filter(rsvp => rsvp.is_attending);
+
+            if (confirmedGuests.length === 0) {
+                showToast("Não há convidados confirmados para exportar.", "error");
+                return;
+            }
+
+            const headers = ["Nome do Convidado", "Status", "Mensagem", "Data da Resposta"];
+            const csvRows = [headers.join(",")]; // Cabeçalho
+
+            // Adiciona as linhas de dados
+            confirmedGuests.forEach(rsvp => {
+                const row = [
+                    this.sanitizeCsvField(rsvp.guest_name),
+                    this.sanitizeCsvField("Confirmado"),
+                    this.sanitizeCsvField(rsvp.message),
+                    this.sanitizeCsvField(new Date(rsvp.created_at).toLocaleString('pt-BR'))
+                ];
+                csvRows.push(row.join(","));
+            });
+
+            const csvString = csvRows.join("\r\n");
+            
+            // Adiciona o BOM (\uFEFF) para garantir que o Excel leia os acentos (UTF-8)
+            const blob = new Blob(["\uFEFF" + csvString], { type: 'text/csv;charset=utf-8;' });
+            
+            // Cria um link de download
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            const filename = `lista_convidados_confirmados_${new Date().toISOString().split('T')[0]}.csv`;
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", filename);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     };
+    
+    // NOVO: Adiciona o listener para o botão de exportar
+    if (btnExportExcel) {
+        btnExportExcel.addEventListener('click', () => {
+            guestsPanel.exportToCsv();
+        });
+    }
 
     // --- LÓGICA DO PAINEL "MINHA CARTEIRA" ---
     const walletPanel = {
@@ -183,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="text-xs text-gray-500 mt-2">Você será redirecionado para o painel seguro do Mercado Pago para ver o seu saldo e gerir os seus saques.</p>
                     </div>
                     
-                    <!-- NOVO: Secção de Desconectar -->
+                    <!-- Secção de Desconectar -->
                     <div id="disconnect-wrapper" class="border-t pt-4 mt-6">
                          <button id="btn-disconnect-mp" class="text-red-600 hover:text-red-800 text-sm font-medium hover:underline">
                             Desconectar minha conta do Mercado Pago
@@ -192,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>`;
             
-            // Adiciona o listener para o novo botão
+            // Adiciona o listener para o botão
             const btnDisconnect = document.getElementById('btn-disconnect-mp');
             if (btnDisconnect) {
                 btnDisconnect.addEventListener('click', () => this.showDisconnectConfirmation());
@@ -232,12 +317,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
         
-        // --- NOVAS FUNÇÕES ---
         showDisconnectConfirmation() {
             const wrapper = document.getElementById('disconnect-wrapper');
             if (!wrapper) return;
             
-            // Substitui o conteúdo da wrapper pela confirmação
             wrapper.innerHTML = `
                 <p class="text-lg font-semibold text-red-700">Tem a certeza?</p>
                 <p class="text-sm text-gray-600 mb-4">Esta ação não pode ser desfeita. Terá de se reconectar para receber novos presentes.</p>
@@ -247,8 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
             
-            // Adiciona listeners aos novos botões
-            document.getElementById('btn-cancel-disconnect').addEventListener('click', () => this.updateStatus()); // Cancela e re-renderiza
+            document.getElementById('btn-cancel-disconnect').addEventListener('click', () => this.updateStatus()); 
             document.getElementById('btn-confirm-disconnect').addEventListener('click', () => this.handleDisconnectMercadoPago());
         },
 
@@ -265,7 +347,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Atualiza o campo 'mp_credentials' para null no Supabase
             const { error } = await supabaseClient
                 .from('events')
                 .update({ mp_credentials: null })
@@ -280,18 +361,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Sucesso
             showToast('Conta do Mercado Pago desconectada.', 'success');
             
-            // Limpa os dados localmente
             if (eventData) {
                 eventData.mp_credentials = null;
             }
             
-            // Re-renderiza o painel (que agora mostrará o estado "Não Conectado")
             this.updateStatus(); 
         },
-        // --- FIM DAS NOVAS FUNÇÕES ---
     };
     
     // --- LÓGICA DOS BOTÕES DE ATIVAÇÃO (TOGGLES) ---
@@ -365,23 +442,19 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mainTitleColorInput) mainTitleColorInput.value = data.main_title_color || '#FFFFFF';
             if (heroImagePreview && data.hero_image_url) { heroImagePreview.src = data.hero_image_url; heroImagePreview.classList.remove('hidden'); }
             
-            // NOVO: Adiciona o preenchimento dos novos campos
             if (galleryTitleInput) galleryTitleInput.value = data.gallery_title || '';
             if (giftsIntroTextInput) giftsIntroTextInput.value = data.gifts_intro_text || '';
 
             if (giftsEditorList) { giftsEditorList.innerHTML = ''; if (data.gifts) data.gifts.sort((a, b) => a.id - b.id).forEach(renderGiftEditor); }
             
-            // Carrega fotos da galeria principal
             currentGalleryFiles = (data.gallery_photos && Array.isArray(data.gallery_photos)) ? [...data.gallery_photos] : [];
             renderGalleryPreviews();
             if(galleryPhotosUpload) galleryPhotosUpload.value = '';
 
-            // Carrega fotos da História 1
             currentStory1Files = (data.story_images_1 && Array.isArray(data.story_images_1)) ? [...data.story_images_1] : [];
             renderStory1Previews();
             if(story1PhotosUpload) story1PhotosUpload.value = '';
 
-            // Carrega fotos da História 2
             currentStory2Files = (data.story_images_2 && Array.isArray(data.story_images_2)) ? [...data.story_images_2] : [];
             renderStory2Previews();
             if(story2PhotosUpload) story2PhotosUpload.value = '';
@@ -446,7 +519,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Funções de preview para Galeria Principal
     const renderGalleryPreviews = () => {
-        if (!galleryPreviewGrid) return; // Adiciona verificação
+        if (!galleryPreviewGrid) return; 
         galleryPreviewGrid.innerHTML = '';
         currentGalleryFiles.forEach((fileOrUrl, index) => {
             const previewWrapper = document.createElement('div');
@@ -595,7 +668,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             try {
                 const newSlug = sanitizeSlug(pageSlugInput.value);
-                const newSlugPremium = sanitizeSlug(pageSlugPremiumInput.value); // Adicionado
+                const newSlugPremium = sanitizeSlug(pageSlugPremiumInput.value); 
 
                 if (!newSlug) {
                     throw new Error("O link personalizado (padrão) não pode estar vazio.");
@@ -613,7 +686,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 
-                // Adicionada validação para o slug premium
                 if (newSlugPremium && newSlugPremium !== (eventData?.slug_premium || '')) {
                     if (newSlugPremium === newSlug) {
                         throw new Error("O link premium não pode ser igual ao link padrão.");
@@ -636,7 +708,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     heroImageUrl = await uploadFile(file, filePath);
                 }
 
-                // Lógica de upload da Galeria Principal
                 const galleryUrlsToSave = [];
                 for (const fileOrUrl of currentGalleryFiles) {
                     if (typeof fileOrUrl === 'string') {
@@ -648,7 +719,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                // Nova Lógica de upload da História 1
                 const story1UrlsToSave = [];
                 for (const fileOrUrl of currentStory1Files) {
                     if (typeof fileOrUrl === 'string') {
@@ -660,7 +730,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 
-                // Nova Lógica de upload da História 2
                 const story2UrlsToSave = [];
                 for (const fileOrUrl of currentStory2Files) {
                     if (typeof fileOrUrl === 'string') {
@@ -676,7 +745,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const pageDataToSave = {
                     user_id: user.id,
                     slug: newSlug,
-                    slug_premium: newSlugPremium || null, // Adicionado
+                    slug_premium: newSlugPremium || null, 
                     main_title: mainTitleInput ? mainTitleInput.value : null,
                     event_date: eventDateInput ? eventDateInput.value : null,
                     intro_text: introTextInput ? introTextInput.value : null,
@@ -694,11 +763,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     story_title_2: storyTitle2Input ? storyTitle2Input.value : null,
                     story_proposal: storyContent2Input ? storyContent2Input.value : null,
                     
-                    // NOVO: Campos de texto da galeria e presentes
                     gallery_title: galleryTitleInput ? galleryTitleInput.value : null,
                     gifts_intro_text: giftsIntroTextInput ? giftsIntroTextInput.value : null,
 
-                    // Novas colunas (jsonb)
                     story_images_1: story1UrlsToSave.length > 0 ? story1UrlsToSave : null,
                     story_images_2: story2UrlsToSave.length > 0 ? story2UrlsToSave : null,
                     gallery_photos: galleryUrlsToSave.length > 0 ? galleryUrlsToSave : null
@@ -782,9 +849,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (user) {
             if (accountEmailInput) accountEmailInput.value = user.email;
             await loadEventData(user.id);
-            switchTab('layouts'); // Inicia na aba 'Layouts'
+            switchTab('layouts'); 
         } else {
             window.location.href = '/login';
         }
     })();
 });
+
