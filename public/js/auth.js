@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btnSendResetLink.disabled = true;
             btnSendResetLink.textContent = 'Enviando...';
 
-            const productionLoginUrl = 'https://www.ilovecasamento.com.br/login.html';
+            const productionLoginUrl = 'https://ilovecasamento.com.br/login.html';
             
             const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { 
                 redirectTo: productionLoginUrl 
