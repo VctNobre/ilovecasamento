@@ -30,7 +30,7 @@ function createStorySection(data) {
                     <div class="md:w-2/5 text-gray-600 text-center md:text-left">
                         <p class="leading-relaxed">${data.story_how_we_met ? data.story_how_we_met.replace(/\n/g, '<br>') : 'Texto sobre como nos conhecemos...'}</p>
                     </div>
-                    <div class="md:w-3/5">
+                    <div class="md:w-full">
                         ${renderStoryCarousel(
                             data.story_images_1,
                             'story-1-carousel-container',
@@ -49,7 +49,7 @@ function createStorySection(data) {
                     <div class="md:w-2/5 text-gray-600 text-center md:text-left">
                         <p class="leading-relaxed">${data.story_proposal ? data.story_proposal.replace(/\n/g, '<br>') : 'Texto sobre o pedido de casamento...'}</p>
                     </div>
-                    <div class="md:w-3/5">
+                    <div class="md:w-full">
                         ${renderStoryCarousel(
                             data.story_images_2,
                             'story-2-carousel-container',
@@ -188,7 +188,7 @@ export function render(data) {
     return `
         <!-- Cabeçalho com Imagem de Capa e Overlay -->        
         
-        <header id="hero-section" class="hero-section relative w-full h-[70vh] md:h-[80vh] overflow-hidden">
+        <header id="hero-section" class="hero-section relative w-full h-[100vh] md:h-[100vh] overflow-hidden">
             <img id="hero-image" src="${data.hero_image_url || 'https://images.pexels.com/photos/1024989/pexels-photo-1024989.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'}" alt="Foto do Casal" class="w-full h-full object-cover">
             
             <!-- Overlay para legibilidade -->

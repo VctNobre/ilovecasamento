@@ -293,7 +293,7 @@ function attachEventListeners(data) {
         });
     }
 
-    // --- LÓGICA DE CARROSSEL GENÉRICA (MODERNO) ---
+    // --- LÓGICA DE CARROSSEL GENÉRICA (MODERNO) - ATUALIZADA ---
     const setupCarousel = (containerSelector, imageId, prevId, nextId, counterId, photos) => {
         const galleryContainer = document.querySelector(containerSelector);
         const imageEl = document.getElementById(imageId);
@@ -301,24 +301,57 @@ function attachEventListeners(data) {
         const btnNext = document.getElementById(nextId);
         const counterEl = document.getElementById(counterId);
         const photoList = photos || [];
+        
         let currentIndex = 0;
+        let isTransitioning = false; // NOVO: Flag para impedir cliques rápidos
+        const transitionTime = 300; // Tempo do fade em ms (deve corresponder ao CSS)
 
         if (!galleryContainer || !imageEl || !btnPrev || !btnNext || photoList.length === 0) {
             if(galleryContainer) galleryContainer.style.display = 'none'; // Esconde se não houver fotos
             return;
         }
 
+        // NOVO: Pré-carrega todas as imagens para o cache do navegador
+        const preloadedImages = [];
+        photoList.forEach(src => {
+            const img = new Image();
+            img.src = src;
+            preloadedImages.push(img);
+        });
+
         const showPhoto = (index) => {
+            // Se uma transição já estiver a acontecer, ignora o clique
+            if (isTransitioning) return;
+            isTransitioning = true;
+
             if (index < 0) index = photoList.length - 1; // Loop
             if (index >= photoList.length) index = 0; // Loop
             
+            // Se a foto já for a atual, liberta a flag e sai
+            if (index === currentIndex) {
+                isTransitioning = false;
+                return;
+            }
+            
             currentIndex = index;
             
+            // Inicia o fade-out
             imageEl.style.opacity = '0';
+            
+            // Espera o fade-out terminar
             setTimeout(() => {
-                imageEl.src = photoList[index];
+                // Troca a imagem (já está pré-carregada, então é instantâneo)
+                imageEl.src = preloadedImages[index].src;
+                
+                // Inicia o fade-in
                 imageEl.style.opacity = '1';
-            }, 300);
+                
+                // Libera a flag APÓS o fade-in terminar
+                setTimeout(() => {
+                    isTransitioning = false;
+                }, transitionTime); 
+
+            }, transitionTime); 
             
             if (counterEl) {
                 counterEl.textContent = `${index + 1} / ${photoList.length}`;
@@ -342,6 +375,7 @@ function attachEventListeners(data) {
         });
         
         const handleSwipe = () => {
+            if (isTransitioning) return; // NOVO: Impede swipe durante a transição
             if (touchEndX < touchStartX - 50) { // Swiped left
                 showPhoto(currentIndex + 1);
             }
@@ -350,8 +384,14 @@ function attachEventListeners(data) {
             }
         };
 
-        // Mostra a primeira foto
-        showPhoto(0);
+        // Mostra a primeira foto (sem transição inicial)
+        if (preloadedImages.length > 0) {
+            imageEl.src = preloadedImages[0].src;
+            imageEl.style.opacity = '1';
+            if (counterEl) {
+                counterEl.textContent = `1 / ${photoList.length}`;
+            }
+        }
     };
 
     // INICIALIZA OS CARROSSÉIS (Layout Moderno)
@@ -573,4 +613,3 @@ function attachEventListeners(data) {
         });
     }
 }
-
