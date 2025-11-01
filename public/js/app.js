@@ -29,18 +29,24 @@ const showToast = (message, type = 'success') => {
 // Exporta as funções para que outros ficheiros as possam usar
 export { supabaseClient, showToast };
 
-// --- LÓGICA DE REDIRECIONAMENTO GLOBAL ---
+// --- LÓGICA DE REDIRECIONAMENTO GLOBAL (CORRIGIDA) ---
 supabaseClient.auth.onAuthStateChange((event, session) => {
     const user = session?.user;
     const currentPage = window.location.pathname;
+    
+    // --- ALTERAÇÃO ---
+    // Verifica se estamos no fluxo de recuperação de senha olhando o hash da URL
+    const isPasswordRecovery = window.location.hash.includes('type=recovery');
+    // --- FIM DA ALTERAÇÃO ---
 
     if (user) {
-
-        if (currentPage.includes('/login')) {
+        // Redireciona para o dashboard...
+        // A MENOS QUE estejamos na página de login E seja uma recuperação de senha.
+        if (currentPage.includes('/login') && !isPasswordRecovery) {
             window.location.href = '/dashboard';
         }
     } else {
-
+        // Se não há utilizador, e estamos no dashboard, manda para o login.
         if (currentPage.includes('/dashboard')) {
             window.location.href = '/login';
         }
