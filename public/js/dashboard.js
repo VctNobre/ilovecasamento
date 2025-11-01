@@ -179,8 +179,8 @@ document.addEventListener('DOMContentLoaded', () => {
             let str = String(field);
             // Escapa aspas duplas internas duplicando-as
             str = str.replace(/"/g, '""');
-            // Se o campo contém vírgula, aspas ou quebra de linha, envolve-o em aspas
-            if (str.search(/("|,|\n)/g) >= 0) {
+            // Se o campo contém ponto e vírgula, aspas ou quebra de linha, envolve-o em aspas
+            if (str.search(/("|;|\n)/g) >= 0) {
                 str = `"${str}"`;
             }
             return str;
@@ -193,26 +193,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Filtra apenas convidados confirmados
-            const confirmedGuests = this.guestData.filter(rsvp => rsvp.is_attending);
+            // MUDANÇA: Não filtra mais, usa todos os dados
+            // const confirmedGuests = this.guestData.filter(rsvp => rsvp.is_attending);
+            // if (confirmedGuests.length === 0) { ... }
 
-            if (confirmedGuests.length === 0) {
-                showToast("Não há convidados confirmados para exportar.", "error");
-                return;
-            }
+            // MUDANÇA: Define os cabeçalhos na ordem solicitada
+            const headers = ["Nome do Convidado", "Status", "Data da Resposta", "Mensagem"];
+            const csvRows = [headers.join(";")]; // MUDANÇA: usa ; como delimitador
 
-            const headers = ["Nome do Convidado", "Status", "Mensagem", "Data da Resposta"];
-            const csvRows = [headers.join(",")]; // Cabeçalho
-
-            // Adiciona as linhas de dados
-            confirmedGuests.forEach(rsvp => {
+            // MUDANÇA: Itera sobre this.guestData (todos os convidados)
+            this.guestData.forEach(rsvp => {
                 const row = [
+                    // MUDANÇA: Ordem das colunas
                     this.sanitizeCsvField(rsvp.guest_name),
-                    this.sanitizeCsvField("Confirmado"),
-                    this.sanitizeCsvField(rsvp.message),
-                    this.sanitizeCsvField(new Date(rsvp.created_at).toLocaleString('pt-BR'))
+                    this.sanitizeCsvField(rsvp.is_attending ? "Confirmado" : "Não poderá ir"), // MUDANÇA: Status dinâmico
+                    this.sanitizeCsvField(new Date(rsvp.created_at).toLocaleString('pt-BR')),
+                    this.sanitizeCsvField(rsvp.message)
                 ];
-                csvRows.push(row.join(","));
+                csvRows.push(row.join(";")); // MUDANÇA: usa ; como delimitador
             });
 
             const csvString = csvRows.join("\r\n");
@@ -223,7 +221,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Cria um link de download
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
-            const filename = `lista_convidados_confirmados_${new Date().toISOString().split('T')[0]}.csv`;
+            // MUDANÇA: Nome do arquivo para "geral"
+            const filename = `lista_convidados_geral_${new Date().toISOString().split('T')[0]}.csv`;
             
             link.setAttribute("href", url);
             link.setAttribute("download", filename);
