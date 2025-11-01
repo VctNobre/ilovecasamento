@@ -1,19 +1,5 @@
 // public/js/layouts/moderno.js
 
-// Função helper para formatar o texto em parágrafos
-function formatTextToParagraphs(text, defaultText = '') {
-    if (!text || text.trim() === '') {
-        return `<p class="leading-relaxed">${defaultText}</p>`;
-    }
-    
-    return text
-        .split('\n') // Divide o texto em parágrafos a cada quebra de linha
-        .filter(p => p.trim() !== '') // Remove linhas vazias
-        .map(p => `<p class="leading-relaxed mb-4">${p}</p>`) // Envolve cada parágrafo numa tag <p> com margem
-        .join(''); // Junta tudo
-}
-
-
 function createStorySection(data) {
     if (!data.story_section_enabled) return '';
 
@@ -37,15 +23,14 @@ function createStorySection(data) {
     return `
         <section id="story-section" class="py-20 md:py-28">
             <div class="container mx-auto px-6 md:px-8 max-w-4xl">
-                <!-- REVERTIDO: Título H2 com a fonte serif (Playfair) original -->
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.story_title_1 || 'Nossa História'}</h2>
                 
                 <!-- Como nos Conhecemos -->
                 <div class="flex flex-col md:flex-row items-center gap-12 md:gap-16 mb-20">
                     <div class="md:w-2/5 text-gray-600 text-center md:text-left">
-                        ${formatTextToParagraphs(data.story_how_we_met, 'Texto sobre como nos conhecemos...')}
+                        <p class="leading-relaxed">${data.story_how_we_met ? data.story_how_we_met.replace(/\n/g, '<br>') : 'Texto sobre como nos conhecemos...'}</p>
                     </div>
-                    <div class="md:w-3/5">
+                    <div class="md:w-full">
                         ${renderStoryCarousel(
                             data.story_images_1,
                             'story-1-carousel-container',
@@ -59,13 +44,12 @@ function createStorySection(data) {
                 </div>
 
                 <!-- O Pedido -->
-                <!-- REVERTIDO: Título H2 com a fonte serif (Playfair) original -->
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.story_title_2 || 'O Pedido'}</h2>
                 <div class="flex flex-col md:flex-row-reverse items-center gap-12 md:gap-16">
                     <div class="md:w-2/5 text-gray-600 text-center md:text-left">
-                        ${formatTextToParagraphs(data.story_proposal, 'Texto sobre o pedido de casamento...')}
+                        <p class="leading-relaxed">${data.story_proposal ? data.story_proposal.replace(/\n/g, '<br>') : 'Texto sobre o pedido de casamento...'}</p>
                     </div>
-                    <div class="md:w-3/5">
+                    <div class="md:w-full">
                         ${renderStoryCarousel(
                             data.story_images_2,
                             'story-2-carousel-container',
@@ -85,16 +69,24 @@ function createStorySection(data) {
 function createGallerySection(data) {
     if (!data.gallery_section_enabled || !data.gallery_photos || data.gallery_photos.length === 0) return '';
     
+    // A lógica de clique (lightbox) foi removida, pois o carrossel a substitui.
     return `
         <section id="gallery-section" class="py-20 md:py-28 bg-white">
             <div class="container mx-auto px-6 md:px-8 max-w-5xl">
-                <!-- REVERTIDO: Título H2 com a fonte serif (Playfair) original -->
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">${data.gallery_title || 'Galeria de Fotos'}</h2>
                 
+                <!-- Modern Gallery Carousel -->
+                <!-- ALTERAÇÃO: Removido max-w-3xl e mx-auto para que o carrossel ocupe max-w-5xl (largura do container pai) -->
+                <!-- Adicionado ID "main-gallery-container" para o setupCarousel -->
                 <div id="main-gallery-container" class="relative w-full rounded-lg shadow-xl overflow-hidden" style="aspect-ratio: 16 / 10; user-select: none;">
+                    <!-- Imagem principal -->
                     <img id="modern-gallery-image" src="${data.gallery_photos[0]}" alt="Foto da Galeria" class="w-full h-full object-cover transition-opacity duration-300">
+                    
+                    <!-- Botões de Navegação -->
                     <button id="modern-gallery-prev" class="gallery-nav-btn absolute left-4 top-1/2 -translate-y-1/2">&#10094;</button>
                     <button id="modern-gallery-next" class="gallery-nav-btn absolute right-4 top-1/2 -translate-y-1/2">&#10095;</button>
+                    
+                    <!-- Contador -->
                     <div id="modern-gallery-counter" class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-sm py-1 px-3 rounded-full">
                         1 / ${data.gallery_photos.length}
                     </div>
@@ -106,6 +98,7 @@ function createGallerySection(data) {
 
 function createGiftsSection(data) {
     
+    // CORREÇÃO: Define o texto de introdução
     const introText = data.gifts_intro_text 
         ? `<p class="text-gray-600 max-w-3xl mx-auto mb-12 text-center leading-relaxed">${data.gifts_intro_text.replace(/\n/g, '<br>')}</p>` 
         : '';
@@ -114,19 +107,21 @@ function createGiftsSection(data) {
         return `
         <section id="gifts-section" class="py-20 md:py-28">
              <div class="container mx-auto px-6 md:px-8 max-w-5xl">
-                <!-- REVERTIDO: Título H2 com a fonte serif (Playfair) original -->
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#33333V'};">Lista de Presentes</h2>
-                ${introText} <p class="text-center text-gray-500">A lista de presentes ainda não foi adicionada.</p>
+                ${introText} <!-- Adicionado aqui --><p class="text-center text-gray-500">A lista de presentes ainda não foi adicionada.</p>
             </div>
         </section>
         `;
     }
 
     const giftItems = data.gifts.map(gift => `
+        <!-- ALTERAÇÃO: Card reestruturado para a imagem preencher o topo -->
         <div class="gift-card text-center bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+            <!-- Imagem preenche a div, sem padding -->
             <div class="w-full h-48">
                 <img src="${gift.image_url || 'https://placehold.co/400x300/F9F5F2/967E76?text=Presente'}" alt="${gift.title}" class="w-full h-full object-cover">
             </div>
+            <!-- Conteúdo com padding, botão alinhado abaixo -->
             <div class="p-4 flex-grow flex flex-col">
                 <h3 class="text-lg font-semibold text-gray-700">${gift.title}</h3>
                 <p class="text-gray-500 mb-4 mt-1 flex-grow">R$ ${Number(gift.value).toFixed(2).replace('.', ',')}</p>
@@ -138,9 +133,8 @@ function createGiftsSection(data) {
     return `
         <section id="gifts-section" class="py-20 md:py-28">
              <div class="container mx-auto px-6 md:px-8 max-w-5xl">
-                <!-- REVERTIDO: Título H2 com a fonte serif (Playfair) original -->
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-16" style="color: ${data.title_color || '#333333'};">Lista de Presentes</h2>
-                ${introText} <div id="gift-list-container" class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
+                ${introText} <!-- Adicionado aqui --><div id="gift-list-container" class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
                     ${giftItems}
                 </div>
             </div>
@@ -155,7 +149,6 @@ function createRsvpSection(data) {
     return `
         <section id="rsvp-section" class="py-20 md:py-28 bg-beige-light">
             <div class="container mx-auto px-6 md:px-8 max-w-2xl">
-                <!-- REVERTIDO: Título H2 com a fonte serif (Playfair) original -->
                 <h2 class="text-4xl md:text-5xl font-serif text-center mb-12" style="color: ${data.title_color || '#333333'};">Confirme sua Presença</h2>
                 <form id="rsvp-form" class="space-y-6">
                     <div>
@@ -191,39 +184,36 @@ export function render(data) {
             year: 'numeric' 
           })
         : 'Data do Casamento';
-        
-    // Adiciona a classe de tema ao body
-    document.body.classList.remove('theme-padrao'); 
-    document.body.classList.add('theme-moderno'); // Garante que está no modo moderno
 
     return `
-        <!-- REVERTIDO: A classe "hero-section" é necessária para o layout de grid (lado a lado) do tema moderno -->
-        <header id="hero-section" class="hero-section relative w-full h-[70vh] md:h-screen overflow-hidden">
+        <!-- Cabeçalho com Imagem de Capa e Overlay -->        
+        
+        <header id="hero-section" class="hero-section relative w-full h-[100vh] md:h-[100vh] overflow-hidden">
             <img id="hero-image" src="${data.hero_image_url || 'https://images.pexels.com/photos/1024989/pexels-photo-1024989.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'}" alt="Foto do Casal" class="w-full h-full object-cover">
             
+            <!-- Overlay para legibilidade -->
             <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white p-4">
                 <div class="text-center">
-                    
-                    <!-- REVERTIDO: Estilo original com fonte serif (Playfair Display) -->
                     <h1 class="text-5xl md:text-7xl font-serif leading-tight" style="color: ${data.main_title_color || '#FFFFFF'};">${data.main_title || 'Felipe & Caroline'}</h1>
-                    
-                    <!-- REVERTIDO: Estilo original -->
                     <p class="text-xl md:text-2xl mt-4">${formattedDate}</p>
                 </div>
             </div>
         </header>
 
         <div id="page-content">
+            <!-- Bloco de Introdução (agora sem o título e a data) -->
             <div id="intro-block" class="bg-beige-extralight text-center py-12 md:py-16">
                 <div class="container mx-auto px-6">
-                    <div class="text-gray-600 max-w-2xl mx-auto">
-                        ${formatTextToParagraphs(data.intro_text)}
-                    </div>
-                    <!-- REVERTIDO: Assinatura com a classe .font-signature original -->
+                    ${data.intro_text ? `
+                        <div class="text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                            ${data.intro_text.replace(/\n/g, '<br>')}
+                        </div>
+                    ` : ''}
                     <p class="font-signature text-3xl md:text-4xl mt-8" style="color: ${data.title_color || '#333333'};">${data.signature || 'Felipe & Caroline'}</p>
                 </div>
             </div>
 
+            <!-- Conteúdo Principal -->
             <main id="main-content" class="bg-beige-extralight">
                 ${createStorySection(data)}
                 ${createGallerySection(data)}
@@ -236,8 +226,7 @@ export function render(data) {
             </footer>
         </div>
 
-        <!-- Lightbox (inalterado) -->
-        <div id="gallery-lightbox" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-4 transition-opacity duration-300 opacity-0 pointer-events-none">
+        <!-- Adicionando o HTML do Lightbox para consistência (ele é controlado pelo evento.js) --><div id="gallery-lightbox" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-4 transition-opacity duration-300 opacity-0 pointer-events-none">
             <button id="lightbox-close" class="absolute top-4 right-4 text-white text-5xl opacity-80 hover:opacity-100">&times;</button>
             <button id="lightbox-prev" class="absolute left-4 md:left-10 text-white text-4xl opacity-80 hover:opacity-100">&#10094;</button>
             <button id="lightbox-next" class="absolute right-4 md:right-10 text-white text-4xl opacity-80 hover:opacity-100">&#10095;</button>
@@ -245,4 +234,3 @@ export function render(data) {
         </div>
     `;
 }
-

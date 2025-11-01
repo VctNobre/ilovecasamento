@@ -1,6 +1,6 @@
 /* css/moderno.css - Estilo Elegante e Minimalista */
 
-/* REVERTIDO: Importa Playfair Display (para títulos/assinatura) e Montserrat (para corpo) */
+/* Importação das Fontes */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@400;500&display=swap');
 
 /* Variáveis de Cores e Tipografia */
@@ -21,30 +21,17 @@ body.theme-moderno {
     background-color: var(--color-background-extralight);
 }
 
-/* * CORREÇÃO DE LAYOUT:
- * Anula o 'display: grid' do ficheiro 'base.css' em ecrãs de computador.
- * Isto força o conteúdo a ficar 'embaixo' da imagem, em vez de 'ao lado'.
-*/
-@media (min-width: 1024px) {
-    body.theme-moderno #page-wrapper {
-        display: block !important;
-    }
-}
-
-/* Estilo para Títulos (voltando para Playfair Display) */
+/* Estilo para Títulos */
 .theme-moderno .font-serif {
     font-family: var(--font-serif);
     color: var(--color-heading);
 }
 
-/* REVERTIDO: Estilo da Assinatura - volta para Playfair Display Italic */
+/* Estilo para a Assinatura (usando a mesma fonte dos títulos) */
 .theme-moderno .font-signature {
-    font-family: var(--font-serif); /* Playfair Display */
-    font-weight: 400; /* Regular */
+    font-family: var(--font-serif);
+    font-weight: 400;
     font-style: italic;
-    /* Remove as alterações de 'uppercase' e 'letter-spacing' */
-    text-transform: none;
-    letter-spacing: normal;
 }
 
 
@@ -120,7 +107,10 @@ body.theme-moderno {
        estar presente no 'evento.html' para que isto funcione.
     */
     clip-path: url(#torn-paper-edge);
-    
-    /* REVERTIDO: Remove z-index e position (não são necessários com o layout corrigido) */
-}
 
+    /* Garante que a secção da imagem fique "por cima" 
+       do conteúdo que rola no layout de grid do desktop.
+    */
+    position: relative;
+    z-index: 10;
+}
