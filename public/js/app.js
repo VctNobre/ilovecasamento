@@ -34,17 +34,23 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
     const user = session?.user;
     const currentPage = window.location.pathname;
     
+    // --- LÓGICA DE FLAG DE RECUPERAÇÃO ---
+    // 1. Se o evento é de recuperação, define a flag para o auth.js usar
+    if (event === "PASSWORD_RECOVERY") {
+        sessionStorage.setItem('isResettingPassword', 'true');
+        return; // Para aqui
+    }
+
+    // 2. Se a flag estiver definida, não faz nada (deixa o auth.js trabalhar)
+    if (sessionStorage.getItem('isResettingPassword') === 'true') {
+        return;
+    }
+    // --- FIM DA LÓGICA DA FLAG ---
+    
     // Se temos um utilizador (sessão existe)...
     if (user) {
-        // E estamos na página de login...
+        // E estamos na página de login... (e NÃO é recuperação)
         if (currentPage.includes('/login')) {
-            
-            // ...NÃO nos redirecione se o evento for PASSWORD_RECOVERY.
-            // Isto permite ao auth.js mostrar o formulário de redefinição.
-            if (event === "PASSWORD_RECOVERY") {
-                return; // Para o script aqui e não faz nada.
-            }
-            
             // Se for qualquer outro evento (SIGNED_IN, etc.), então redirecione.
             window.location.href = '/dashboard';
         }

@@ -10,11 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('register-form');
     const toggleFormLink = document.getElementById('toggle-form');
     const forgotPasswordContainer = document.getElementById('forgot-password-container');
-    const ouDivider = document.getElementById('ou-divider'); // ID do divisor "OU"
-    
-    // Formulário de Redefinição de Senha (Novo)
-    const passwordResetForm = document.getElementById('password-reset-form');
-    const btnUpdatePasswordSubmit = document.getElementById('btn-update-password-submit');
     
     const urlParams = new URLSearchParams(window.location.search);
     const action = urlParams.get('action');
@@ -41,6 +36,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCancelReset = document.getElementById('btn-cancel-reset');
     const btnSendResetLink = document.getElementById('btn-send-reset-link');
     const resetEmailInput = document.getElementById('reset-email-input');
+    const passwordResetForm = document.getElementById('password-reset-form');
+    const btnUpdatePasswordSubmit = document.getElementById('btn-update-password-submit');
+    const newPasswordResetInput = document.getElementById('new-password-reset');
+    const confirmPasswordResetInput = document.getElementById('confirm-password-reset');
+    const ouDivider = document.getElementById('ou-divider'); // Divisor "OU"
+    const resetError = document.getElementById('password-reset-error');
+
+
 
     // --- Funções ---
     const loginWithGoogle = () => {
@@ -50,87 +53,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    const setRequirementStyle = (element, isValid) => {
-        if (!element) return;
-        element.style.color = isValid ? '#10B981' : '#6B7280';
-        element.style.fontWeight = isValid ? '600' : 'normal';
-    };
-
     const openResetModal = () => resetPasswordModal && resetPasswordModal.classList.replace('hidden', 'flex');
     const closeResetModal = () => resetPasswordModal && resetPasswordModal.classList.replace('flex', 'hidden');
 
-    // --- Event Listeners ---
-    
-    // --- NOVO: Lógica de Redefinição de Senha (Ouve o evento do Supabase) ---
-    supabaseClient.auth.onAuthStateChange(async (event, session) => {
-        if (event === "PASSWORD_RECOVERY") {
-            // O utilizador clicou no link do email e está na sessão de recuperação
-            
-            // 1. Esconder tudo o que não é relevante
+
+    // --- OUVINTE DE ESTADO DE AUTENTICAÇÃO (CONTROLA A PÁGINA) ---
+    // O app.js define a flag 'isResettingPassword'. Este script LÊ a flag.
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+        
+        // Verifica a flag que o app.js (no seu Canvas) definiu
+        const isResetting = sessionStorage.getItem('isResettingPassword') === 'true';
+
+        // Caso: Recuperação de Senha
+        if (isResetting) {
+            // Esconde tudo
             if (loginForm) loginForm.classList.add('hidden');
             if (registerForm) registerForm.classList.add('hidden');
             if (toggleFormLink) toggleFormLink.classList.add('hidden');
-            if (ouDivider) ouDivider.classList.add('hidden');
             if (btnGoogleLogin) btnGoogleLogin.classList.add('hidden');
-            if (forgotPasswordContainer) forgotPasswordContainer.classList.add('hidden');
-
-            // 2. Mostrar o formulário de redefinição
+            if (ouDivider) ouDivider.classList.add('hidden');
+            if (forgotPasswordContainer) forgotPasswordContainer.style.display = 'none'; // usa display none
+            
+            // Mostra o formulário de redefinição
             if (passwordResetForm) passwordResetForm.classList.remove('hidden');
         }
+        // Se não estiver a redefinir, o app.js já tratou do redirecionamento
+        // para o dashboard se o utilizador estiver logado.
     });
+    // --- FIM DO OUVINTE DE ESTADO ---
 
-    // --- NOVO: Listener para o botão do formulário de redefinição de senha ---
-    if (btnUpdatePasswordSubmit) {
-        btnUpdatePasswordSubmit.addEventListener('click', async () => {
-            const newPassword = document.getElementById('reset-new-password').value;
-            const confirmPassword = document.getElementById('reset-confirm-password').value;
-            const errorEl = document.getElementById('password-reset-error');
-            
-            if (errorEl) errorEl.textContent = '';
 
-            // Validações
-            if (!newPassword || !confirmPassword) {
-                if (errorEl) errorEl.textContent = 'Por favor, preencha ambos os campos.';
-                return;
-            }
-            if (newPassword.length < 8) {
-                // Sincroniza com os requisitos de registro
-                if (errorEl) errorEl.textContent = 'A senha deve ter no mínimo 8 caracteres.';
-                return;
-            }
-            if (newPassword !== confirmPassword) {
-                if (errorEl) errorEl.textContent = 'As senhas não coincidem.';
-                return;
-            }
+    // --- Event Listeners (EXISTENTES) ---
 
-            // Desativa o botão
-            btnUpdatePasswordSubmit.disabled = true;
-            btnUpdatePasswordSubmit.textContent = 'Salvando...';
-
-            // Envia a atualização para o Supabase
-            // (Funciona porque o utilizador está na sessão de 'PASSWORD_RECOVERY')
-            const { error } = await supabaseClient.auth.updateUser({
-                password: newPassword
-            });
-
-            if (error) {
-                if (errorEl) errorEl.textContent = `Erro: ${error.message}`;
-                btnUpdatePasswordSubmit.disabled = false;
-                btnUpdatePasswordSubmit.textContent = 'Salvar Nova Senha';
-            } else {
-                // Sucesso!
-                showToast('Senha atualizada com sucesso! Pode fazer login.');
-                
-                // Recarrega a página para o estado de login normal
-                setTimeout(() => {
-                    window.location.hash = ''; // Limpa o token da URL
-                    window.location.reload();
-                }, 2000);
-            }
-        });
-    }
-
-    // --- Lógica de Registo (Existente) ---
+    // --- Lógica de Registo ---
     if (registerForm) {
         const btnRegister = document.getElementById('btn-register');
         const emailRegisterInput = document.getElementById('register-email');
@@ -287,11 +242,13 @@ document.addEventListener('DOMContentLoaded', () => {
             btnSendResetLink.disabled = true;
             btnSendResetLink.textContent = 'Enviando...';
 
+            // URL DE REDIRECIONAMENTO CORRIGIDA (sem www)
             const productionLoginUrl = 'https://ilovecasamento.com.br/login.html';
             
             const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { 
                 redirectTo: productionLoginUrl 
             });
+
             if (error) {
                 showToast(`Erro: ${error.message}`, 'error');
                 btnSendResetLink.disabled = false;
@@ -322,4 +279,44 @@ document.addEventListener('DOMContentLoaded', () => {
             forgotPasswordContainer.style.display = 'none';
         }
     }
+
+    // --- NOVO LISTENER: SUBMISSÃO DA NOVA SENHA ---
+    if (btnUpdatePasswordSubmit) {
+        btnUpdatePasswordSubmit.addEventListener('click', async () => {
+            const newPassword = newPasswordResetInput.value;
+            const confirmPassword = confirmPasswordResetInput.value;
+
+            if (resetError) resetError.textContent = '';
+            if (!newPassword || newPassword.length < 8) {
+                if(resetError) resetError.textContent = 'A senha deve ter no mínimo 8 caracteres.';
+                return;
+            }
+            if (newPassword !== confirmPassword) {
+                if(resetError) resetError.textContent = 'As senhas não coincidem.';
+                return;
+            }
+
+            btnUpdatePasswordSubmit.disabled = true;
+            btnUpdatePasswordSubmit.textContent = 'Salvando...';
+
+            // Atualiza a senha do utilizador
+            const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
+
+            if (error) {
+                if(resetError) resetError.textContent = `Erro: ${error.message}`;
+                btnUpdatePasswordSubmit.disabled = false;
+                btnUpdatePasswordSubmit.textContent = 'Salvar Nova Senha';
+            } else {
+                // SUCESSO!
+                // Limpa a flag de redefinição
+                sessionStorage.removeItem('isResettingPassword');
+                
+                showToast('Senha redefinida com sucesso! Você será redirecionado.', 'success');
+                
+                // Força o redirecionamento para o dashboard
+                setTimeout(() => window.location.href = '/dashboard', 2000);
+            }
+        });
+    }
 });
+
