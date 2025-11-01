@@ -34,6 +34,8 @@ const redirectUri = process.env.MP_REDIRECT_URI || 'http://localhost:3000/mp-cal
 
 //Taxa de comissão
 const DEFAULT_PLATFORM_FEE = 0.03; // 3%
+// NOVA: Taxa de transação do MP que será repassada ao convidado
+const MP_TRANSACTION_FEE_PERCENTAGE = 0.0398; // 3.98%
 
 
 // --- Inicialização Mercado Pago (usando o objeto importado) ---
@@ -123,6 +125,7 @@ app.post('/create-payment-preference', async (req, res) => {
         
         const coupleAccessToken = eventData.mp_credentials.access_token;
         
+        // A taxa da *plataforma* (minha) ainda é calculada sobre o valor *original* dos presentes
         const feePercentage = (typeof eventData.custom_fee_percentage === 'number')
             ? eventData.custom_fee_percentage
             : DEFAULT_PLATFORM_FEE;
@@ -138,8 +141,29 @@ app.post('/create-payment-preference', async (req, res) => {
             currency_id: 'BRL',
         }));
 
-        const totalAmount = items.reduce((acc, item) => acc + item.unit_price, 0);
-        const feeAmount = parseFloat((totalAmount * feePercentage).toFixed(2));
+        // Calcula o valor original dos presentes
+        const originalTotalAmount = items.reduce((acc, item) => acc + item.unit_price, 0);
+
+        // --- LÓGICA DE REPASSAR A TAXA ---
+        // 1. Calcula a taxa do MP sobre o valor original
+        const mpFeeAmount = parseFloat((originalTotalAmount * MP_TRANSACTION_FEE_PERCENTAGE).toFixed(2));
+
+        // 2. Adiciona a taxa como um item separado que será pago pelo convidado
+        if (mpFeeAmount > 0) {
+            items.push({
+                id: 'mp_fee',
+                title: 'Taxa de Conveniência (Pagamento)',
+                description: 'Taxa para cobrir custos de transação do Mercado Pago.',
+                quantity: 1,
+                unit_price: mpFeeAmount,
+                currency_id: 'BRL',
+            });
+        }
+        // --- FIM DA LÓGICA DA TAXA ---
+
+        // 3. A taxa da *plataforma* (minha) continua baseada no valor *original*
+        const platformFeeAmount = parseFloat((originalTotalAmount * feePercentage).toFixed(2));
+        
         const siteUrl = process.env.SITE_URL || "https://ilovecasamento.com.br";
 
         const successPath = eventData.slug ? `/${eventData.slug}` : `/evento/${eventId}`;
@@ -148,8 +172,8 @@ app.post('/create-payment-preference', async (req, res) => {
 
         const result = await couplePreference.create({
             body: {
-                items: items,
-                marketplace_fee: feeAmount,
+                items: items, // O array de itens agora inclui a taxa do MP
+                marketplace_fee: platformFeeAmount, // A taxa da plataforma (minha)
                 back_urls: {
                     success: successUrl,
                     failure: successUrl.replace('success', 'failure'),
@@ -192,4 +216,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>
   console.log(`Servidor a correr na porta ${PORT}`)
 );
-

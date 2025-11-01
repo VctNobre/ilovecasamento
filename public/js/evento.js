@@ -144,27 +144,26 @@ function attachEventListeners(data) {
     const btnCheckout = document.getElementById('btn-checkout');
     const btnSubmitRsvp = document.getElementById('btn-submit-rsvp');
     
-    // --- LÓGICA DO CARRINHO ---
+     // --- LÓGICA DO CARRINHO ---
     // 'data.gifts' aqui já contém os presentes com o 'value' correto e unificado
     let originalGifts = data.gifts || [];
     let cart = [];
+
+    // NOVA: Define a taxa do MP aqui para ser usada no carrinho
+    const MP_TRANSACTIO_FEE_PERCENTAGE = 0.0398; // 3.98%
     
     const openCart = () => {if (!cartModal || !cartModalOverlay) return;
-        cartModalOverlay.classList.remove('hidden');
-        cartModal.classList.remove('hidden');
-        setTimeout(() => cartModal.classList.remove('scale-95'), 10); };
+// ... (código inalterado) ...
+        cartModal.classList.remove('scale-95'), 10); };
     const closeCart = () => { if (!cartModal || !cartModalOverlay) return;
-        cartModal.classList.add('scale-95');
-        setTimeout(() => {
-            cartModalOverlay.classList.add('hidden');
-            cartModal.classList.add('hidden');
+// ... (código inalterado) ...
         }, 300); };
     
     // O updateCartUI funcionará automaticamente porque 'item.value' já é o preço correto
     const updateCartUI = () => {     
         if (!cartItemsContainer || !cartCount || !cartTotal) return;
         cartItemsContainer.innerHTML = '';
-        let total = 0;
+        let itemsTotal = 0; // Renomeado de 'total'
         if (cart.length === 0) {
             cartItemsContainer.innerHTML = '<p class="text-gray-500">O seu carrinho está vazio.</p>';
         } else {
@@ -173,11 +172,45 @@ function attachEventListeners(data) {
                 itemDiv.className = 'flex items-center justify-between border-b pb-4';
                 itemDiv.innerHTML = `<div class="flex items-center"><img src="${item.image_url || 'https://placehold.co/100x100?text=Presente'}" alt="${item.title}" class="w-16 h-16 object-cover rounded-md mr-4"><div><p class="font-semibold text-gray-800">${item.title}</p><button data-cart-item-id="${item.cartItemId}" class="remove-item-btn text-red-500 text-sm hover:underline">Remover</button></div></div><p class="font-semibold text-gray-900">R$ ${Number(item.value).toFixed(2).replace('.', ',')}</p>`;
                 cartItemsContainer.appendChild(itemDiv);
-                total += Number(item.value);
+                itemsTotal += Number(item.value);
             });
         }
+
+        // --- LÓGICA DA TAXA (CLIENT-SIDE) ---
+        // 1. Calcula a taxa e o total final
+        const mpFeeAmount = itemsTotal * MP_TRANSACTIO_FEE_PERCENTAGE;
+        const finalTotal = itemsTotal + mpFeeAmount;
+
+        // 2. Procura e remove a linha de taxa antiga para evitar duplicatas
+        const existingFeeRow = document.getElementById('cart-fee-row');
+        if (existingFeeRow) existingFeeRow.remove();
+
+        // 3. Encontra o container do total
+        const totalContainer = document.getElementById('cart-total')?.closest('.border-t');
+
+        // 4. Adiciona a nova linha da taxa (apenas se houver itens no carrinho)
+        if (itemsTotal > 0 && totalContainer) {
+            const feeRow = document.createElement('div');
+            feeRow.id = 'cart-fee-row';
+            // Classes para espaçamento e estilo
+            feeRow.className = 'flex justify-between items-center text-md font-medium text-gray-600 mb-2'; 
+            feeRow.innerHTML = `
+                <span>Taxa de Conveniência (${(MP_TRANSACTIO_FEE_PERCENTAGE * 100).toFixed(2)}%)</span>
+                <span>R$ ${mpFeeAmount.toFixed(2).replace('.', ',')}</span>
+            `;
+            
+            // Insere a linha de taxa *antes* da linha de "Total"
+            const totalRow = totalContainer.querySelector('.flex'); // A linha "Total"
+            if (totalRow) {
+                totalRow.before(feeRow);
+            }
+        }
+        // --- FIM DA LÓGICA DA TAXA ---
+
+
         cartCount.textContent = cart.length;
-        cartTotal.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        // 5. Atualiza o "Total" com o valor final (Presentes + Taxa)
+        cartTotal.textContent = `R$ ${finalTotal.toFixed(2).replace('.', ',')}`;
         if (btnCheckout) btnCheckout.disabled = cart.length === 0;
     };
     
