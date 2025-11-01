@@ -182,7 +182,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         </a>
                         <p class="text-xs text-gray-500 mt-2">Você será redirecionado para o painel seguro do Mercado Pago para ver o seu saldo e gerir os seus saques.</p>
                     </div>
+                    
+                    <!-- NOVO: Secção de Desconectar -->
+                    <div id="disconnect-wrapper" class="border-t pt-4 mt-6">
+                         <button id="btn-disconnect-mp" class="text-red-600 hover:text-red-800 text-sm font-medium hover:underline">
+                            Desconectar minha conta do Mercado Pago
+                         </button>
+                         <p class="text-xs text-gray-500 mt-2">Isso removerá a permissão de receber pagamentos. Você poderá conectar novamente a qualquer momento.</p>
+                    </div>
                 </div>`;
+            
+            // Adiciona o listener para o novo botão
+            const btnDisconnect = document.getElementById('btn-disconnect-mp');
+            if (btnDisconnect) {
+                btnDisconnect.addEventListener('click', () => this.showDisconnectConfirmation());
+            }
         },
         renderNotConnected() {
             if (!this.container) return;
@@ -217,6 +231,67 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Não foi possível iniciar a conexão. Tente novamente.', 'error');
             }
         },
+        
+        // --- NOVAS FUNÇÕES ---
+        showDisconnectConfirmation() {
+            const wrapper = document.getElementById('disconnect-wrapper');
+            if (!wrapper) return;
+            
+            // Substitui o conteúdo da wrapper pela confirmação
+            wrapper.innerHTML = `
+                <p class="text-lg font-semibold text-red-700">Tem a certeza?</p>
+                <p class="text-sm text-gray-600 mb-4">Esta ação não pode ser desfeita. Terá de se reconectar para receber novos presentes.</p>
+                <div class="flex justify-center gap-4">
+                    <button id="btn-cancel-disconnect" class="text-gray-600 font-medium py-2 px-4 rounded-lg hover:bg-gray-100">Cancelar</button>
+                    <button id="btn-confirm-disconnect" class="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700">Sim, desconectar</button>
+                </div>
+            `;
+            
+            // Adiciona listeners aos novos botões
+            document.getElementById('btn-cancel-disconnect').addEventListener('click', () => this.updateStatus()); // Cancela e re-renderiza
+            document.getElementById('btn-confirm-disconnect').addEventListener('click', () => this.handleDisconnectMercadoPago());
+        },
+
+        async handleDisconnectMercadoPago() {
+            const btn = document.getElementById('btn-confirm-disconnect');
+            if(btn) {
+                btn.disabled = true;
+                btn.textContent = 'A desconectar...';
+            }
+
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) {
+                showToast('Sessão expirada. Faça login novamente.', 'error');
+                return;
+            }
+
+            // Atualiza o campo 'mp_credentials' para null no Supabase
+            const { error } = await supabaseClient
+                .from('events')
+                .update({ mp_credentials: null })
+                .eq('user_id', user.id);
+
+            if (error) {
+                showToast(`Erro ao desconectar: ${error.message}`, 'error');
+                if(btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Sim, desconectar';
+                }
+                return;
+            }
+
+            // Sucesso
+            showToast('Conta do Mercado Pago desconectada.', 'success');
+            
+            // Limpa os dados localmente
+            if (eventData) {
+                eventData.mp_credentials = null;
+            }
+            
+            // Re-renderiza o painel (que agora mostrará o estado "Não Conectado")
+            this.updateStatus(); 
+        },
+        // --- FIM DAS NOVAS FUNÇÕES ---
     };
     
     // --- LÓGICA DOS BOTÕES DE ATIVAÇÃO (TOGGLES) ---
@@ -289,6 +364,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (titleColorInput) titleColorInput.value = data.title_color || '#333333';
             if (mainTitleColorInput) mainTitleColorInput.value = data.main_title_color || '#FFFFFF';
             if (heroImagePreview && data.hero_image_url) { heroImagePreview.src = data.hero_image_url; heroImagePreview.classList.remove('hidden'); }
+            
+            // NOVO: Adiciona o preenchimento dos novos campos
+            if (galleryTitleInput) galleryTitleInput.value = data.gallery_title || '';
+            if (giftsIntroTextInput) giftsIntroTextInput.value = data.gifts_intro_text || '';
+
             if (giftsEditorList) { giftsEditorList.innerHTML = ''; if (data.gifts) data.gifts.sort((a, b) => a.id - b.id).forEach(renderGiftEditor); }
             
             // Carrega fotos da galeria principal
@@ -613,6 +693,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     story_how_we_met: storyContent1Input ? storyContent1Input.value : null,
                     story_title_2: storyTitle2Input ? storyTitle2Input.value : null,
                     story_proposal: storyContent2Input ? storyContent2Input.value : null,
+                    
+                    // NOVO: Campos de texto da galeria e presentes
+                    gallery_title: galleryTitleInput ? galleryTitleInput.value : null,
+                    gifts_intro_text: giftsIntroTextInput ? giftsIntroTextInput.value : null,
+
                     // Novas colunas (jsonb)
                     story_images_1: story1UrlsToSave.length > 0 ? story1UrlsToSave : null,
                     story_images_2: story2UrlsToSave.length > 0 ? story2UrlsToSave : null,
@@ -697,11 +782,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (user) {
             if (accountEmailInput) accountEmailInput.value = user.email;
             await loadEventData(user.id);
-            switchTab('layouts');
+            switchTab('layouts'); // Inicia na aba 'Layouts'
         } else {
             window.location.href = '/login';
         }
     })();
 });
-
-
