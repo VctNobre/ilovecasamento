@@ -197,19 +197,17 @@ export function render(data) {
     document.body.classList.add('theme-moderno'); // Garante que está no modo moderno
 
     return `
-        <!-- CORREÇÃO DE LAYOUT: Adicionada a class="hero-section" para o CSS do grid funcionar -->
+        <!-- CORREÇÃO DE LAYOUT: Adicionada a class="hero-section" -->
         <header id="hero-section" class="hero-section relative w-full h-[70vh] md:h-screen overflow-hidden">
             <img id="hero-image" src="${data.hero_image_url || 'https://images.pexels.com/photos/1024989/pexels-photo-1024989.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'}" alt="Foto do Casal" class="w-full h-full object-cover">
             
             <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white p-4">
                 <div class="text-center">
                     
-                    <!-- CORREÇÃO: Aplica o estilo Montserrat Medium, uppercase e letter-spacing APENAS AQUI -->
-                    <!-- Usa font-sans (Montserrat) e font-medium (500) -->
-                    <!-- Reduzido o tamanho da fonte para text-4xl / md:text-5xl para ser menos "enorme" -->
+                    <!-- CORRIGIDO: Aplica o estilo Montserrat Medium, uppercase e letter-spacing -->
                     <h1 class="text-4xl md:text-5xl font-sans font-medium leading-tight uppercase" style="letter-spacing: 6.4px; color: ${data.main_title_color || '#FFFFFF'};">${data.main_title || 'Felipe & Caroline'}</h1>
                     
-                    <!-- CORREÇÃO: Aplica o estilo Montserrat Medium, uppercase e letter-spacing APENAS AQUI -->
+                    <!-- CORRIGIDO: Aplica o estilo Montserrat Medium, uppercase e letter-spacing -->
                     <p class="text-lg md:text-xl mt-4 font-sans font-medium uppercase" style="letter-spacing: 6.4px;">${formattedDate.toUpperCase()}</p>
                 </div>
             </div>

@@ -5,7 +5,6 @@
 
 /* Variáveis de Cores e Tipografia */
 :root {
-    /* RESTAURADO: --font-serif agora usa Playfair Display */
     --font-serif: 'Playfair Display', serif; 
     --font-sans: 'Montserrat', sans-serif;
     --color-text: #5C5C5C;
@@ -20,6 +19,12 @@ body.theme-moderno {
     font-family: var(--font-sans);
     color: var(--color-text);
     background-color: var(--color-background-extralight);
+
+    /* CORREÇÃO CRÍTICA DO LAYOUT: Anula o display: grid do base.css para esta parte */
+    /* Garante que o conteúdo abaixo da hero-section NÃO fica ao lado */
+    display: block !important;
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
 }
 
 /* Estilo para Títulos (voltando para Playfair Display) */
@@ -32,7 +37,7 @@ body.theme-moderno {
 .theme-moderno .font-signature {
     font-family: var(--font-serif); /* Playfair Display */
     font-weight: 400; /* Regular */
-    font-style: italic; /* Adicionado para o estilo de assinatura */
+    font-style: italic; /* Adicionado para o estilo de assinatura, se desejado */
     font-size: 1.5rem; /* 24px */
     letter-spacing: 0; /* Volta ao normal */
     text-transform: none; /* Volta ao normal */
@@ -107,15 +112,9 @@ body.theme-moderno {
 
 /* Efeito de Papel Rasgado (Aplicado somente ao layout moderno) */
 #hero-section {
-    /* O SVG <clipPath> com id="torn-paper-edge" deve
-       estar presente no 'evento.html' para que isto funcione.
-    */
+
     clip-path: url(#torn-paper-edge);
 
-    /* Garante que a secção da imagem fique "por cima" 
-       do conteúdo que rola no layout de grid do desktop.
-    */
-    position: relative;
-    z-index: 10;
+
 }
 
